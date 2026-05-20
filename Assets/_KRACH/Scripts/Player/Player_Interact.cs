@@ -82,7 +82,7 @@ public class Player_Interact : NetworkBehaviour
         RpcPlayPunchEffects(hitSomething);
     }
 
-    // [ClientRpc] wird vom Server aufgerufen, aber auf ALLEN CLIENTS ausgeführt.
+    // [ClientRpc] wird vom Server aufgerufen, aber auf ALLEN CLIENTS ausgefï¿½hrt.
     // includeOwner = false verhindert, dass der lokale Spieler den Sound/Animation doppelt abspielt.
     [ClientRpc(includeOwner = false)]
     private void RpcPlayPunchEffects(bool hitSomething)
