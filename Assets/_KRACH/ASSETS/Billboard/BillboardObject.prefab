@@ -81,7 +81,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -1611095847, guid: 9ae74faefa5671a4eb8cc61a69b788a2, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 69c30291565a1407abc7ca25da395ea9, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -104,6 +104,7 @@ GameObject:
   - component: {fileID: 3234403350367809677}
   - component: {fileID: 3444666412621817683}
   - component: {fileID: 3847888004710153319}
+  - component: {fileID: -1716078403743312420}
   m_Layer: 0
   m_Name: BillboardObject
   m_TagString: Untagged
@@ -215,3 +216,48 @@ MonoBehaviour:
   serverOnly: 0
   visibility: 0
   hasSpawned: 0
+--- !u!114 &-1716078403743312420
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6281945527010714970}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c60bff4681f50cf439e1012be0041733, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LuaSoundEmitter
+  CollisionTag: 
+  EventReference:
+    Guid:
+      Data1: -1366175969
+      Data2: 1246796757
+      Data3: 667356306
+      Data4: 1421458892
+    Path: event:/SFX/PropColl_Plastic
+  EventPlayTrigger: 7
+  EventStopTrigger: 0
+  AllowFadeout: 1
+  TriggerOnce: 0
+  Preload: 0
+  NonRigidbodyVelocity: 0
+  OverrideAttenuation: 0
+  OverrideMinDistance: 2
+  OverrideMaxDistance: 3
+  Params: []
+  enableOcclusion: 0
+  playerTransform: {fileID: 0}
+  obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  maxDistance: 20
+  maxParameterDistance: 30
+  invertFadeRange: 0
+  stopAudioWhenOutOfRange: 0
+  nonOcclusionTag: NoOcclusion
+  selectedMaterial: 1
+  enableOneShotCooldown: 1
+  oneShotCooldownDuration: 0.3
+  scaledValue: 0
+  isObstructed: 0

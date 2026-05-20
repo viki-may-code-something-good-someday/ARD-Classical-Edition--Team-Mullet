@@ -54,6 +54,12 @@ public class LuaSoundEmitter : EventHandler
     [SerializeField] private ReverbType selectedMaterial = ReverbType.Room;
     [Space(10)]
 
+    [Header("One-Shot Cooldown")]
+    [SerializeField] private bool enableOneShotCooldown = false;
+    [ShowIf("enableOneShotCooldown")]
+    [SerializeField] private float oneShotCooldownDuration = 1f;
+    [Space(10)]
+
     [ShowIf("enableOcclusion")]
     [Header("Debug")]
     [SerializeField] private float scaledValue;
@@ -70,6 +76,7 @@ public class LuaSoundEmitter : EventHandler
     private bool hasTriggered;
     private bool isQuitting;
     private int  materialParameterValue;
+    private float oneShotCooldownTimer = 0f;
 
     public bool IsActive  { get; private set; }
     public bool IsPlaying()
@@ -129,6 +136,12 @@ public class LuaSoundEmitter : EventHandler
 
     private void Update()
     {
+        // Update One-Shot Cooldown timer
+        if (enableOneShotCooldown && oneShotCooldownTimer > 0f)
+        {
+            oneShotCooldownTimer -= Time.deltaTime;
+        }
+
         if (!IsActive) return;
 
         if (playerTransform == null)
@@ -194,11 +207,18 @@ public class LuaSoundEmitter : EventHandler
     public void Play()
     {
         if (TriggerOnce && hasTriggered) return;
+        if (enableOneShotCooldown && oneShotCooldownTimer > 0f) return; // Cooldown active, cannot play
         if (EventReference.IsNull) return;
         if (!eventDescription.isValid()) Lookup();
 
         IsActive     = true;
         hasTriggered = true;
+        
+        // Start cooldown timer if enabled
+        if (enableOneShotCooldown)
+        {
+            oneShotCooldownTimer = oneShotCooldownDuration;
+        }
     }
 
     public void Stop()

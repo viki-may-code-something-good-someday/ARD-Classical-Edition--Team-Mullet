@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 286782459826712307}
   - component: {fileID: 7933124897484601078}
   m_Layer: 0
-  m_Name: PunchBurstBillboardEmitter
+  m_Name: ParticlePunchBurstBillboardEmitter
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
