@@ -235,7 +235,7 @@ MonoBehaviour:
       Data2: 1246796757
       Data3: 667356306
       Data4: 1421458892
-    Path: event:/SFX/PropColl_Plastic
+    Path: event:/SFX/Props/PropColl_Plastic
   EventPlayTrigger: 7
   EventStopTrigger: 0
   AllowFadeout: 1

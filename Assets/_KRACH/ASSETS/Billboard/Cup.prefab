@@ -10,7 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -1716078403743312420, guid: 85459ab20452abc488469f13c66a14a4, type: 3}
       propertyPath: EventReference.Path
-      value: event:/SFX/PropColl_Glass
+      value: event:/SFX/Props/PropColl_Glass
       objectReference: {fileID: 0}
     - target: {fileID: -1716078403743312420, guid: 85459ab20452abc488469f13c66a14a4, type: 3}
       propertyPath: EventReference.Guid.Data1
@@ -46,7 +46,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6281945527010714970, guid: 85459ab20452abc488469f13c66a14a4, type: 3}
       propertyPath: m_Name
-      value: Billboard Sprite (32) Variant
+      value: Cup
       objectReference: {fileID: 0}
     - target: {fileID: 6572622372612838990, guid: 85459ab20452abc488469f13c66a14a4, type: 3}
       propertyPath: m_Sprite

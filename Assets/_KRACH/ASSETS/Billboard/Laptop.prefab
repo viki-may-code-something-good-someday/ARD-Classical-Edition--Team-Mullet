@@ -10,7 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -1716078403743312420, guid: 85459ab20452abc488469f13c66a14a4, type: 3}
       propertyPath: EventReference.Path
-      value: event:/SFX/PropColl_MetalLight
+      value: event:/SFX/Props/PropColl_MetalLight
       objectReference: {fileID: 0}
     - target: {fileID: -1716078403743312420, guid: 85459ab20452abc488469f13c66a14a4, type: 3}
       propertyPath: EventReference.Guid.Data1

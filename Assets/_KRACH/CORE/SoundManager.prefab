@@ -71,7 +71,7 @@ MonoBehaviour:
       Data2: 1107032738
       Data3: 1105983632
       Data4: -773767184
-    Path: event:/SFX/NeighbourListens
+    Path: event:/SFX/Hunter/NeighbourListens
   soundboxEvents:
   - Guid:
       Data1: 1494729036
