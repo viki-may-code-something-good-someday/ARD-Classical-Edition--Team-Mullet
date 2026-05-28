@@ -199,7 +199,7 @@ public class GameManager : MonoBehaviour
         return Mathf.FloorToInt(score);
     }
 
-    public void WallWasDestroyed(WallData wall)
+    public void WallWasDestroyed(Wall wall)
     {
         for (int i = 0; i < rooms.Length; i++)
         {

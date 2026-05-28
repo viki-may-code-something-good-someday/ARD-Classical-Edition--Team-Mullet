@@ -12,5 +12,5 @@ public class RoomObjectArray
 {
     public RoomObj roomObject;
     public RoomTypes roomType;
-    [SerializeField] public WallData[] destructableWallsNextToRoom;
+    [SerializeField] public Wall[] destructableWallsNextToRoom;
 }

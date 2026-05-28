@@ -1,10 +1,10 @@
 using FMODUnity;
-using Mirror; // WICHTIG: Mirror hinzufügen!
+using Mirror;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class WallData : NetworkBehaviour
+public class Wall : NetworkBehaviour, IDestructable
 {
     [Header("References")]
     [SerializeField] private GameObject wallNormal;
@@ -13,7 +13,7 @@ public class WallData : NetworkBehaviour
 
     [Header("Settings")]
     [SerializeField] private bool indestructable;
-    // Leben muss nur der Server kennen, das müssen wir nicht zwingend synchronisieren
+    // Leben muss nur der Server kennen, das mï¿½ssen wir nicht zwingend synchronisieren
     [SerializeField] private float health;
     [SerializeField] private float explosionForce;
     [SerializeField] private float explosionRadius;
@@ -24,43 +24,61 @@ public class WallData : NetworkBehaviour
 
     public float Health { get { return health; } }
 
+    public ParticleSystem HitParticles => throw new System.NotImplementedException();
+
     private bool fadeOutSpeedIncreased;
     private bool fadeOutPieces;
 
-    // SyncVar: Wenn der Server das auf true setzt, wissen ALLE Spieler (auch die, die später ins Spiel joinen), 
-    // dass diese Wand kaputt ist. Das löst automatisch "OnWallDestroyed" auf allen PCs aus.
+    // SyncVar: Wenn der Server das auf true setzt, wissen ALLE Spieler (auch die, die spï¿½ter ins Spiel joinen), 
+    // dass diese Wand kaputt ist. Das lï¿½st automatisch "OnWallDestroyed" auf allen PCs aus.
     [SyncVar(hook = nameof(OnWallDestroyed))]
     private bool isDestroyed = false;
 
     private void Update()
     {
-        // Die visuelle Fade-Out-Logik läuft einfach lokal auf jedem Rechner
+        // Die visuelle Fade-Out-Logik lï¿½uft einfach lokal auf jedem Rechner
         if (fadeOutPieces)
         {
             FadeOutWallDecorations();
         }
     }
 
-    // WICHTIG: Diese Methode wird vom Destructable-Script auf dem SERVER aufgerufen.
-    // Nur der Server verwaltet die Lebenspunkte.
     [Server]
     public void TakeDamage(float _damage, Vector3 _hitPoint, Vector3 _hitNormal)
     {
-        if (indestructable || isDestroyed) return;
+        if (indestructable) return;
+
+        if (isDestroyed)
+        {
+            Debug.LogWarning($"trying to damage a wall that is already destroyed: {gameObject.name}");
+            return;
+        }
+
+        // Sound/Effects auf allen Clients abspielen
+        RpcShowEffects(_hitPoint, _hitNormal);
+        RpcPlayHitSound(_hitPoint);
 
         health -= _damage;
 
-        // Sound auf allen Clients abspielen
-        RpcPlayHitSound(_hitPoint);
-
         if (health <= 0f)
         {
-            // 1. Status auf zerstört setzen (Triggert den Hook für das Mesh-Swapping)
+            // 1. Status auf zerstoert setzen (Triggert den Hook fuer das Mesh-Swapping)
             isDestroyed = true;
 
-            // 2. Den RPC für die physikalische Explosion an alle aktiven Spieler senden
+            // 2. Den RPC fuer die physikalische Explosion an alle aktiven Spieler senden
             RpcTriggerExplosion(_hitPoint);
         }
+    }
+
+    [ClientRpc]
+    private void RpcShowEffects(Vector3 _hitPoint, Vector3 _hitNormal)
+    {
+        if (HitParticles == null)
+        {
+            Debug.LogWarning($"{HitParticles.name} is unassigned and has to be assigned in the inspector");
+        }
+
+        Instantiate(HitParticles, _hitPoint, Quaternion.LookRotation(_hitNormal));
     }
 
     [ClientRpc]
@@ -69,8 +87,8 @@ public class WallData : NetworkBehaviour
         RuntimeManager.PlayOneShot("event:/SFX/WallHit", point);
     }
 
-    // Dieser Hook wird auf ALLEN Rechnern ausgeführt, sobald isDestroyed = true wird.
-    // Auch wenn ein Spieler 5 Minuten später ins Spiel joint, sieht er dadurch die Wand im kaputten Zustand.
+    // Dieser Hook wird auf ALLEN Rechnern ausgefuehrt, sobald isDestroyed = true wird.
+    // Auch wenn ein Spieler 5 Minuten spaeter ins Spiel joint, sieht er dadurch die Wand im kaputten Zustand.
     private void OnWallDestroyed(bool oldState, bool newState)
     {
         if (newState == true && oldState == false)
@@ -83,7 +101,7 @@ public class WallData : NetworkBehaviour
     }
 
     // ClientRpc: Die eigentliche physikalische Explosion.
-    // Läuft lokal auf allen Rechnern, spart massiv Netzwerk-Bandbreite.
+    // Laeuft lokal auf allen Rechnern, spart massiv Netzwerk-Bandbreite.
     [ClientRpc]
     private void RpcTriggerExplosion(Vector3 _hitPoint)
     {

@@ -1,53 +1,50 @@
 using UnityEngine;
 using FMODUnity;
-using System;
 using DG.Tweening;
-using System.Collections.Generic;
+using Mirror;
 
-public class SoundBox : MonoBehaviour
+public class SoundBox : NetworkBehaviour, IDestructable
 {
     [SerializeField] private float health;
     [SerializeField] private StudioEventEmitter musicEmitter;
 
     [SerializeField] private GameObject hitAnimsContainer;
 
+    public ParticleSystem HitParticles => throw new System.NotImplementedException();
 
-    // public enum SoundBoxType
-    // {
-    //     Base,
-    //     Drum,
-    //     Lead,
-    //     Sfx,
-    // }
-    // public SoundBoxType soundBoxType;
-
-    // private void Initialize()
-    // {
-
-    // }
-
-    // private void Start()
-    // {
-    //     musicEmitter.GetComponent<StudioEventEmitter>();
-    // }
-
-
+    [Server]
     public void TakeDamage(float _damage, Vector3 _hitPoint, Vector3 _hitNormal)
     {
         health -= _damage;
 
-        foreach (DOTweenAnimation anim in hitAnimsContainer.GetComponentsInChildren<DOTweenAnimation>())
-        {
-            if (anim != null) anim.DORestart();
-        }
+        RpcShowEffects(_hitPoint, _hitNormal);
 
         if (health <= 0f)
         {
-            GetDestroyed(_hitPoint, _hitNormal);
+            GetDestroyed();
         }
     }
 
-    private void GetDestroyed(Vector3 _hitPoint, Vector3 _hitNormal)
+    [ClientRpc]
+    private void RpcShowEffects(Vector3 _hitPoint, Vector3 _hitNormal)
+    {
+        foreach (DOTweenAnimation anim in hitAnimsContainer.GetComponentsInChildren<DOTweenAnimation>())
+        {
+            if (anim != null)
+            {
+                anim.DORestart();
+            }
+        }
+
+        if (HitParticles == null)
+        {
+            Debug.LogWarning($"{HitParticles.name} is unassigned and has to be assigned in the inspector");
+        }
+
+        Instantiate(HitParticles, _hitPoint, Quaternion.LookRotation(_hitNormal));
+    }
+
+    private void GetDestroyed()
     {
         RuntimeManager.PlayOneShot("event:/SFX/SpeakerDestroy", transform.position);    // sound
         musicEmitter.Stop();

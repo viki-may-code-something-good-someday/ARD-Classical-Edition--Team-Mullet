@@ -8,7 +8,7 @@ public class RoomObj : MonoBehaviour
     public bool canEnemySpawnInThisRoom;
     public StudioEventEmitter musicEmitter;
     public bool hasPlayerOpenedThisRoom;
-    [SerializeField] public WallData[] wallsInThisRoom;
+    [SerializeField] public Wall[] wallsInThisRoom;
 
     private void Awake()
     {
@@ -21,12 +21,12 @@ public class RoomObj : MonoBehaviour
         if (musicEmitter) musicEmitter.SetParameter("RoomOcclusion", 1);
     }
 
-    public void AssignWalls(WallData[] walls)
+    public void AssignWalls(Wall[] walls)
     {
         wallsInThisRoom = walls;
     }
 
-    public void RemoveWallFromRoomArray(WallData wallToRemove)
+    public void RemoveWallFromRoomArray(Wall wallToRemove)
     {
         SetPlayerHasOpenedThisRoom(true);
 

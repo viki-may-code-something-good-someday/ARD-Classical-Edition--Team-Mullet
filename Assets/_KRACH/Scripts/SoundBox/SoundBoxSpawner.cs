@@ -51,7 +51,7 @@ public class SoundBoxSpawner : MonoBehaviour
             Debug.LogWarning("SoundBoxSpawner: SoundManager not found in scene.");
         }
 
-        for (int i = soundBoxWaves.Count - 1; i >= 0 ; i--)
+        for (int i = soundBoxWaves.Count - 1; i >= 0; i--)
         {
             soundBoxWaves[i].hasSpawned = false;
             soundBoxWaves[i].activeInstances.Clear();
@@ -68,39 +68,39 @@ public class SoundBoxSpawner : MonoBehaviour
     }
 
     private void Update()
-{
-    if (!activeUpdate) return;
-
-    if (currentWaveIndex >= soundBoxWaves.Count)
     {
-        WinGame();
-        return;
+        if (!activeUpdate) return;
+
+        if (currentWaveIndex >= soundBoxWaves.Count)
+        {
+            WinGame();
+            return;
+        }
+
+        SoundBoxWave currentWave = soundBoxWaves[currentWaveIndex];
+
+        if (!currentWave.hasSpawned)
+        {
+            SpawnSoundBoxWave(currentWave);
+            currentWave.hasSpawned = true;
+
+            SoundManager.Instance.InitializeSoundboxEmitters();
+
+            return;
+        }
+
+        // IMPORTANT: only check clear if it had instances
+        if (!waitingForNextWave &&
+            currentWave.hasSpawned &&
+            currentWave.activeInstances.Count == 0 &&
+            currentWave.boxes.Count > 0)
+        {
+            Debug.Log("Wave " + currentWaveIndex + " cleared");
+
+            waitingForNextWave = true;
+            ClearWave();
+        }
     }
-
-    SoundBoxWave currentWave = soundBoxWaves[currentWaveIndex];
-
-    if (!currentWave.hasSpawned)
-    {
-        SpawnSoundBoxWave(currentWave);
-        currentWave.hasSpawned = true;
-
-        SoundManager.Instance.InitializeSoundboxEmitters();
-
-        return;
-    }
-
-    // IMPORTANT: only check clear if it had instances
-    if (!waitingForNextWave &&
-        currentWave.hasSpawned &&
-        currentWave.activeInstances.Count == 0 &&
-        currentWave.boxes.Count > 0)
-    {
-        Debug.Log("Wave " + currentWaveIndex + " cleared");
-
-        waitingForNextWave = true;
-        ClearWave();
-    }
-}
 
 
     private void SpawnSoundBoxWave(SoundBoxWave wave)
@@ -139,11 +139,10 @@ public class SoundBoxSpawner : MonoBehaviour
 
     private void WinGame()
     {
-        if(wonGame) return;
+        if (wonGame) return;
 
         wonGame = true;
 
-        Debug.Log("All waves cleared! You win!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         GameManager.Instance.WinGame();
     }
 
