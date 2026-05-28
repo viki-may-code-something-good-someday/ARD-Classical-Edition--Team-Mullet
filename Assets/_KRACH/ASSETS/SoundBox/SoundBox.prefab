@@ -386,7 +386,7 @@ Transform:
   m_GameObject: {fileID: 1907500625080834734}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.00176621, z: 0.0065952777}
+  m_LocalPosition: {x: 0, y: -0.193, z: 0.581}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -509,7 +509,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: -0.42199993, z: 0}
-  m_LocalScale: {x: 100, y: 100, z: 100}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 4464859835862413070}
@@ -542,7 +542,7 @@ Transform:
   m_GameObject: {fileID: 4139715181967023043}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.0036507412, z: 0.0063481927}
+  m_LocalPosition: {x: 0, y: 0.37, z: 0.635}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -674,9 +674,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fbd62801c7c7d8d43838a45309cfc23e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SoundBox
-  health: 3
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   musicEmitter: {fileID: 0}
   hitAnimsContainer: {fileID: 6889427616163889293}
+  hitParticles: {fileID: 0}
+  health: 3
 --- !u!114 &5126255375370723303
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1015,14 +1019,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7931829897911017735}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: 0.13052656, w: -0.9914448}
-  m_LocalPosition: {x: 0, y: 0.0063086175, z: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2373934434485155919}
   m_Father: {fileID: 4403024441903155936}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -15}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &9171712252984422222
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -1107,7 +1111,7 @@ Transform:
   m_GameObject: {fileID: 8477242683799723101}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.00176621, z: 0.0071747866}
+  m_LocalPosition: {x: 0, y: -0.19300002, z: 0.635}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

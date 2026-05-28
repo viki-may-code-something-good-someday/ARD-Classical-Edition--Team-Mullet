@@ -86,6 +86,7 @@ MonoBehaviour:
   wallNormal: {fileID: 2240644022633607083}
   wallBroken: {fileID: 3995930024737658038}
   wallDecorations: []
+  hitParticle: {fileID: 0}
   indestructable: 0
   health: 3
   explosionForce: 1000
@@ -149,7 +150,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3671108214043795730}
-  m_Mesh: {fileID: -5495902117074765545, guid: ef53d2f20296ebb43ba0276eecac16cc, type: 3}
+  m_Mesh: {fileID: -5495902117074765545, guid: 1fefb42810d6d7243b9218d51e26597c, type: 3}
 --- !u!23 &1137834722575431887
 MeshRenderer:
   m_ObjectHideFlags: 0

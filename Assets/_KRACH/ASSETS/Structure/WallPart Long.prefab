@@ -56,6 +56,34 @@ PrefabInstance:
       propertyPath: m_Name
       value: WallPart Long
       objectReference: {fileID: 0}
+    - target: {fileID: 5118571989366928516, guid: fbddb5bcaae4dfc4fb5a678f78546259, type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: -5495902117074765545, guid: 2aa457f5af21cf14b8b90db123a9ac77, type: 3}
+    - target: {fileID: 6257489950564341073, guid: fbddb5bcaae4dfc4fb5a678f78546259, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 6257489950564341073, guid: fbddb5bcaae4dfc4fb5a678f78546259, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 6257489950564341073, guid: fbddb5bcaae4dfc4fb5a678f78546259, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6257489950564341073, guid: fbddb5bcaae4dfc4fb5a678f78546259, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6257489950564341073, guid: fbddb5bcaae4dfc4fb5a678f78546259, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 7716098506952581668, guid: fbddb5bcaae4dfc4fb5a678f78546259, type: 3}
+      propertyPath: m_Size.z
+      value: 5.68
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
