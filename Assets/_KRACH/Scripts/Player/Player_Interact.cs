@@ -74,7 +74,8 @@ public class Player_Interact : NetworkBehaviour
         {
             if (hitinfoBillboard.collider.TryGetComponent<BillboardObject>(out BillboardObject billboardObject))
             {
-                billboardObject.TakePunch(origin);
+                // Punch-Position an alle Clients senden -> die führen TakePunch lokal aus
+                RpcPunchBillboard(hitinfoBillboard.collider.gameObject, origin);
                 hitSomething = true;
             }
         }
@@ -82,7 +83,16 @@ public class Player_Interact : NetworkBehaviour
         RpcPlayPunchEffects(hitSomething);
     }
 
-    // [ClientRpc] wird vom Server aufgerufen, aber auf ALLEN CLIENTS ausgef�hrt.
+    [ClientRpc]
+    private void RpcPunchBillboard(GameObject _billboardGameObject, Vector3 _origin)
+    {
+        if (_billboardGameObject.TryGetComponent<BillboardObject>(out BillboardObject billboardObject))
+        {
+            billboardObject.TakePunch(_origin);
+        }
+    }
+
+    // [ClientRpc] wird vom Server aufgerufen, aber auf ALLEN CLIENTS ausgefuehrt.
     // includeOwner = false verhindert, dass der lokale Spieler den Sound/Animation doppelt abspielt.
     [ClientRpc(includeOwner = false)]
     private void RpcPlayPunchEffects(bool hitSomething)

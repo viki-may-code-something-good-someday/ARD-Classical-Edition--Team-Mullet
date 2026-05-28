@@ -1,7 +1,6 @@
-using Mirror; // Mirror hinzugefügt
 using UnityEngine;
 
-public class BillboardObject : NetworkBehaviour
+public class BillboardObject : MonoBehaviour
 {
     [SerializeField] private bool flippedSprite;
     [SerializeField] private bool knockbackEnabled = true;
@@ -24,7 +23,7 @@ public class BillboardObject : NetworkBehaviour
     {
         if (isKnockedBack || mainCamera == null) return;
 
-        // Lokale Drehung für jeden Spieler bleibt erhalten
+
         Vector3 directionToCamera = mainCamera.transform.position - transform.position;
         directionToCamera.y = 0f;
 
@@ -38,28 +37,24 @@ public class BillboardObject : NetworkBehaviour
         }
     }
 
-    [ServerCallback] // Sorgt dafür, dass die Kollision nur 1x vom Server registriert wird
     private void OnCollisionEnter(Collision collision)
     {
         if (knockbackEnabled && collision.gameObject.CompareTag("Player"))
         {
-            RpcApplyKnockback(collision.transform.position, knockbackForce);
+            ApplyKnockback(collision.transform.position, knockbackForce);
         }
     }
 
-    // Wird von Player_Interact (Server) ausgelöst
-    [Server]
-    public void TakePunch(Vector3 puncherPosition)
+    // (von Player_Interact via ClientRpc auf allen Clients aufgerufen)
+    public void TakePunch(Vector3 _puncherPosition)
     {
         if (knockbackEnabled)
         {
-            RpcApplyKnockback(puncherPosition, knockbackForce * punchKnockbackMultiplier);
+            ApplyKnockback(_puncherPosition, knockbackForce * punchKnockbackMultiplier);
         }
     }
 
-    // Client Physik und VFX
-    [ClientRpc]
-    private void RpcApplyKnockback(Vector3 sourcePosition, float force)
+    private void ApplyKnockback(Vector3 _sourcePosition, float _force)
     {
         if (punchParticles != null)
         {
@@ -67,16 +62,14 @@ public class BillboardObject : NetworkBehaviour
             particles.Play();
         }
 
-        Vector3 knockbackDirection = (transform.position - sourcePosition).normalized;
+        Vector3 knockbackDirection = (transform.position - _sourcePosition).normalized;
         float randomMultiplier = Mathf.Max(Random.value, 0.5f) * 3f;
 
-        Vector3 velocity = new Vector3(
+        rb.linearVelocity = new Vector3(
             knockbackDirection.x,
             0.8f,
             knockbackDirection.z
-        ) * force * randomMultiplier;
-
-        rb.linearVelocity = velocity;
+        ) * _force * randomMultiplier;
 
         isKnockedBack = true;
         CancelInvoke(nameof(ResetKnockback));
