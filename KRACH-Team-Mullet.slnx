@@ -3,10 +3,10 @@
   <Project Path="Edgegap.csproj" />
   <Project Path="com.rlabrecque.steamworks.net.csproj" />
   <Project Path="Mirror.Components.csproj" />
-  <Project Path="Assembly-CSharp.csproj" />
   <Project Path="Mirror.Editor.csproj" />
   <Project Path="Mirror.Examples.csproj" />
   <Project Path="kcp2k.csproj" />
+  <Project Path="Assembly-CSharp.csproj" />
   <Project Path="Mirror.csproj" />
   <Project Path="SimpleWebTransport.csproj" />
   <Project Path="FizzySteamworks.csproj" />
