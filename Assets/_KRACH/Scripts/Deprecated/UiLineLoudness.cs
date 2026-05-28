@@ -7,15 +7,15 @@ public class UiLineLoudness : MonoBehaviour
     [SerializeField] private Transform downPoint;
 
     [SerializeField] private Transform line;
-    
+
     [SerializeField] private float currentValue = 0f;
     private float currentY;
     private float targetY;
-    
+
     // Lerp Parameter
     [SerializeField] private float slowLerpSpeed = 0.3f;  // Geschwindigkeit für Value 0 (langsam)
     [SerializeField] private float fastLerpSpeed = 1f;  // Geschwindigkeit für Value 1 (schneller)
-    
+
     // Sinus Schwankung Parameter
     [SerializeField] private float swingAmplitude = 0.2f;  // Amplitude der Schwankung
     [SerializeField] private float swingFrequency = 2f;    // Aktuelle Frequenz
@@ -32,7 +32,7 @@ public class UiLineLoudness : MonoBehaviour
     private Image uiImage;
     private Renderer meshRenderer;
     private LineRenderer lineRenderer;
-    
+
     // Rotation wiggle (left-right)
     [SerializeField] private float rotationAmplitude = 5f; // degrees
     [SerializeField] private float rotationFrequency = 1.5f; // Hz
@@ -66,8 +66,6 @@ public class UiLineLoudness : MonoBehaviour
     {
         if (line == null)
             return;
-
-        currentValue = SoundManager.Instance.currentLoudness; // Normalisieren auf 0-1 (angenommen maxLoudness ist 100)
 
         // Zielposition basierend auf currentValue setzen
         targetY = Mathf.Lerp(
