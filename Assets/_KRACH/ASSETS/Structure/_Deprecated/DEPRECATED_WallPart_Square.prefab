@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 6496755606578907054}
   - component: {fileID: 3778848539515109997}
   m_Layer: 0
-  m_Name: WallPart_Square
+  m_Name: DEPRECATED_WallPart_Square
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

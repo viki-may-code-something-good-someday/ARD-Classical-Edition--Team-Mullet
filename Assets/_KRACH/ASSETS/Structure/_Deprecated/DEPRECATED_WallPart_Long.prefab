@@ -28638,7 +28638,7 @@ GameObject:
   - component: {fileID: 4193694191051500277}
   - component: {fileID: 4223755018577207837}
   m_Layer: 8
-  m_Name: WallPart_Long
+  m_Name: DEPRECATED_WallPart_Long
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
