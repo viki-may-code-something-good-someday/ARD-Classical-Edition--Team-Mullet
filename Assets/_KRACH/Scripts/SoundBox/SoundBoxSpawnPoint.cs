@@ -7,5 +7,5 @@ public class SoundBoxSpawnPoint : MonoBehaviour
     {
         Instantiate(soundBoxPrefab, transform.position, Quaternion.identity, parent);
     }
-    
+
 }

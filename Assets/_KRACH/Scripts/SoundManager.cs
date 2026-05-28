@@ -11,14 +11,14 @@ public class SoundManager : MonoBehaviour
     public EventReference remixSchubertEvent;
     public EventReference neighbourEvent;
     public EventReference neightbourlistensEvent;
-    
+
     private EventInstance classicSchubertInstance;
     private EventInstance remixSchubertInstance;
     private EventInstance neighbourInstance;
     private GameObject neighbourGO;
-    
+
     public EventReference[] soundboxEvents;
-    StudioEventEmitter [] soundboxEmitters;
+    StudioEventEmitter[] soundboxEmitters;
 
     public int currentLoudness = 0;
 
@@ -47,7 +47,7 @@ public class SoundManager : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
-        
+
         // Music Bus initialisieren
         musicBus = RuntimeManager.GetBus("bus:/Music");
         ScheduleNextReduction();
@@ -77,7 +77,7 @@ public class SoundManager : MonoBehaviour
             // Wechsle zwischen Reduktion und Normal (1.0)
             targetVolumeMultiplier = (targetVolumeMultiplier == 1f) ? reductionMultiplier : 1f;
             timeSinceVolumeChange = 0f;
-            
+
             // Play Neighbour Sound only when reducing (not when volume goes back up)
             if (targetVolumeMultiplier == reductionMultiplier)
             {
@@ -112,7 +112,7 @@ public class SoundManager : MonoBehaviour
 
     public RMF_State GetCurrentRMFState()
     {
-        if(currentLoudness == 0)
+        if (currentLoudness == 0)
         {
             return RMF_State.Low;
         }
@@ -144,9 +144,9 @@ public class SoundManager : MonoBehaviour
     {
         // Find all SoundBox Objects and then take the soundemitter component and fill in the array.
         GameObject[] soundboxes = GameObject.FindGameObjectsWithTag("SoundBox");
-        
+
         soundboxEmitters = new StudioEventEmitter[soundboxes.Length];
-        
+
         for (int i = 0; i < soundboxes.Length; i++)
         {
             soundboxEmitters[i] = soundboxes[i].GetComponent<StudioEventEmitter>();

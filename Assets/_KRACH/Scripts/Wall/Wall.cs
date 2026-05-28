@@ -10,6 +10,7 @@ public class Wall : NetworkBehaviour, IDestructable
     [SerializeField] private GameObject wallNormal;
     [SerializeField] private GameObject wallBroken;
     [SerializeField] private List<GameObject> wallDecorations = new List<GameObject>();
+    [SerializeField] private ParticleSystem hitParticle;
 
     [Header("Settings")]
     [SerializeField] private bool indestructable;
@@ -24,7 +25,7 @@ public class Wall : NetworkBehaviour, IDestructable
 
     public float Health { get { return health; } }
 
-    public ParticleSystem HitParticles => throw new System.NotImplementedException();
+    public ParticleSystem HitParticles => hitParticle;
 
     private bool fadeOutSpeedIncreased;
     private bool fadeOutPieces;
@@ -75,7 +76,7 @@ public class Wall : NetworkBehaviour, IDestructable
     {
         if (HitParticles == null)
         {
-            Debug.LogWarning($"{HitParticles.name} is unassigned and has to be assigned in the inspector");
+            Debug.LogWarning($"is unassigned on {name} and has to be assigned in the inspector");
         }
 
         Instantiate(HitParticles, _hitPoint, Quaternion.LookRotation(_hitNormal));

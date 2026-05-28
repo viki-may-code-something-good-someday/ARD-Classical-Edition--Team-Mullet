@@ -5,18 +5,20 @@ using Mirror;
 
 public class SoundBox : NetworkBehaviour, IDestructable
 {
-    [SerializeField] private float health;
+    [Header("References")]
     [SerializeField] private StudioEventEmitter musicEmitter;
-
     [SerializeField] private GameObject hitAnimsContainer;
+    [SerializeField] private ParticleSystem hitParticles;
 
-    public ParticleSystem HitParticles => throw new System.NotImplementedException();
+    [Header("Settings")]
+    [SerializeField] private float health;
+
+    public ParticleSystem HitParticles => hitParticles;
 
     [Server]
     public void TakeDamage(float _damage, Vector3 _hitPoint, Vector3 _hitNormal)
     {
         health -= _damage;
-
         RpcShowEffects(_hitPoint, _hitNormal);
 
         if (health <= 0f)
@@ -36,19 +38,26 @@ public class SoundBox : NetworkBehaviour, IDestructable
             }
         }
 
-        if (HitParticles == null)
+        if (hitParticles == null)
         {
-            Debug.LogWarning($"{HitParticles.name} is unassigned and has to be assigned in the inspector");
+            Debug.LogWarning($"[SoundBox] hitParticles on '{name}' is unassigned in the Inspector.");
+            return;
         }
 
-        Instantiate(HitParticles, _hitPoint, Quaternion.LookRotation(_hitNormal));
+        Instantiate(hitParticles, _hitPoint, Quaternion.LookRotation(_hitNormal));
     }
 
+    [Server]
     private void GetDestroyed()
     {
-        RuntimeManager.PlayOneShot("event:/SFX/SpeakerDestroy", transform.position);    // sound
-        musicEmitter.Stop();
+        RpcOnDestroyed();
+        SoundBoxSpawner.Instance.NotifySoundBoxDestroyed(this);
+    }
 
-        SoundBoxSpawner.Instance.DestroyingSoundBox(this);
+    [ClientRpc]
+    private void RpcOnDestroyed()
+    {
+        RuntimeManager.PlayOneShot("event:/SFX/SpeakerDestroy", transform.position);
+        musicEmitter.Stop();
     }
 }

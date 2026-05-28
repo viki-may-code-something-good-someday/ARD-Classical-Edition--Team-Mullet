@@ -5,9 +5,6 @@ using System.Collections.Generic;
 public class SoundBoxWave : ScriptableObject
 {
     [Tooltip("SoundBox prefab references to spawn for this wave.")]
-    public List<SoundBox> boxes = new List<SoundBox>();
-    public List<int> spawnPosNumbers = new List<int>();
-
-    [HideInInspector] public List<SoundBox> activeInstances = new List<SoundBox>();
-    [HideInInspector] public bool hasSpawned = false;
+    public List<SoundBox> Boxes = new List<SoundBox>();
+    public List<int> SpawnPosNumbers = new List<int>();
 }
