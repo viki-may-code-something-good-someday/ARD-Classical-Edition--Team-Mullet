@@ -46,6 +46,7 @@ public class WallData : NetworkBehaviour
     [Server]
     public void TakeDamage(float _damage, Vector3 _hitPoint, Vector3 _hitNormal)
     {
+        Debug.Log("TAKE DAMAGE CALLED");
         if (indestructable || isDestroyed) return;
 
         health -= _damage;

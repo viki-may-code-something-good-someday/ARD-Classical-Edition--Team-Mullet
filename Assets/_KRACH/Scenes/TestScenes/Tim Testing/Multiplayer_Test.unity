@@ -132,6 +132,7 @@ GameObject:
   - component: {fileID: 114644003}
   - component: {fileID: 114644007}
   - component: {fileID: 114644006}
+  - component: {fileID: 114644008}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -173,7 +174,7 @@ MonoBehaviour:
   editorAutoStart: 0
   sendRate: 60
   offlineScene: 
-  onlineScene: Assets/_KRACH/Scenes/MainScene.unity
+  onlineScene: Assets/_KRACH/Scenes/TestScenes/Tim Testing/Multiplayer_Test.unity
   offlineSceneLoadDelay: 0
   transport: {fileID: 114644003}
   networkAddress: localhost
@@ -181,7 +182,7 @@ MonoBehaviour:
   disconnectInactiveConnections: 0
   disconnectInactiveTimeout: 60
   authenticator: {fileID: 0}
-  playerPrefab: {fileID: 0}
+  playerPrefab: {fileID: 4346577877502998422, guid: 0b36d0b65afa0484eaa2d7eb23d89c46, type: 3}
   autoCreatePlayer: 0
   playerSpawnMethod: 0
   spawnPrefabs: []
@@ -241,6 +242,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef4bffeda13d7a748973ff9204401c07, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SteamManager
+--- !u!114 &114644008
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 114644002}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c5bfb7c02931f04b998a9882e1410fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AutoHost
 --- !u!1 &165735572
 GameObject:
   m_ObjectHideFlags: 0
