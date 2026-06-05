@@ -1,5 +1,6 @@
 using FMODUnity;
 using Mirror;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -82,9 +83,8 @@ public class CharacterController_FirstPerson : NetworkBehaviour
 
     void Update()
     {
-        if (SceneManager.GetActiveScene().name == "Multiplayer_Test")
+        if (SceneManager.GetActiveScene().name == "Viktor_TestScene")
         {
-            Debug.Log("Gets update");
             if (playerModel.activeSelf == false)
             {
                 playerModel.SetActive(true);
@@ -93,7 +93,6 @@ public class CharacterController_FirstPerson : NetworkBehaviour
 
             if (isOwned)
             {
-                Debug.Log("Gets owned");
                 HandleSprintInput();
                 HandleMovement();
                 HandleJump();
@@ -102,33 +101,34 @@ public class CharacterController_FirstPerson : NetworkBehaviour
         }
     }
 
-    public bool IsInLevel()
+    [Button]
+    public bool LevelManagerIsInLevel()
     {
-        if (levelManager == null)
+        if (LevelManager.Instance == null)
         {
-            if (GameObject.Find("GameManager").GetComponent<LevelManager>() != null)
-            {
-                levelManager = GameObject.Find("GameManager").GetComponent<LevelManager>();
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            Debug.LogError("LevelManager not found in scene!");
+            return false;
         }
         else
         {
+            Debug.Log("LevelManager found in scene!");
             return true;
         }
-
     }
 
     public void SpawnPlayerAtPosition(PlayerRole role)
     {
         Debug.Log("Spawning player");
-        LevelManager levelManager = GameObject.Find("GameManager").GetComponent<LevelManager>();
+        if (LevelManager.Instance == null)
+        {
+            Debug.LogError("LevelManager not found! Cannot spawn player.");
+            return;
+        }
 
-        Vector3 position = levelManager.vandalistSpawnPositions[Random.Range(0, 3)].position;
+        // currently only spawns vandalists
+        Transform[] spawnPositions = LevelManager.Instance.vandalistSpawnPositions;
+        Vector3 position = spawnPositions[Random.Range(0, spawnPositions.Length)].position;
+
 
         controller.enabled = false;
 

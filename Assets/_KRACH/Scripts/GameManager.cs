@@ -19,7 +19,10 @@ public class GameManager : NetworkBehaviour
     [SyncVar(hook = nameof(OnGameStateChanged))]
     private GameState currentState;
 
+    public GameState CurrentState => currentState;
+
     public float maxPlaytimeInSeconds;
+
     private float currentPlaytime;
 
     private void Awake()
@@ -138,8 +141,4 @@ public class GameManager : NetworkBehaviour
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
-
-    // ── Public getter ──────────────────────────────────────────────────────────
-
-    public GameState CurrentState => currentState;
 }

@@ -134,7 +134,9 @@ public class SoundBoxSpawner : MonoBehaviour
     {
         if (gameWon) return;
 
+        Debug.Log("All box-waves destroyed! -> WinGame is not implemented here right now.");
+
         gameWon = true;
-        GameManager.Instance.WinGame();
+        //GameManager.Instance.WinGame();
     }
 }

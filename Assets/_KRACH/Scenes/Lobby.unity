@@ -965,10 +965,10 @@ MonoBehaviour:
   hunterPlayerListViewContent: {fileID: 1822404554}
   vandalistPlayerListViewContent: {fileID: 1377907799}
   playerListItemPrefab: {fileID: 6862216167453053174, guid: bd0b8d264d517cd49bfcf33be2ff3acf, type: 3}
-  localPlayerObject: {fileID: 0}
+  localPlayerObject: {fileID: 4346577877502998422, guid: 0b36d0b65afa0484eaa2d7eb23d89c46, type: 3}
   currentLobbyID: 0
   playerItemCreated: 0
-  localPlayerController: {fileID: 0}
+  localPlayerController: {fileID: 6191122419052942345, guid: 0b36d0b65afa0484eaa2d7eb23d89c46, type: 3}
   startGameButton: {fileID: 1255447873}
   readyToggle: {fileID: 1373731435}
   readyToggleText: {fileID: 540419516}
