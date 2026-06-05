@@ -53,6 +53,8 @@ public class SoundBox : NetworkBehaviour, IDestructable
     {
         RpcOnDestroyed();
         SoundBoxSpawner.Instance.NotifySoundBoxDestroyed(this);
+
+        NetworkServer.Destroy(gameObject);
     }
 
     [ClientRpc]
