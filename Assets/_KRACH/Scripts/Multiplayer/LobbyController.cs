@@ -327,19 +327,38 @@ public class LobbyController : MonoBehaviour
 
         foreach (PlayerListItem playerListItem in totalPlayerbaseListItems)
         {
+            // null-check: item könnte bereits destroyed sein (z.B. durch OnStopClient)
+            if (playerListItem == null)
+            {
+                playerListItemToRemove.Add(playerListItem);
+                continue;
+            }
+
             if (!Manager.gamePlayers.Any(b => b.connectionID == playerListItem.connectionID))
             {
                 playerListItemToRemove.Add(playerListItem);
             }
         }
+
         if (playerListItemToRemove.Count > 0)
         {
             foreach (PlayerListItem playerlistItemToRemove in playerListItemToRemove)
             {
+                // nochmal prüfen, da zwischen den zwei loops Destroys passieren können
+                if (playerlistItemToRemove == null)
+                {
+                    totalPlayerbaseListItems.Remove(playerlistItemToRemove);
+                    hunterPlayerListItems.Remove(playerlistItemToRemove);
+                    vandalistPlayerListItems.Remove(playerlistItemToRemove);
+                    continue;
+                }
+
                 GameObject objectToRemove = playerlistItemToRemove.gameObject;
                 RemovePlayerFromList(playerlistItemToRemove, objectToRemove);
                 objectToRemove = null;
             }
         }
+
+        UpdateRoleCountTexts();
     }
 }

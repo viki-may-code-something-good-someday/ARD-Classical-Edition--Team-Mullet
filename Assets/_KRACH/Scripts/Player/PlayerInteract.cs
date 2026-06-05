@@ -15,15 +15,6 @@ public class PlayerInteract : NetworkBehaviour
 
     private bool rightArmPunching;
 
-
-    void Start()
-    {
-        if (isLocalPlayer)
-        {
-            playerCamera = Camera.main;
-        }
-    }
-
     void Update()
     {
         if (!isLocalPlayer) return;

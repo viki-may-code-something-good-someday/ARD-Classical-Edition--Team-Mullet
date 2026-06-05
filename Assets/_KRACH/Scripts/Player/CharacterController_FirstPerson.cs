@@ -65,7 +65,6 @@ public class CharacterController_FirstPerson : NetworkBehaviour
 
     //Multiplayer
     public GameObject playerModel;
-    public LevelManager levelManager;
 
     void Start()
     {
