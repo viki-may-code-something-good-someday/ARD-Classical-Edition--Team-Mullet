@@ -20,6 +20,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_KRACH/Scenes/TestScenes/Tim Testing/Multiplayer_Test.unity
     guid: 20cf4e74c2e762447b6ff3c90ca41322
+  - enabled: 1
+    path: Assets/_KRACH/Scenes/TestScenes/Viktor_TestScene.unity
+    guid: 391504482073025418cb49153ab99b5b
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

@@ -8,11 +8,11 @@ public class PlayerInteract : NetworkBehaviour
 {
     [Header("References")]
     [SerializeField] private List<GameObject> armsVisuals = new List<GameObject>();
+    [SerializeField] private Camera playerCamera;
     [Header("Interaction Settings")]
     [SerializeField] private float hitRange;
     [SerializeField] private float hitDamage;
 
-    private Camera cameraMain;
     private bool rightArmPunching;
 
 
@@ -20,7 +20,7 @@ public class PlayerInteract : NetworkBehaviour
     {
         if (isLocalPlayer)
         {
-            cameraMain = Camera.main;
+            playerCamera = Camera.main;
         }
     }
 
@@ -36,17 +36,16 @@ public class PlayerInteract : NetworkBehaviour
 
     private void LocalPunch()
     {
-        Debug.Log("Local punch!");
         PunchAnimation();
 
-        bool hitSomething = Physics.Raycast(cameraMain.transform.position, cameraMain.transform.forward, hitRange, LayerMask.GetMask("Interactable", "Destructable", "Default"), QueryTriggerInteraction.Ignore);
+        bool hitSomething = Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, hitRange, LayerMask.GetMask("Interactable", "Destructable", "Default"), QueryTriggerInteraction.Ignore);
 
         if (hitSomething)
             RuntimeManager.PlayOneShot("event:/SFX/Punch");
         else
             RuntimeManager.PlayOneShot("event:/SFX/PunchAir");
 
-        CmdTryInteract(cameraMain.transform.position, cameraMain.transform.forward);
+        CmdTryInteract(playerCamera.transform.position, playerCamera.transform.forward);
     }
 
     [Command]

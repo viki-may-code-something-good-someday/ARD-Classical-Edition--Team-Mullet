@@ -127,7 +127,7 @@ MonoBehaviour:
     m_Bits: 1
   groundDistance: 0.4
   velocity: {x: 0, y: 0, z: 0}
-  playerModel: {fileID: 3623104323739898729}
+  playerModel: {fileID: 1608425576210504766}
   levelManager: {fileID: 0}
 --- !u!114 &8448123267095305124
 MonoBehaviour:
@@ -147,6 +147,7 @@ MonoBehaviour:
   armsVisuals:
   - {fileID: 1606076847740660885}
   - {fileID: 2798362159584349920}
+  playerCamera: {fileID: 5574050046996855397}
   hitRange: 2
   hitDamage: 1
 --- !u!114 &-1951849665373551477
