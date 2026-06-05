@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 8448123267095305124}
   - component: {fileID: -1951849665373551477}
   m_Layer: 6
-  m_Name: Player
+  m_Name: TOBEDELETED_ArchivePlayer
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
