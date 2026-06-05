@@ -146,7 +146,7 @@ public class CharacterController_FirstPerson : NetworkBehaviour
 
     private void HandleSprintInput()
     {
-        if (InputManager.Instance == null) { return; }
+        if (InputManager.Instance == null) return;
         sprinting = InputManager.Instance.CurrentInput.SprintHeld;
     }
 
@@ -247,7 +247,7 @@ public class CharacterController_FirstPerson : NetworkBehaviour
 
     private void HandleJump()
     {
-        if (InputManager.Instance == null) { return; }
+        if (InputManager.Instance == null) return;
 
         InputData input = InputManager.Instance.CurrentInput;
 

@@ -337,7 +337,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: deb7c3c27cbd1ea48ac4171aa4660257, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  characterController: {fileID: 0}
+  characterController: {fileID: 8166971595331418044}
   footstepClips:
   - {fileID: 8300000, guid: 31827a7e69015ca4c9c38ca976955f95, type: 3}
   - {fileID: 8300000, guid: e76907f4de12ec448810bb53f27ada9b, type: 3}

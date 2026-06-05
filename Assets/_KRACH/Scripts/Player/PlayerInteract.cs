@@ -28,7 +28,14 @@ public class PlayerInteract : NetworkBehaviour
     {
         if (!isLocalPlayer) return;
 
-        if (Input.GetMouseButtonDown(0))
+        HandleActionInput();
+    }
+
+    private void HandleActionInput()
+    {
+        if (InputManager.Instance == null) return;
+
+        if (InputManager.Instance.CurrentInput.ActionPressed)
         {
             LocalPunch();
         }
