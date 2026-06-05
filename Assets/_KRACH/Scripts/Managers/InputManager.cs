@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using Mirror;
 
 // Input snapshot for a single frame, consumed by gameplay systems.
 public struct InputData
@@ -20,11 +19,9 @@ public struct InputData
 // Requires a PlayerInput component with Action Map "Player" and actions:
 // Move, Look, Sprint, Action, Interact, Jump, Crouch
 [RequireComponent(typeof(PlayerInput))]
-public class InputManager : NetworkBehaviour
+public class InputManager : MonoBehaviour
 {
-    [Header("Role")]
-    [SyncVar(hook = nameof(OnRoleChanged))]
-    public PlayerRole Role = PlayerRole.Default;
+    public static InputManager Instance { get; private set; }
 
     public event System.Action<InputData> OnInputChanged;
     public InputData CurrentInput { get; private set; }
@@ -38,12 +35,16 @@ public class InputManager : NetworkBehaviour
     private InputAction jumpAction;
     private InputAction crouchAction;
 
-
-    public static InputManager Instance { get; private set; }
-
-
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+
         playerInput = GetComponent<PlayerInput>();
 
         moveAction = playerInput.actions["Move"];
@@ -57,25 +58,17 @@ public class InputManager : NetworkBehaviour
 
     private void Update()
     {
-        if (!isLocalPlayer) { return; }
         ReadAndBroadcastInput();
     }
 
-
-    public override void OnStartLocalPlayer()
+    public void SetRole(PlayerRole _newRole)
     {
-        base.OnStartLocalPlayer();
-        Instance = this;
-        playerInput.enabled = true;
-        Debug.Log($"[InputManager] Local player started — Role: {Role}");
+        InputData updated = CurrentInput;
+        updated.Role = _newRole;
+        CurrentInput = updated;
+        OnInputChanged?.Invoke(CurrentInput);
+        Debug.Log($"[InputManager] Role set to: {_newRole}");
     }
-
-    public override void OnStopLocalPlayer()
-    {
-        base.OnStopLocalPlayer();
-        if (Instance == this) { Instance = null; }
-    }
-
 
     private void ReadAndBroadcastInput()
     {
@@ -88,7 +81,7 @@ public class InputManager : NetworkBehaviour
             InteractPressed = interactAction.WasPressedThisFrame(),
             JumpPressed = jumpAction.WasPressedThisFrame(),
             CrouchHeld = crouchAction.IsPressed(),
-            Role = Role
+            Role = CurrentInput.Role  // Role wird lokal gehalten, nicht überschrieben
         };
 
         if (HasInputChanged(CurrentInput, newInput))
@@ -96,19 +89,6 @@ public class InputManager : NetworkBehaviour
             CurrentInput = newInput;
             OnInputChanged?.Invoke(CurrentInput);
         }
-    }
-
-    // Mirror SyncVar hook — fires when Role changes on any client
-    private void OnRoleChanged(PlayerRole _oldRole, PlayerRole _newRole)
-    {
-        Debug.Log($"[InputManager] Role changed: {_oldRole} → {_newRole}");
-        OnInputChanged?.Invoke(CurrentInput);
-    }
-
-    [Server]
-    public void ServerSetRole(PlayerRole _newRole)
-    {
-        Role = _newRole;
     }
 
     private bool HasInputChanged(InputData _previous, InputData _current)

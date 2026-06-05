@@ -3364,6 +3364,52 @@ MonoBehaviour:
   - {fileID: 534063131}
   vandalistSpawnPositions:
   - {fileID: 1638952408}
+--- !u!114 &932320168
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 932320163}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37f8f7b3e13554c4d8d6991b09a7aabb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InputManager
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  Role: 2
+--- !u!114 &932320169
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 932320163}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.PlayerInput
+  m_Actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  m_NotificationBehavior: 0
+  m_UIInputModule: {fileID: 0}
+  m_DeviceLostEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_DeviceRegainedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ControlsChangedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ActionEvents: []
+  m_NeverAutoSwitchControlSchemes: 0
+  m_DefaultControlScheme: Keyboard&Mouse
+  m_DefaultActionMap: Player
+  m_SplitScreenIndex: -1
+  m_Camera: {fileID: 0}
 --- !u!1001 &947306508
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5077,6 +5123,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 3703404839426254418, guid: 71e5a7587b39d554fadd21a11f37c8ad, type: 3}
       insertIndex: -1
       addedObject: {fileID: 932320167}
+    - targetCorrespondingSourceObject: {fileID: 3703404839426254418, guid: 71e5a7587b39d554fadd21a11f37c8ad, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 932320169}
+    - targetCorrespondingSourceObject: {fileID: 3703404839426254418, guid: 71e5a7587b39d554fadd21a11f37c8ad, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 932320168}
   m_SourcePrefab: {fileID: 100100000, guid: 71e5a7587b39d554fadd21a11f37c8ad, type: 3}
 --- !u!4 &1995832930 stripped
 Transform:
