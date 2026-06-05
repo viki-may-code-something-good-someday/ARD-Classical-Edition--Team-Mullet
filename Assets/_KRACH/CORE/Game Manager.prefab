@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4492720644668827207}
   - component: {fileID: 7956548004404623784}
+  - component: {fileID: 5217711761549431325}
   m_Layer: 0
   m_Name: Game Manager
   m_TagString: Untagged
@@ -44,10 +45,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 915f8774de744024c819c76ffe8abbb5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  maxScore: 1000
-  playerCameraController: {fileID: 0}
-  playerCamera: {fileID: 0}
-  playerController: {fileID: 0}
-  rooms: []
-  gameLostScorePenalty: 500
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
   maxPlaytimeInSeconds: 0
+--- !u!114 &5217711761549431325
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3703404839426254418}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Mirror::Mirror.NetworkIdentity
+  sceneId: 0
+  _assetId: 2824353412
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0

@@ -4,7 +4,7 @@ using Mirror;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player_Interact : NetworkBehaviour
+public class PlayerInteract : NetworkBehaviour
 {
     [Header("References")]
     [SerializeField] private List<GameObject> armsVisuals = new List<GameObject>();

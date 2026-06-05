@@ -1,11 +1,14 @@
 ﻿using Mirror;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections;
 
 public class Camera_FirstPerson : NetworkBehaviour
 {
     public Transform playerBody;     // The character root (rotates horizontally)
     public Transform cameraPivot;    // The vertical pivot (rotates up/down)
+
+    [SerializeField] private Camera playerCamera;
     public float mouseSensitivity = 1.5f;
 
     private float xRotation = 0f;
@@ -18,18 +21,48 @@ public class Camera_FirstPerson : NetworkBehaviour
 
     public override void OnStartClient()
     {
+        base.OnStartClient();
+
         if (!isLocalPlayer)
         {
             // Kamera für andere Spieler ausschalten
-            GetComponentInChildren<Camera>().enabled = false;
+            Camera cam = GetComponentInChildren<Camera>();
+            if (cam != null) { cam.enabled = false; }
+
             // AudioListener auch ausschalten falls vorhanden
-            GetComponentInChildren<AudioListener>().enabled = false;
+            AudioListener listener = GetComponentInChildren<AudioListener>();
+            if (listener != null) { listener.enabled = false; }
         }
+    }
+
+    void Update()
+    {
+        if (!isLocalPlayer) { return; }
+
+        HandleCursorToggle();
+        HandleCameraRotation();
+    }
+
+    private void HandleCursorToggle()
+    {
+        if (Input.GetKeyDown(KeyCode.T)) { SwitchCursorMode(); }
+    }
+
+    private void HandleCameraRotation()
+    {
+        if (Mouse.current == null) { return; }
+        if (Cursor.lockState == CursorLockMode.None) { return; }
+
+        Vector2 mouseDelta = Mouse.current.delta.ReadValue() * mouseSensitivity;
+
+        xRotation -= mouseDelta.y;
+        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+        cameraPivot.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        playerBody.Rotate(Vector3.up * mouseDelta.x);
     }
 
     public void SwitchCursorMode()
     {
-
         if (Cursor.lockState == CursorLockMode.Locked)
         {
             Cursor.lockState = CursorLockMode.None;
@@ -42,37 +75,27 @@ public class Camera_FirstPerson : NetworkBehaviour
         }
     }
 
-    void Update()
+    public void StartCameraShake(float _duration, float _magnitude)
     {
-        if (!isLocalPlayer) return;
+        StartCoroutine(CameraShake(_duration, _magnitude));
+    }
 
-        if (Input.GetKeyDown(KeyCode.T)) { SwitchCursorMode(); }
-        if (Mouse.current == null) return;
-        if (Cursor.lockState == CursorLockMode.None) return;
+    private IEnumerator CameraShake(float _duration, float _magnitude)
+    {
+        if (playerCamera == null) { yield break; }
 
-        Vector2 mouseDelta = Mouse.current.delta.ReadValue() * mouseSensitivity;
+        Vector3 originalPos = playerCamera.transform.localPosition;
+        float elapsed = 0f;
 
-        xRotation -= mouseDelta.y;
-        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
-        cameraPivot.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
-        playerBody.Rotate(Vector3.up * mouseDelta.x);
+        while (elapsed < _duration)
+        {
+            float x = Random.Range(-1f, 1f) * _magnitude;
+            float y = Random.Range(-1f, 1f) * _magnitude;
+            playerCamera.transform.localPosition = new Vector3(x, y, originalPos.z);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
 
-        /*
-        if (Input.GetKeyDown(KeyCode.T)) { SwitchCursorMode(); }
-
-        if (Mouse.current == null) return;
-        if (Cursor.lockState == CursorLockMode.None) return;
-
-        // Get mouse movement delta
-        Vector2 mouseDelta = Mouse.current.delta.ReadValue() * mouseSensitivity;
-
-        // Vertical rotation (pitch)
-        xRotation -= mouseDelta.y;
-        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
-        cameraPivot.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
-
-        // Horizontal rotation (yaw)
-        playerBody.Rotate(Vector3.up * mouseDelta.x);
-        */
+        playerCamera.transform.localPosition = originalPos;
     }
 }

@@ -4,7 +4,7 @@ using UnityEngine;
 public class FootstepAudioController : MonoBehaviour
 {
     [Header("References")]
-    public CharacterController_FirstPerson characterController;
+    public CharacterController characterController;
 
     [Header("Footstep Settings")]
     public AudioClip[] footstepClips;

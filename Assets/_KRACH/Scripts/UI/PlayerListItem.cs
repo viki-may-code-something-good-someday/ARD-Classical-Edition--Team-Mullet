@@ -3,8 +3,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public enum PlayerRole { Hunter, Vandalist, Default }
-
 public class PlayerListItem : MonoBehaviour
 {
     public string playerName;
@@ -42,7 +40,7 @@ public class PlayerListItem : MonoBehaviour
     {
         this.role = role; // Rolle speichern
         playerNameText.text = playerName;
-        playerRole.text = role.ToString() + " •";
+        playerRole.text = role.ToString() + " ï¿½";
         playerIcon.uvRect = new Rect(0, 1, 1, -1);
         if (!avatarReceived) { GetPlayerIcon(); }
         UpdateReadyStatusText();
@@ -94,7 +92,7 @@ public class PlayerListItem : MonoBehaviour
                 texture.LoadRawTextureData(image);
                 texture.Apply();
 
-                // Steam liefert Textur vertikal gespiegelt – hier flippen:
+                // Steam liefert Textur vertikal gespiegelt ï¿½ hier flippen:
                 //texture = FlipTexture(texture);
             }
         }
@@ -119,7 +117,7 @@ public class PlayerListItem : MonoBehaviour
         }
 
         flipped.Apply();
-        Destroy(original); // Original aufräumen um Memory Leaks zu vermeiden
+        Destroy(original); // Original aufrï¿½umen um Memory Leaks zu vermeiden
         return flipped;
     }
 

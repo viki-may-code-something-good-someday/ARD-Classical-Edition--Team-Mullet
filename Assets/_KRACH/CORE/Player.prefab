@@ -104,7 +104,6 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   walkSpeed: 6
-  ToggleToSprint: 0
   canSprint: 0
   baseSprintSpeed: 9
   maxSprintSpeed: 15
@@ -128,7 +127,7 @@ MonoBehaviour:
     m_Bits: 1
   groundDistance: 0.4
   velocity: {x: 0, y: 0, z: 0}
-  playerModel: {fileID: 0}
+  playerModel: {fileID: 3623104323739898729}
   levelManager: {fileID: 0}
 --- !u!114 &8448123267095305124
 MonoBehaviour:
@@ -567,6 +566,7 @@ MonoBehaviour:
   syncInterval: 0
   playerBody: {fileID: 2111440495359995585}
   cameraPivot: {fileID: 7229640499008521558}
+  playerCamera: {fileID: 5574050046996855397}
   mouseSensitivity: 0.1
 --- !u!114 &7081812428538924776
 MonoBehaviour:
@@ -724,7 +724,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: deb7c3c27cbd1ea48ac4171aa4660257, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  characterController: {fileID: 3159534273627049395}
+  characterController: {fileID: 0}
   footstepClips:
   - {fileID: 8300000, guid: 31827a7e69015ca4c9c38ca976955f95, type: 3}
   - {fileID: 8300000, guid: e76907f4de12ec448810bb53f27ada9b, type: 3}

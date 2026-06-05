@@ -15,7 +15,6 @@ public class CharacterController_FirstPerson : NetworkBehaviour
     private float footstepTimer = 0f;
 
     [Header("Sprint Settings")]
-    public bool ToggleToSprint = false;           // false = hold to sprint, true = press to sprint
     public bool canSprint;
     public float baseSprintSpeed = 9f;            // initial sprint speed
     public float maxSprintSpeed = 15f;            // maximum sprint speed
@@ -37,6 +36,7 @@ public class CharacterController_FirstPerson : NetworkBehaviour
 
     private bool isJumping = false;
     private float jumpHoldTimer = 0f;
+    private bool jumpHeldLastFrame = false;  // tracks held state across frames for variable jump
 
 
     [Header("Fall Settings")]
@@ -146,17 +146,8 @@ public class CharacterController_FirstPerson : NetworkBehaviour
 
     private void HandleSprintInput()
     {
-        if (ToggleToSprint)
-        {
-            if (Input.GetKeyDown(KeyCode.LeftShift))
-            {
-                sprinting = !sprinting;
-            }
-        }
-        else
-        {
-            sprinting = Input.GetKey(KeyCode.LeftShift);
-        }
+        if (InputManager.Instance == null) { return; }
+        sprinting = InputManager.Instance.CurrentInput.SprintHeld;
     }
 
     void HandleMovement()
@@ -182,8 +173,9 @@ public class CharacterController_FirstPerson : NetworkBehaviour
         }
 
         // Get input
-        float x = Input.GetAxis("Horizontal");
-        float z = Input.GetAxis("Vertical");
+        Vector2 moveInput = InputManager.Instance != null ? InputManager.Instance.CurrentInput.MoveInput : Vector2.zero;
+        float x = moveInput.x;
+        float z = moveInput.y;
 
         bool isMoving = x != 0 || z != 0;
 
@@ -255,18 +247,24 @@ public class CharacterController_FirstPerson : NetworkBehaviour
 
     private void HandleJump()
     {
+        if (InputManager.Instance == null) { return; }
+
+        InputData input = InputManager.Instance.CurrentInput;
+
         // Start jump
-        if (Input.GetButtonDown("Jump") && isGrounded)
+        if (input.JumpPressed && isGrounded)
         {
             velocity.y = Mathf.Sqrt(jumpHeight * 2f * baseFallGravity);
             isJumping = true;
             jumpHoldTimer = 0f;
+            jumpHeldLastFrame = true;
             currentFallGravity = baseFallGravity;
             airTime = 0f;
         }
 
         // Variable height logic (hold to go higher)
-        if (Input.GetButton("Jump") && isJumping)
+        // JumpPressed is one-shot, so we track held state via jumpHeldLastFrame
+        if (jumpHeldLastFrame && isJumping)
         {
             if (jumpHoldTimer < jumpHoldTime)
             {
@@ -276,10 +274,12 @@ public class CharacterController_FirstPerson : NetworkBehaviour
             }
         }
 
-        // If jump is released or timer runs out, stop extending jump
-        if (Input.GetButtonUp("Jump"))
+        // Detect jump release: was held last frame, button no longer pressed this frame
+        bool jumpHeldThisFrame = !input.JumpPressed && jumpHeldLastFrame;
+        if (jumpHeldThisFrame)
         {
             isJumping = false;
+            jumpHeldLastFrame = false;
 
             // CUT the upward velocity for small hop
             if (velocity.y > 0)
@@ -287,7 +287,6 @@ public class CharacterController_FirstPerson : NetworkBehaviour
                 velocity.y *= 0.3f; // You can adjust this — lower = sharper cut
             }
         }
-
 
         // Cancel jump if falling
         if (velocity.y <= 0)
