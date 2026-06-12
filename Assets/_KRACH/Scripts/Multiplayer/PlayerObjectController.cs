@@ -48,6 +48,12 @@ public class PlayerObjectController : NetworkBehaviour
         this.PlayerReadyUpdate(this.ready, !this.ready);
     }
 
+    [Command]
+    private void CmdSetReadyState(bool newState)
+    {
+        this.PlayerReadyUpdate(this.ready, newState);
+    }
+
     public void ChangeReady()
     {
         if (isOwned)
@@ -63,6 +69,10 @@ public class PlayerObjectController : NetworkBehaviour
         LobbyController.instance.FindLocalPlayer();
         LobbyController.instance.UpdateLobbyName();
 
+        if (isServer)
+        {
+            CmdSetReadyState(true);
+        }
     }
 
     public override void OnStartClient()

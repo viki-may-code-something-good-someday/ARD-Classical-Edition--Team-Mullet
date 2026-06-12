@@ -25,6 +25,9 @@ public class GameManager : NetworkBehaviour
 
     private float currentPlaytime;
 
+    public bool testInEditor;
+    public GameObject networkManager;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -33,6 +36,14 @@ public class GameManager : NetworkBehaviour
             return;
         }
         Instance = this;
+
+        if (testInEditor)
+        {
+            GameObject nm = GameObject.Instantiate(networkManager);
+            nm.GetComponent<CustomNetworkManager>().onlineScene = SceneManager.GetActiveScene().ToString();
+            nm.GetComponent<CustomNetworkManager>().StartHost();
+            nm.GetComponent<SteamLobby>().HostLobby();
+        }
     }
 
     private void Start()

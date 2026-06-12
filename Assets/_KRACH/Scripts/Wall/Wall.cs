@@ -23,6 +23,7 @@ public class Wall : NetworkBehaviour, IDestructable
     [SerializeField] private float wallDecorationsFadeOutSpeedMultiplier = 0.2f;
     [SerializeField] private float speedUpWallDecorationsFadeOutSpeedMultiplier = 0.5f;
 
+
     public float Health { get { return health; } }
 
     public ParticleSystem HitParticles => hitParticle;

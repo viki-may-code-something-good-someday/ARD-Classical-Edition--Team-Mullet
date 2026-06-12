@@ -49,6 +49,7 @@ public class PlayerInteract : NetworkBehaviour
     [Command]
     private void CmdTryInteract(Vector3 origin, Vector3 direction)
     {
+        Debug.Log("Sending interaction");
         bool hitSomething = false;
 
         if (Physics.Raycast(origin, direction, out RaycastHit hitinfo, hitRange, LayerMask.GetMask("Interactable"), QueryTriggerInteraction.Ignore))
