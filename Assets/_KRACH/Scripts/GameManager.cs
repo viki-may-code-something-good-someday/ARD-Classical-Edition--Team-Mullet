@@ -19,8 +19,14 @@ public class GameManager : NetworkBehaviour
     [SyncVar(hook = nameof(OnGameStateChanged))]
     private GameState currentState;
 
+    public GameState CurrentState => currentState;
+
     public float maxPlaytimeInSeconds;
+
     private float currentPlaytime;
+
+    public bool testInEditor;
+    public GameObject networkManager;
 
     private void Awake()
     {
@@ -30,6 +36,14 @@ public class GameManager : NetworkBehaviour
             return;
         }
         Instance = this;
+
+        if (testInEditor)
+        {
+            GameObject nm = GameObject.Instantiate(networkManager);
+            nm.GetComponent<CustomNetworkManager>().onlineScene = SceneManager.GetActiveScene().ToString();
+            nm.GetComponent<CustomNetworkManager>().StartHost();
+            nm.GetComponent<SteamLobby>().HostLobby();
+        }
     }
 
     private void Start()
@@ -138,8 +152,4 @@ public class GameManager : NetworkBehaviour
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
-
-    // ── Public getter ──────────────────────────────────────────────────────────
-
-    public GameState CurrentState => currentState;
 }

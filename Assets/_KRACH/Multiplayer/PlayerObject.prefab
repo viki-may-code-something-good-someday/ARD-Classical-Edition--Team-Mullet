@@ -10,8 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 3923833997022282371}
   - component: {fileID: 4680851988968097038}
+  - component: {fileID: 1227811745107253367}
   - component: {fileID: 7272808432725617656}
-  - component: {fileID: 9032900328091177965}
   - component: {fileID: 7366977398291245437}
   m_Layer: 6
   m_Name: Player Camera
@@ -86,6 +86,25 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
+--- !u!114 &1227811745107253367
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1034154011109326264}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69fba77c64654ba43afef7f3e9fb51c1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  playerBody: {fileID: 7115139135493471771}
+  cameraPivot: {fileID: 4809818173979025313}
+  playerCamera: {fileID: 4680851988968097038}
+  mouseSensitivity: 0.1
 --- !u!114 &7272808432725617656
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -131,24 +150,6 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
---- !u!114 &9032900328091177965
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1034154011109326264}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 69fba77c64654ba43afef7f3e9fb51c1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0
-  playerBody: {fileID: 7115139135493471771}
-  cameraPivot: {fileID: 4809818173979025313}
-  mouseSensitivity: 0.1
 --- !u!114 &7366977398291245437
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -336,7 +337,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: deb7c3c27cbd1ea48ac4171aa4660257, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  characterController: {fileID: 5128184422578144709}
+  characterController: {fileID: 8166971595331418044}
   footstepClips:
   - {fileID: 8300000, guid: 31827a7e69015ca4c9c38ca976955f95, type: 3}
   - {fileID: 8300000, guid: e76907f4de12ec448810bb53f27ada9b, type: 3}
@@ -604,32 +605,34 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   walkSpeed: 6
-  ToggleToSprint: 0
-  canSprint: 0
-  baseSprintSpeed: 9
-  maxSprintSpeed: 15
-  sprintAcceleration: 1.7
-  sprintBurstAcceleration: 14
-  sprintDecaySpeed: 3
-  sprintBurstThreshold: 2.5
-  playerCamera: {fileID: 5574050046996855397, guid: a2faea5b8dd51f3489349b73f5d418fe, type: 3}
-  normalFOV: 60
-  maxSprintFOV: 70
-  fovChangeSpeed: 8
+  groundCheck: {fileID: 6826781417353443385}
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 1
+  groundDistance: 0.4
   jumpHeight: 2
   jumpHoldTime: 0.2
   jumpHoldGravityMultiplier: 0.5
   baseFallGravity: 10
   maxFallGravity: 50
   fallGravityScaling: 1.5
-  groundCheck: {fileID: 6826781417353443385}
-  groundMask:
-    serializedVersion: 2
-    m_Bits: 1
-  groundDistance: 0.4
+  canSprint: 0
+  baseSprintSpeed: 9
+  maxSprintSpeed: 15
+  sprintBurstThreshold: 2.5
+  sprintAcceleration: 1.7
+  sprintBurstAcceleration: 14
+  sprintDecaySpeed: 3
+  playerCamera: {fileID: 5574050046996855397, guid: a2faea5b8dd51f3489349b73f5d418fe, type: 3}
+  normalFOV: 60
+  maxSprintFOV: 70
+  fovChangeSpeed: 8
+  baseStepInterval: 0.4
+  footstepTimer: 0
+  gameplayScene: Assets/_KRACH/Scenes/MainLevel_Test.unity
+  controller: {fileID: 8166971595331418044}
   velocity: {x: 0, y: 0, z: 0}
   playerModel: {fileID: 2698249127586981476}
-  levelManager: {fileID: 0}
 --- !u!114 &3612966290959217811
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -648,6 +651,7 @@ MonoBehaviour:
   armsVisuals:
   - {fileID: 2526413897759942239}
   - {fileID: 1410622708008567850}
+  playerCamera: {fileID: 4680851988968097038}
   hitRange: 2
   hitDamage: 1
 --- !u!1 &5363979060368924945

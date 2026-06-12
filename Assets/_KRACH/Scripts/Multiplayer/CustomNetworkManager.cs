@@ -6,12 +6,18 @@ using UnityEngine.SceneManagement;
 
 public class CustomNetworkManager : NetworkManager
 {
+    [Header("References")]
     [SerializeField] private PlayerObjectController gamePlayerPrefab;
+    [Scene][SerializeField] private string lobbyScene;
+    [Scene][SerializeField] private string gameplayScene;
+
+
     public List<PlayerObjectController> gamePlayers { get; } = new List<PlayerObjectController>();
+
 
     public override void OnServerAddPlayer(NetworkConnectionToClient conn)
     {
-        if (SceneManager.GetActiveScene().name == "Lobby")
+        if (SceneManager.GetActiveScene().path == lobbyScene)
         {
             PlayerObjectController gamePlayerInstance = Instantiate(gamePlayerPrefab);
 
@@ -23,8 +29,13 @@ public class CustomNetworkManager : NetworkManager
         }
     }
 
-    public void StartGame(string sceneName)
+    public void StartGame(string sceneName, bool useCustomNetworkGameplazScene)
     {
+        if (useCustomNetworkGameplazScene)
+        {
+            sceneName = gameplayScene;
+        }
+
         ServerChangeScene(sceneName);
     }
 }

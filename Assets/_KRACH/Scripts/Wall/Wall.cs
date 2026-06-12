@@ -23,6 +23,7 @@ public class Wall : NetworkBehaviour, IDestructable
     [SerializeField] private float wallDecorationsFadeOutSpeedMultiplier = 0.2f;
     [SerializeField] private float speedUpWallDecorationsFadeOutSpeedMultiplier = 0.5f;
 
+
     public float Health { get { return health; } }
 
     public ParticleSystem HitParticles => hitParticle;
@@ -56,8 +57,8 @@ public class Wall : NetworkBehaviour, IDestructable
         }
 
         // Sound/Effects auf allen Clients abspielen
-        RpcShowEffects(_hitPoint, _hitNormal);
-        RpcPlayHitSound(_hitPoint);
+        // RpcShowEffects(_hitPoint, _hitNormal);
+        // RpcPlayHitSound(_hitPoint);
 
         health -= _damage;
 

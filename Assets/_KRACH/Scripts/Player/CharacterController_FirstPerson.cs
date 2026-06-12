@@ -1,5 +1,6 @@
 using FMODUnity;
 using Mirror;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -7,68 +8,67 @@ using UnityEngine.SceneManagement;
 public class CharacterController_FirstPerson : NetworkBehaviour
 {
     [Header("Movement Settings")]
-    public float walkSpeed = 6f;
+    [SerializeField] private float walkSpeed = 6f;
 
-    [Header("Audio")]
-    private string footstepEvent = "event:/SFX/Footstep";
-    private float baseStepInterval = 0.4f;
-    private float footstepTimer = 0f;
+    private Vector3 velocity;
 
-    [Header("Sprint Settings")]
-    public bool canSprint;
-    public float baseSprintSpeed = 9f;            // initial sprint speed
-    public float maxSprintSpeed = 15f;            // maximum sprint speed
-    public float sprintAcceleration = 1.7f;       // acceleration before sprintBurstThreshold
-    public float sprintBurstAcceleration = 14f;   // acceleration after sprintBurstThreshold
-    public float sprintDecaySpeed = 3f;           // decay speed when not sprinting
-    public float sprintBurstThreshold = 2.5f;     // time in seconds before burst kicks in
-
-    [Header("Camera FOV Settings")]
-    public Camera playerCamera;                   // assign your main camera here
-    public float normalFOV = 60f;
-    public float maxSprintFOV = 70f;
-    public float fovChangeSpeed = 8f;
+    [Header("Ground Check")]
+    [SerializeField] private Transform groundCheck;
+    [SerializeField] private LayerMask groundMask;
+    [SerializeField] private float groundDistance = 0.4f;
+    private bool isGrounded = true;
 
     [Header("Jump Settings")]
-    public float jumpHeight = 2f;
-    public float jumpHoldTime = 0.2f;        // How long you can hold the button for higher jump
-    public float jumpHoldGravityMultiplier = 0.5f;
+    [SerializeField] private float jumpHeight = 2f;
+    // How long you can hold the button for higher jump
+    [SerializeField] private float jumpHoldTime = 0.2f;
+    [SerializeField] private float jumpHoldGravityMultiplier = 0.5f;
 
     private bool isJumping = false;
     private float jumpHoldTimer = 0f;
     private bool jumpHeldLastFrame = false;  // tracks held state across frames for variable jump
 
-
     [Header("Fall Settings")]
-    public float baseFallGravity = 10f;
-    public float maxFallGravity = 30f;
-    public float fallGravityScaling = 2f;
+    [SerializeField] private float baseFallGravity = 10f;
+    [SerializeField] private float maxFallGravity = 30f;
+    [SerializeField] private float fallGravityScaling = 2f;
 
-    [Header("References")]
-    public Transform groundCheck;
-    public LayerMask groundMask;
-    public float groundDistance = 0.4f; //make sure this works hukvgjhtfnhjftgfjz
+    // Fall tracking
+    private float currentFallGravity;
+    private float airTime;
 
-    private CharacterController controller;
-    public Vector3 velocity;
-    private bool isGrounded = true;
+    [Header("Sprint Settings")]
+    [SerializeField] private bool canSprint;
+    [SerializeField] private float baseSprintSpeed = 9f;
+    [SerializeField] private float maxSprintSpeed = 15f;
+    [SerializeField] private float sprintBurstThreshold = 2.5f;     // time in seconds before burst kicks in
+    [SerializeField] private float sprintAcceleration = 1.7f;       // acceleration before sprintBurstThreshold
+    [SerializeField] private float sprintBurstAcceleration = 14f;   // acceleration after sprintBurstThreshold
+    [SerializeField] private float sprintDecaySpeed = 3f;           // decay speed when not sprinting per Second
 
     // Internal sprint state
     private bool sprinting = false;
     private float currentSprintSpeed;
     private float sprintTimer = 0f;
 
-    // Fall tracking
-    private float currentFallGravity;
-    private float airTime;
+    [Header("Camera FOV Settings")]
+    [SerializeField] private Camera playerCamera;
+    [SerializeField] private float normalFOV = 60f;
+    [SerializeField] private float maxSprintFOV = 70f;
+    [SerializeField] private float fovChangeSpeed = 8f;
 
-    //Multiplayer
-    public GameObject playerModel;
-    public LevelManager levelManager;
+    [Header("Audio")]
+    [SerializeField] private float baseStepInterval = 0.4f;
+    [SerializeField] private float footstepTimer = 0f;
+    private string footstepEvent = "event:/SFX/Footstep";
+
+    [Header("References")]
+    [Scene][SerializeField] private string gameplayScene;
+    [SerializeField] private CharacterController controller;
+    [SerializeField] private GameObject playerModel;
 
     void Start()
     {
-        controller = GetComponent<CharacterController>();
         currentSprintSpeed = baseSprintSpeed;
         currentFallGravity = baseFallGravity;
 
@@ -82,9 +82,8 @@ public class CharacterController_FirstPerson : NetworkBehaviour
 
     void Update()
     {
-        if (SceneManager.GetActiveScene().name == "Multiplayer_Test")
+        if (SceneManager.GetActiveScene().path == gameplayScene)
         {
-            Debug.Log("Gets update");
             if (playerModel.activeSelf == false)
             {
                 playerModel.SetActive(true);
@@ -93,7 +92,6 @@ public class CharacterController_FirstPerson : NetworkBehaviour
 
             if (isOwned)
             {
-                Debug.Log("Gets owned");
                 HandleSprintInput();
                 HandleMovement();
                 HandleJump();
@@ -102,33 +100,34 @@ public class CharacterController_FirstPerson : NetworkBehaviour
         }
     }
 
-    public bool IsInLevel()
+    [Button]
+    public bool LevelManagerIsInLevel()
     {
-        if (levelManager == null)
+        if (LevelManager.Instance == null)
         {
-            if (GameObject.Find("GameManager").GetComponent<LevelManager>() != null)
-            {
-                levelManager = GameObject.Find("GameManager").GetComponent<LevelManager>();
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            Debug.LogError("LevelManager not found in scene!");
+            return false;
         }
         else
         {
+            Debug.Log("LevelManager found in scene!");
             return true;
         }
-
     }
 
     public void SpawnPlayerAtPosition(PlayerRole role)
     {
         Debug.Log("Spawning player");
-        LevelManager levelManager = GameObject.Find("GameManager").GetComponent<LevelManager>();
+        if (LevelManager.Instance == null)
+        {
+            Debug.LogError("LevelManager not found! Cannot spawn player.");
+            return;
+        }
 
-        Vector3 position = levelManager.vandalistSpawnPositions[Random.Range(0, 3)].position;
+        // currently only spawns vandalists
+        Transform[] spawnPositions = LevelManager.Instance.vandalistSpawnPositions;
+        Vector3 position = spawnPositions[Random.Range(0, spawnPositions.Length)].position;
+
 
         controller.enabled = false;
 
@@ -146,7 +145,7 @@ public class CharacterController_FirstPerson : NetworkBehaviour
 
     private void HandleSprintInput()
     {
-        if (InputManager.Instance == null) { return; }
+        if (InputManager.Instance == null) return;
         sprinting = InputManager.Instance.CurrentInput.SprintHeld;
     }
 
@@ -247,7 +246,7 @@ public class CharacterController_FirstPerson : NetworkBehaviour
 
     private void HandleJump()
     {
-        if (InputManager.Instance == null) { return; }
+        if (InputManager.Instance == null) return;
 
         InputData input = InputManager.Instance.CurrentInput;
 

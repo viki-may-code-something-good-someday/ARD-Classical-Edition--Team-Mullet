@@ -965,10 +965,10 @@ MonoBehaviour:
   hunterPlayerListViewContent: {fileID: 1822404554}
   vandalistPlayerListViewContent: {fileID: 1377907799}
   playerListItemPrefab: {fileID: 6862216167453053174, guid: bd0b8d264d517cd49bfcf33be2ff3acf, type: 3}
-  localPlayerObject: {fileID: 0}
+  localPlayerObject: {fileID: 4346577877502998422, guid: 0b36d0b65afa0484eaa2d7eb23d89c46, type: 3}
   currentLobbyID: 0
   playerItemCreated: 0
-  localPlayerController: {fileID: 0}
+  localPlayerController: {fileID: 6191122419052942345, guid: 0b36d0b65afa0484eaa2d7eb23d89c46, type: 3}
   startGameButton: {fileID: 1255447873}
   readyToggle: {fileID: 1373731435}
   readyToggleText: {fileID: 540419516}
@@ -2788,14 +2788,14 @@ MonoBehaviour:
       - m_Target: {fileID: 417888613}
         m_TargetAssemblyTypeName: LobbyController, Assembly-CSharp
         m_MethodName: StartGame
-        m_Mode: 5
+        m_Mode: 6
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: Multiplayer_Test
-          m_BoolArgument: 0
+          m_StringArgument: Viktor_TestScene
+          m_BoolArgument: 1
         m_CallState: 2
 --- !u!114 &1255447874
 MonoBehaviour:

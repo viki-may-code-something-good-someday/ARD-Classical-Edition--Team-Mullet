@@ -8,27 +8,25 @@ public class PlayerInteract : NetworkBehaviour
 {
     [Header("References")]
     [SerializeField] private List<GameObject> armsVisuals = new List<GameObject>();
+    [SerializeField] private Camera playerCamera;
     [Header("Interaction Settings")]
     [SerializeField] private float hitRange;
     [SerializeField] private float hitDamage;
 
-    private Camera cameraMain;
     private bool rightArmPunching;
-
-
-    void Start()
-    {
-        if (isLocalPlayer)
-        {
-            cameraMain = Camera.main;
-        }
-    }
 
     void Update()
     {
         if (!isLocalPlayer) return;
 
-        if (Input.GetMouseButtonDown(0))
+        HandleActionInput();
+    }
+
+    private void HandleActionInput()
+    {
+        if (InputManager.Instance == null) return;
+
+        if (InputManager.Instance.CurrentInput.ActionPressed)
         {
             LocalPunch();
         }
@@ -36,22 +34,23 @@ public class PlayerInteract : NetworkBehaviour
 
     private void LocalPunch()
     {
-        Debug.Log("Local punch!");
         PunchAnimation();
 
-        bool hitSomething = Physics.Raycast(cameraMain.transform.position, cameraMain.transform.forward, hitRange, LayerMask.GetMask("Interactable", "Destructable", "Default"), QueryTriggerInteraction.Ignore);
+        bool hitSomething = Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, hitRange, LayerMask.GetMask("Interactable", "Destructable", "Default"), QueryTriggerInteraction.Ignore);
 
-        if (hitSomething)
-            RuntimeManager.PlayOneShot("event:/SFX/Punch");
-        else
-            RuntimeManager.PlayOneShot("event:/SFX/PunchAir");
+        // Sounds can not be found -> uncomment when fixed
+        // if (hitSomething)
+        //     RuntimeManager.PlayOneShot("event:/SFX/Punch");
+        // else
+        //     RuntimeManager.PlayOneShot("event:/SFX/PunchAir");
 
-        CmdTryInteract(cameraMain.transform.position, cameraMain.transform.forward);
+        CmdTryInteract(playerCamera.transform.position, playerCamera.transform.forward);
     }
 
     [Command]
     private void CmdTryInteract(Vector3 origin, Vector3 direction)
     {
+        Debug.Log("Sending interaction");
         bool hitSomething = false;
 
         if (Physics.Raycast(origin, direction, out RaycastHit hitinfo, hitRange, LayerMask.GetMask("Interactable"), QueryTriggerInteraction.Ignore))
@@ -64,7 +63,16 @@ public class PlayerInteract : NetworkBehaviour
         }
         else if (Physics.Raycast(origin, direction, out RaycastHit hitinfoDestructable, hitRange, LayerMask.GetMask("Destructable"), QueryTriggerInteraction.Ignore))
         {
-            if (hitinfoDestructable.collider.TryGetComponent<IDestructable>(out IDestructable destructableObject))
+            /*
+             if (hitinfoDestructable.collider.TryGetComponent<IDestructable>(out IDestructable destructableObject))
+            {
+                destructableObject.TakeDamage(hitDamage, hitinfoDestructable.point, hitinfoDestructable.normal);
+                hitSomething = true;
+            }
+            */
+
+            IDestructable destructableObject = hitinfoDestructable.collider.GetComponentInParent<IDestructable>();
+            if (destructableObject != null)
             {
                 destructableObject.TakeDamage(hitDamage, hitinfoDestructable.point, hitinfoDestructable.normal);
                 hitSomething = true;

@@ -41,10 +41,11 @@ public class SoundBox : NetworkBehaviour, IDestructable
         if (hitParticles == null)
         {
             Debug.LogWarning($"[SoundBox] hitParticles on '{name}' is unassigned in the Inspector.");
-            return;
         }
-
-        Instantiate(hitParticles, _hitPoint, Quaternion.LookRotation(_hitNormal));
+        else
+        {
+            Instantiate(hitParticles, _hitPoint, Quaternion.LookRotation(_hitNormal));
+        }
     }
 
     [Server]
@@ -52,12 +53,21 @@ public class SoundBox : NetworkBehaviour, IDestructable
     {
         RpcOnDestroyed();
         SoundBoxSpawner.Instance.NotifySoundBoxDestroyed(this);
+
+        NetworkServer.Destroy(gameObject);
     }
 
     [ClientRpc]
     private void RpcOnDestroyed()
     {
         RuntimeManager.PlayOneShot("event:/SFX/SpeakerDestroy", transform.position);
-        musicEmitter.Stop();
+        if (musicEmitter == null)
+        {
+            Debug.LogWarning($"[SoundBox] musicEmitter on '{name}' is unassigned in the Inspector.");
+        }
+        else
+        {
+            musicEmitter.Stop();
+        }
     }
 }

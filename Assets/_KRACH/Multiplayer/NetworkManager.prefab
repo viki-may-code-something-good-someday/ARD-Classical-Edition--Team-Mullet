@@ -52,8 +52,8 @@ MonoBehaviour:
   headlessStartMode: 0
   editorAutoStart: 0
   sendRate: 60
-  offlineScene: 
-  onlineScene: Assets/_KRACH/Scenes/MainScene.unity
+  offlineScene: Assets/_KRACH/Scenes/MainMenu.unity
+  onlineScene: Assets/_KRACH/Scenes/Lobby.unity
   offlineSceneLoadDelay: 0
   transport: {fileID: 5053853639049343821}
   networkAddress: localhost
@@ -61,7 +61,7 @@ MonoBehaviour:
   disconnectInactiveConnections: 0
   disconnectInactiveTimeout: 60
   authenticator: {fileID: 0}
-  playerPrefab: {fileID: 0}
+  playerPrefab: {fileID: 4346577877502998422, guid: 0b36d0b65afa0484eaa2d7eb23d89c46, type: 3}
   autoCreatePlayer: 0
   playerSpawnMethod: 0
   spawnPrefabs: []
@@ -81,6 +81,8 @@ MonoBehaviour:
   evaluationInterval: 3
   timeInterpolationGui: 0
   gamePlayerPrefab: {fileID: 0}
+  lobbyScene: Assets/_KRACH/Scenes/Lobby.unity
+  gameplayScene: Assets/_KRACH/Scenes/MainLevel_Test.unity
 --- !u!114 &5053853639049343821
 MonoBehaviour:
   m_ObjectHideFlags: 0
