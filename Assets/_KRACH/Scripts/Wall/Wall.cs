@@ -57,8 +57,8 @@ public class Wall : NetworkBehaviour, IDestructable
         }
 
         // Sound/Effects auf allen Clients abspielen
-        RpcShowEffects(_hitPoint, _hitNormal);
-        RpcPlayHitSound(_hitPoint);
+        // RpcShowEffects(_hitPoint, _hitNormal);
+        // RpcPlayHitSound(_hitPoint);
 
         health -= _damage;
 

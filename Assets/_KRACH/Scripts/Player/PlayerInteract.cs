@@ -62,7 +62,16 @@ public class PlayerInteract : NetworkBehaviour
         }
         else if (Physics.Raycast(origin, direction, out RaycastHit hitinfoDestructable, hitRange, LayerMask.GetMask("Destructable"), QueryTriggerInteraction.Ignore))
         {
-            if (hitinfoDestructable.collider.TryGetComponent<IDestructable>(out IDestructable destructableObject))
+            /*
+             if (hitinfoDestructable.collider.TryGetComponent<IDestructable>(out IDestructable destructableObject))
+            {
+                destructableObject.TakeDamage(hitDamage, hitinfoDestructable.point, hitinfoDestructable.normal);
+                hitSomething = true;
+            }
+            */
+
+            IDestructable destructableObject = hitinfoDestructable.collider.GetComponentInParent<IDestructable>();
+            if (destructableObject != null)
             {
                 destructableObject.TakeDamage(hitDamage, hitinfoDestructable.point, hitinfoDestructable.normal);
                 hitSomething = true;

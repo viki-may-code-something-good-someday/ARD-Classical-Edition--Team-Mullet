@@ -125,8 +125,6 @@ public class LobbyController : MonoBehaviour
 
             playerItemCreated = true;
         }
-
-        ReadyPlayer();
     }
 
     public void AddPlayerToListAndSetValues(int isHunterOrVandalist, PlayerListItem playerItem) // 0 = Hunter, 1 = Vandalist - maybe in the future 2 = Viewer
