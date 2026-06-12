@@ -52,8 +52,8 @@ MonoBehaviour:
   headlessStartMode: 0
   editorAutoStart: 0
   sendRate: 60
-  offlineScene: 
-  onlineScene: Assets/_KRACH/Scenes/MainScene.unity
+  offlineScene: Assets/_KRACH/Scenes/MainMenu.unity
+  onlineScene: Assets/_KRACH/Scenes/Lobby.unity
   offlineSceneLoadDelay: 0
   transport: {fileID: 5053853639049343821}
   networkAddress: localhost
@@ -81,6 +81,8 @@ MonoBehaviour:
   evaluationInterval: 3
   timeInterpolationGui: 0
   gamePlayerPrefab: {fileID: 0}
+  lobbyScene: Assets/_KRACH/Scenes/Lobby.unity
+  gameplayScene: Assets/_KRACH/Scenes/MainLevel_Test.unity
 --- !u!114 &5053853639049343821
 MonoBehaviour:
   m_ObjectHideFlags: 0

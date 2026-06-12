@@ -5,24 +5,18 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
-    path: Assets/_KRACH/Scenes/SampleScene.unity
-    guid: 99c9720ab356a0642a771bea13969a05
   - enabled: 1
     path: Assets/_KRACH/Scenes/MainMenu.unity
     guid: 6ecd8593a37303448894108add0e8d98
   - enabled: 1
     path: Assets/_KRACH/Scenes/Lobby.unity
     guid: d674192960cbb1747a7e6d86c44a2652
-  - enabled: 0
-    path: Assets/_KRACH/Scenes/MainScene.unity
-    guid: e58e3556ecf856941adcf76e2418adac
+  - enabled: 1
+    path: Assets/_KRACH/Scenes/MainLevel_Test.unity
+    guid: f5c05be85d9970a4e9eb83333d166e42
   - enabled: 1
     path: Assets/_KRACH/Scenes/TestScenes/Tim Testing/Multiplayer_Test.unity
     guid: 20cf4e74c2e762447b6ff3c90ca41322
-  - enabled: 1
-    path: Assets/_KRACH/Scenes/TestScenes/Viktor_TestScene.unity
-    guid: 391504482073025418cb49153ab99b5b
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

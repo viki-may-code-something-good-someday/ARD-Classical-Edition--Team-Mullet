@@ -605,28 +605,32 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   walkSpeed: 6
-  canSprint: 0
-  baseSprintSpeed: 9
-  maxSprintSpeed: 15
-  sprintAcceleration: 1.7
-  sprintBurstAcceleration: 14
-  sprintDecaySpeed: 3
-  sprintBurstThreshold: 2.5
-  playerCamera: {fileID: 5574050046996855397, guid: a2faea5b8dd51f3489349b73f5d418fe, type: 3}
-  normalFOV: 60
-  maxSprintFOV: 70
-  fovChangeSpeed: 8
+  groundCheck: {fileID: 6826781417353443385}
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 1
+  groundDistance: 0.4
   jumpHeight: 2
   jumpHoldTime: 0.2
   jumpHoldGravityMultiplier: 0.5
   baseFallGravity: 10
   maxFallGravity: 50
   fallGravityScaling: 1.5
-  groundCheck: {fileID: 6826781417353443385}
-  groundMask:
-    serializedVersion: 2
-    m_Bits: 1
-  groundDistance: 0.4
+  canSprint: 0
+  baseSprintSpeed: 9
+  maxSprintSpeed: 15
+  sprintBurstThreshold: 2.5
+  sprintAcceleration: 1.7
+  sprintBurstAcceleration: 14
+  sprintDecaySpeed: 3
+  playerCamera: {fileID: 5574050046996855397, guid: a2faea5b8dd51f3489349b73f5d418fe, type: 3}
+  normalFOV: 60
+  maxSprintFOV: 70
+  fovChangeSpeed: 8
+  baseStepInterval: 0.4
+  footstepTimer: 0
+  gameplayScene: Assets/_KRACH/Scenes/MainLevel_Test.unity
+  controller: {fileID: 8166971595331418044}
   velocity: {x: 0, y: 0, z: 0}
   playerModel: {fileID: 2698249127586981476}
 --- !u!114 &3612966290959217811

@@ -11,17 +11,17 @@ public class PlayerObjectController : NetworkBehaviour
     [SyncVar(hook = nameof(PlayerNameUpdate))] public string playerName;
     [SyncVar(hook = nameof(PlayerReadyUpdate))] public bool ready;
 
-    private CustomNetworkManager manager;
+    private CustomNetworkManager networkManager;
 
-    private CustomNetworkManager Manager
+    private CustomNetworkManager NetworkManager
     {
         get
         {
-            if (manager != null)
+            if (networkManager != null)
             {
-                return manager;
+                return networkManager;
             }
-            return manager = CustomNetworkManager.singleton as CustomNetworkManager;
+            return networkManager = CustomNetworkManager.singleton as CustomNetworkManager;
         }
     }
 
@@ -77,20 +77,20 @@ public class PlayerObjectController : NetworkBehaviour
 
     public override void OnStartClient()
     {
-        if (Manager == null)
+        if (NetworkManager == null)
         {
             Debug.LogError("CustomNetworkManager not found!");
             return;
         }
 
-        manager.gamePlayers.Add(this);
+        networkManager.gamePlayers.Add(this);
         LobbyController.instance.UpdateLobbyName();
         LobbyController.instance.UpdatePlayerList();
     }
 
     public override void OnStopClient()
     {
-        manager.gamePlayers.Remove(this);
+        networkManager.gamePlayers.Remove(this);
         LobbyController.instance.UpdatePlayerList();
     }
 
@@ -113,17 +113,17 @@ public class PlayerObjectController : NetworkBehaviour
     }
 
 
-    public void CanStartGame(string sceneName)
+    public void CanStartGame(string sceneName, bool useCustomNetworkGameplayScene)
     {
         if (isOwned)
         {
-            CmdCanStartGame(sceneName);
+            CmdCanStartGame(sceneName, useCustomNetworkGameplayScene);
         }
     }
 
     [Command]
-    public void CmdCanStartGame(string sceneName)
+    public void CmdCanStartGame(string sceneName, bool useCustomNetworkGameplayScene)
     {
-        manager.StartGame(sceneName);
+        NetworkManager.StartGame(sceneName, useCustomNetworkGameplayScene);
     }
 }

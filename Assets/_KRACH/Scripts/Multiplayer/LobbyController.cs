@@ -67,9 +67,14 @@ public class LobbyController : MonoBehaviour
         if (instance == null) { instance = this; }
     }
 
-    public void StartGame(string sceneName)
+    public void StartGame(string sceneName, bool useCustomNetworkGameplayScene)
     {
-        localPlayerController.CanStartGame(sceneName);
+        localPlayerController.CanStartGame(sceneName, useCustomNetworkGameplayScene);
+    }
+
+    public void StartGame(bool useCustomNetworkGameplayScene)
+    {
+        localPlayerController.CanStartGame("", useCustomNetworkGameplayScene);
     }
 
     public void UpdateLobbyName()

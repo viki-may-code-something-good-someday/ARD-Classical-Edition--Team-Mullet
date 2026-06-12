@@ -38,10 +38,11 @@ public class PlayerInteract : NetworkBehaviour
 
         bool hitSomething = Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, hitRange, LayerMask.GetMask("Interactable", "Destructable", "Default"), QueryTriggerInteraction.Ignore);
 
-        if (hitSomething)
-            RuntimeManager.PlayOneShot("event:/SFX/Punch");
-        else
-            RuntimeManager.PlayOneShot("event:/SFX/PunchAir");
+        // Sounds can not be found -> uncomment when fixed
+        // if (hitSomething)
+        //     RuntimeManager.PlayOneShot("event:/SFX/Punch");
+        // else
+        //     RuntimeManager.PlayOneShot("event:/SFX/PunchAir");
 
         CmdTryInteract(playerCamera.transform.position, playerCamera.transform.forward);
     }
