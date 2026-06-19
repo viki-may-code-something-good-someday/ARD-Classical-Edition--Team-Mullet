@@ -11,6 +11,10 @@ public class Wall : NetworkBehaviour, IDestructable
     [SerializeField] private GameObject wallBroken;
     [SerializeField] private List<GameObject> wallDecorations = new List<GameObject>();
     [SerializeField] private ParticleSystem hitParticle;
+    [SerializeField] private LuaSoundEmitter wallHitSoundEmitter;
+    [SerializeField] private LuaSoundEmitter wallBreakdownSoundEmitter;
+    [Tooltip("Klang für unzerstörbare ('Metall'-)Wände — gespielt statt Schaden, wenn 'indestructable' an ist.")]
+    [SerializeField] private LuaSoundEmitter wallMetalSoundEmitter;
 
     [Header("Settings")]
     [SerializeField] private bool indestructable;
@@ -22,6 +26,8 @@ public class Wall : NetworkBehaviour, IDestructable
     [Header("Wall Decorations")]
     [SerializeField] private float wallDecorationsFadeOutSpeedMultiplier = 0.2f;
     [SerializeField] private float speedUpWallDecorationsFadeOutSpeedMultiplier = 0.5f;
+
+
 
 
     public float Health { get { return health; } }
@@ -48,7 +54,12 @@ public class Wall : NetworkBehaviour, IDestructable
     [Server]
     public void TakeDamage(float _damage, Vector3 _hitPoint, Vector3 _hitNormal)
     {
-        if (indestructable) return;
+        if (indestructable)
+        {
+            // Unzerstörbare ("Metall"-)Wand: nur Feedback-Klang, kein Schaden.
+            RpcPlayMetalSound();
+            return;
+        }
 
         if (isDestroyed)
         {
@@ -57,8 +68,8 @@ public class Wall : NetworkBehaviour, IDestructable
         }
 
         // Sound/Effects auf allen Clients abspielen
-        // RpcShowEffects(_hitPoint, _hitNormal);
-        // RpcPlayHitSound(_hitPoint);
+        RpcShowEffects(_hitPoint, _hitNormal);
+        RpcPlayHitSound(_hitPoint);
 
         health -= _damage;
 
@@ -86,7 +97,14 @@ public class Wall : NetworkBehaviour, IDestructable
     [ClientRpc]
     private void RpcPlayHitSound(Vector3 point)
     {
-        RuntimeManager.PlayOneShot("event:/SFX/WallHit", point);
+        wallHitSoundEmitter.PlayOneShot();
+    }
+
+    [ClientRpc]
+    private void RpcPlayMetalSound()
+    {
+        if (wallMetalSoundEmitter != null)
+            wallMetalSoundEmitter.PlayOneShot();
     }
 
     // Dieser Hook wird auf ALLEN Rechnern ausgefuehrt, sobald isDestroyed = true wird.
@@ -107,7 +125,7 @@ public class Wall : NetworkBehaviour, IDestructable
     [ClientRpc]
     private void RpcTriggerExplosion(Vector3 _hitPoint)
     {
-        RuntimeManager.PlayOneShot("event:/SFX/WallBreakdown", _hitPoint);
+        wallBreakdownSoundEmitter.PlayOneShot();
 
         List<Rigidbody> rigidbodies = wallBroken.transform.GetComponentsInChildren<Rigidbody>().ToList();
 

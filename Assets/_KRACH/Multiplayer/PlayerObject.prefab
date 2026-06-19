@@ -1,5 +1,165 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &193832817252020501
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3473469714625389914}
+  - component: {fileID: 3449724432928271097}
+  m_Layer: 0
+  m_Name: PunchSoundEmitter
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3473469714625389914
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 193832817252020501}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.08855, y: -0.32, z: 0.58}
+  m_LocalScale: {x: 1, y: 1.1111112, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3118677935725421019}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3449724432928271097
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 193832817252020501}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c60bff4681f50cf439e1012be0041733, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LuaSoundEmitter
+  CollisionTag: 
+  enableMultiplayer: 1
+  mirrorSyncMode: 1
+  targetClientId: 0
+  EventReference:
+    Guid:
+      Data1: -403286670
+      Data2: 1154886370
+      Data3: -159499124
+      Data4: 539194039
+    Path: event:/SFX/Vandalist/Punch
+  EventPlayTrigger: 0
+  EventStopTrigger: 0
+  OneShotTrigger: 100
+  AllowFadeout: 1
+  TriggerOnce: 0
+  Preload: 0
+  NonRigidbodyVelocity: 0
+  OverrideAttenuation: 0
+  OverrideMinDistance: 2
+  OverrideMaxDistance: 3
+  Params: []
+  enableOcclusion: 1
+  obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 513
+  maxDistance: 20
+  maxParameterDistance: 30
+  invertFadeRange: 0
+  stopAudioWhenOutOfRange: 0
+  nonOcclusionTag: NoOcclusion
+  selectedMaterial: 1
+  enableOneShotCooldown: 0
+  oneShotCooldownDuration: 1
+  scaledValue: 0
+  isObstructed: 0
+--- !u!1 &776163430782707734
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2584805308470275173}
+  - component: {fileID: 1290949500620203656}
+  m_Layer: 0
+  m_Name: PunchAirSoundEmitter
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2584805308470275173
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 776163430782707734}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.08855, y: -0.32, z: 0.58}
+  m_LocalScale: {x: 1, y: 1.1111112, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3118677935725421019}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1290949500620203656
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 776163430782707734}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c60bff4681f50cf439e1012be0041733, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LuaSoundEmitter
+  CollisionTag: 
+  enableMultiplayer: 1
+  mirrorSyncMode: 1
+  targetClientId: 0
+  EventReference:
+    Guid:
+      Data1: -1000229550
+      Data2: 1292498248
+      Data3: 2059365297
+      Data4: 1461428861
+    Path: event:/SFX/Vandalist/PunchAir
+  EventPlayTrigger: 0
+  EventStopTrigger: 0
+  OneShotTrigger: 100
+  AllowFadeout: 1
+  TriggerOnce: 0
+  Preload: 0
+  NonRigidbodyVelocity: 0
+  OverrideAttenuation: 0
+  OverrideMinDistance: 2
+  OverrideMaxDistance: 3
+  Params: []
+  enableOcclusion: 1
+  obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 513
+  maxDistance: 20
+  maxParameterDistance: 30
+  invertFadeRange: 0
+  stopAudioWhenOutOfRange: 0
+  nonOcclusionTag: NoOcclusion
+  selectedMaterial: 1
+  enableOneShotCooldown: 0
+  oneShotCooldownDuration: 1
+  scaledValue: 0
+  isObstructed: 0
 --- !u!1 &1034154011109326264
 GameObject:
   m_ObjectHideFlags: 0
@@ -204,10 +364,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5023133851415914603}
-  - component: {fileID: 2233231221969325555}
-  - component: {fileID: 4402716739899871668}
+  - component: {fileID: 8697879425367623895}
   m_Layer: 6
-  m_Name: Footsteps
+  m_Name: FootstepSoundEmitter
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -228,104 +387,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 4691285949938190304}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!82 &2233231221969325555
-AudioSource:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2227334020177892542}
-  m_Enabled: 1
-  serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 8300000, guid: 31827a7e69015ca4c9c38ca976955f95, type: 3}
-  m_PlayOnAwake: 0
-  m_Volume: 1
-  m_Pitch: 1
-  Loop: 0
-  Mute: 0
-  Spatialize: 0
-  SpatializePostEffects: 0
-  Priority: 128
-  DopplerLevel: 1
-  MinDistance: 1
-  MaxDistance: 500
-  Pan2D: 0
-  rolloffMode: 0
-  BypassEffects: 0
-  BypassListenerEffects: 0
-  BypassReverbZones: 0
-  rolloffCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  panLevelCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  spreadCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  reverbZoneMixCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
---- !u!114 &4402716739899871668
+--- !u!114 &8697879425367623895
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -334,27 +396,45 @@ MonoBehaviour:
   m_GameObject: {fileID: 2227334020177892542}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: deb7c3c27cbd1ea48ac4171aa4660257, type: 3}
+  m_Script: {fileID: 11500000, guid: c60bff4681f50cf439e1012be0041733, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
-  characterController: {fileID: 8166971595331418044}
-  footstepClips:
-  - {fileID: 8300000, guid: 31827a7e69015ca4c9c38ca976955f95, type: 3}
-  - {fileID: 8300000, guid: e76907f4de12ec448810bb53f27ada9b, type: 3}
-  - {fileID: 8300000, guid: c15e69a5fb3b2ed4da5edc6a2119d43f, type: 3}
-  - {fileID: 8300000, guid: 3736956ff866b00418bb918ac953421f, type: 3}
-  - {fileID: 8300000, guid: dd6732431a5ab8145bc226c56b1b7581, type: 3}
-  - {fileID: 8300000, guid: 5c9406927dd0c704bb3084ea4386caff, type: 3}
-  - {fileID: 8300000, guid: 007b1c2a334eaaf4caa51f553d6b18c8, type: 3}
-  - {fileID: 8300000, guid: e1bc874708b88dd4c98547ca628651f3, type: 3}
-  - {fileID: 8300000, guid: 1e25488ec214c39438fcaaba9d4e6e28, type: 3}
-  - {fileID: 8300000, guid: 695b6feb88847ee4d9770be06b0e6a30, type: 3}
-  - {fileID: 8300000, guid: b804dc95bde7a3847ae5d4e0eb758148, type: 3}
-  - {fileID: 8300000, guid: 796336c45eaadb24ca3a6f71f91ab2d8, type: 3}
-  - {fileID: 8300000, guid: 636e6da7d0602634c8e2243ac6b99f37, type: 3}
-  stepInterval: 0.5
-  maxVolume: 1
-  speedThreshold: 0.1
+  m_EditorClassIdentifier: Assembly-CSharp::LuaSoundEmitter
+  CollisionTag: 
+  enableMultiplayer: 1
+  mirrorSyncMode: 1
+  targetClientId: 0
+  EventReference:
+    Guid:
+      Data1: 595338648
+      Data2: 1144812301
+      Data3: 1415773364
+      Data4: -1227119261
+    Path: event:/SFX/Vandalist/Footstep
+  EventPlayTrigger: 0
+  EventStopTrigger: 0
+  OneShotTrigger: 100
+  AllowFadeout: 1
+  TriggerOnce: 0
+  Preload: 0
+  NonRigidbodyVelocity: 0
+  OverrideAttenuation: 0
+  OverrideMinDistance: 2
+  OverrideMaxDistance: 3
+  Params: []
+  enableOcclusion: 1
+  obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 513
+  maxDistance: 20
+  maxParameterDistance: 30
+  invertFadeRange: 0
+  stopAudioWhenOutOfRange: 0
+  nonOcclusionTag: NoOcclusion
+  selectedMaterial: 1
+  enableOneShotCooldown: 0
+  oneShotCooldownDuration: 1
+  scaledValue: 0
+  isObstructed: 0
 --- !u!1 &2698249127586981476
 GameObject:
   m_ObjectHideFlags: 0
@@ -467,12 +547,13 @@ GameObject:
   - component: {fileID: 4017868926526249065}
   - component: {fileID: 1348197460992893131}
   - component: {fileID: 6191122419052942345}
+  - component: {fileID: 6315722134740732025}
   - component: {fileID: 8166971595331418044}
   - component: {fileID: 5128184422578144709}
   - component: {fileID: 3612966290959217811}
   m_Layer: 6
   m_Name: PlayerObject
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -564,6 +645,29 @@ MonoBehaviour:
   playerSteamID: 0
   playerName: 
   ready: 0
+--- !u!136 &6315722134740732025
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4346577877502998422}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.4
+  m_Height: 1.83
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!143 &8166971595331418044
 CharacterController:
   m_ObjectHideFlags: 0
@@ -629,9 +733,9 @@ MonoBehaviour:
   fovChangeSpeed: 8
   baseStepInterval: 0.4
   footstepTimer: 0
+  footstepSoundEmitter: {fileID: 8697879425367623895}
   gameplayScene: Assets/_KRACH/Scenes/MainLevel_Test.unity
   controller: {fileID: 8166971595331418044}
-  velocity: {x: 0, y: 0, z: 0}
   playerModel: {fileID: 2698249127586981476}
 --- !u!114 &3612966290959217811
 MonoBehaviour:
@@ -654,6 +758,8 @@ MonoBehaviour:
   playerCamera: {fileID: 4680851988968097038}
   hitRange: 2
   hitDamage: 1
+  punchSoundEmitter: {fileID: 3449724432928271097}
+  punchAirSoundEmitter: {fileID: 1290949500620203656}
 --- !u!1 &5363979060368924945
 GameObject:
   m_ObjectHideFlags: 0
@@ -686,6 +792,8 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7669985030270898423}
+  - {fileID: 3473469714625389914}
+  - {fileID: 2584805308470275173}
   m_Father: {fileID: 4809818173979025313}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!20 &5767070758058907573

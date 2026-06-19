@@ -12,11 +12,13 @@ public class BillboardObject : MonoBehaviour
     private Camera mainCamera;
     private Rigidbody rb;
     private bool isKnockedBack;
+    private LuaSoundEmitter collSoundEmitter;
 
     private void Start()
     {
         mainCamera = Camera.main;
         rb = GetComponent<Rigidbody>();
+        collSoundEmitter = GetComponent<LuaSoundEmitter>();
     }
 
     private void Update()
@@ -51,6 +53,9 @@ public class BillboardObject : MonoBehaviour
         if (knockbackEnabled)
         {
             ApplyKnockback(_puncherPosition, knockbackForce * punchKnockbackMultiplier);
+
+            // Play sound on punch
+            collSoundEmitter.PlayOneShot();
         }
     }
 

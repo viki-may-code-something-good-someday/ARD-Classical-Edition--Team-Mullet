@@ -100,14 +100,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8647497576118087877}
+  - component: {fileID: 3847888004710153319}
   - component: {fileID: 2373518318598767925}
   - component: {fileID: 3234403350367809677}
   - component: {fileID: 3444666412621817683}
-  - component: {fileID: 3847888004710153319}
-  - component: {fileID: -1716078403743312420}
+  - component: {fileID: 143707511126151037}
   m_Layer: 0
   m_Name: BillboardObject
-  m_TagString: Untagged
+  m_TagString: NoOcclusion
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -128,6 +128,23 @@ Transform:
   - {fileID: 2398233507360955838}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3847888004710153319
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6281945527010714970}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Mirror::Mirror.NetworkIdentity
+  sceneId: 0
+  _assetId: 2567615150
+  serverOnly: 0
+  visibility: 0
+  hasSpawned: 0
 --- !u!114 &2373518318598767925
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -140,9 +157,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83c1220ad38d7fb41b2524a693bb2bf2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BillboardFacingCamera
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0
   flippedSprite: 0
   knockbackEnabled: 1
   knockbackForce: 3
@@ -199,24 +213,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 80
   m_CollisionDetection: 0
---- !u!114 &3847888004710153319
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6281945527010714970}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Mirror::Mirror.NetworkIdentity
-  sceneId: 0
-  _assetId: 2567615150
-  serverOnly: 0
-  visibility: 0
-  hasSpawned: 0
---- !u!114 &-1716078403743312420
+--- !u!114 &143707511126151037
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -229,15 +226,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LuaSoundEmitter
   CollisionTag: 
+  enableMultiplayer: 1
+  mirrorSyncMode: 1
+  targetClientId: 0
   EventReference:
     Guid:
-      Data1: -1366175969
-      Data2: 1246796757
-      Data3: 667356306
-      Data4: 1421458892
-    Path: event:/SFX/Props/PropColl_Plastic
-  EventPlayTrigger: 7
+      Data1: 1549912873
+      Data2: 1176287652
+      Data3: 681873298
+      Data4: 1099231494
+    Path: event:/SFX/Props/PropColl_Glass
+  EventPlayTrigger: 0
   EventStopTrigger: 0
+  OneShotTrigger: 7
   AllowFadeout: 1
   TriggerOnce: 0
   Preload: 0
@@ -246,8 +247,7 @@ MonoBehaviour:
   OverrideMinDistance: 2
   OverrideMaxDistance: 3
   Params: []
-  enableOcclusion: 0
-  playerTransform: {fileID: 0}
+  enableOcclusion: 1
   obstacleLayer:
     serializedVersion: 2
     m_Bits: 0

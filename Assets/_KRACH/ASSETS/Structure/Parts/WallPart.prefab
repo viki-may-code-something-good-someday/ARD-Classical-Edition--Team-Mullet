@@ -44,6 +44,9 @@ GameObject:
   - component: {fileID: 151400405414378543}
   - component: {fileID: 8904730114808629814}
   - component: {fileID: 1675187135193447262}
+  - component: {fileID: -4738385181215274244}
+  - component: {fileID: 6640883149923703224}
+  - component: {fileID: 5038511741283537845}
   m_Layer: 8
   m_Name: WallPart
   m_TagString: Untagged
@@ -86,7 +89,10 @@ MonoBehaviour:
   wallNormal: {fileID: 2240644022633607083}
   wallBroken: {fileID: 3995930024737658038}
   wallDecorations: []
-  hitParticle: {fileID: 0}
+  hitParticle: {fileID: 286782459826712307, guid: 8958f9f1e77ae644183e4b1c945314c0, type: 3}
+  wallHitSoundEmitter: {fileID: -4738385181215274244}
+  wallBreakdownSoundEmitter: {fileID: 6640883149923703224}
+  wallMetalSoundEmitter: {fileID: 5038511741283537845}
   indestructable: 0
   health: 3
   explosionForce: 1000
@@ -110,6 +116,150 @@ MonoBehaviour:
   serverOnly: 0
   visibility: 0
   hasSpawned: 0
+--- !u!114 &-4738385181215274244
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2824690471612819058}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c60bff4681f50cf439e1012be0041733, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LuaSoundEmitter
+  CollisionTag: 
+  enableMultiplayer: 1
+  mirrorSyncMode: 1
+  targetClientId: 0
+  EventReference:
+    Guid:
+      Data1: 728909804
+      Data2: 1165954831
+      Data3: 941919621
+      Data4: -193704713
+    Path: event:/SFX/Walls/WallHit
+  EventPlayTrigger: 0
+  EventStopTrigger: 0
+  OneShotTrigger: 100
+  AllowFadeout: 1
+  TriggerOnce: 0
+  Preload: 0
+  NonRigidbodyVelocity: 0
+  OverrideAttenuation: 0
+  OverrideMinDistance: 2
+  OverrideMaxDistance: 3
+  Params: []
+  enableOcclusion: 1
+  obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 513
+  maxDistance: 20
+  maxParameterDistance: 30
+  invertFadeRange: 0
+  stopAudioWhenOutOfRange: 0
+  nonOcclusionTag: NoOcclusion
+  selectedMaterial: 1
+  enableOneShotCooldown: 0
+  oneShotCooldownDuration: 1
+  scaledValue: 0
+  isObstructed: 0
+--- !u!114 &6640883149923703224
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2824690471612819058}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c60bff4681f50cf439e1012be0041733, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LuaSoundEmitter
+  CollisionTag: 
+  enableMultiplayer: 1
+  mirrorSyncMode: 1
+  targetClientId: 0
+  EventReference:
+    Guid:
+      Data1: 921257274
+      Data2: 1193614869
+      Data3: -1687536478
+      Data4: 1851585406
+    Path: event:/SFX/Walls/WallBreakdown
+  EventPlayTrigger: 0
+  EventStopTrigger: 0
+  OneShotTrigger: 100
+  AllowFadeout: 1
+  TriggerOnce: 1
+  Preload: 0
+  NonRigidbodyVelocity: 0
+  OverrideAttenuation: 0
+  OverrideMinDistance: 2
+  OverrideMaxDistance: 3
+  Params: []
+  enableOcclusion: 1
+  obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 513
+  maxDistance: 20
+  maxParameterDistance: 30
+  invertFadeRange: 0
+  stopAudioWhenOutOfRange: 0
+  nonOcclusionTag: NoOcclusion
+  selectedMaterial: 1
+  enableOneShotCooldown: 0
+  oneShotCooldownDuration: 1
+  scaledValue: 0
+  isObstructed: 0
+--- !u!114 &5038511741283537845
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2824690471612819058}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c60bff4681f50cf439e1012be0041733, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LuaSoundEmitter
+  CollisionTag: 
+  enableMultiplayer: 1
+  mirrorSyncMode: 1
+  targetClientId: 0
+  EventReference:
+    Guid:
+      Data1: 514370236
+      Data2: 1260148097
+      Data3: -297335874
+      Data4: -180814793
+    Path: event:/SFX/Walls/WallMetal
+  EventPlayTrigger: 0
+  EventStopTrigger: 0
+  OneShotTrigger: 100
+  AllowFadeout: 1
+  TriggerOnce: 1
+  Preload: 0
+  NonRigidbodyVelocity: 0
+  OverrideAttenuation: 0
+  OverrideMinDistance: 2
+  OverrideMaxDistance: 3
+  Params: []
+  enableOcclusion: 1
+  obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 513
+  maxDistance: 20
+  maxParameterDistance: 30
+  invertFadeRange: 0
+  stopAudioWhenOutOfRange: 0
+  nonOcclusionTag: NoOcclusion
+  selectedMaterial: 1
+  enableOneShotCooldown: 0
+  oneShotCooldownDuration: 1
+  scaledValue: 0
+  isObstructed: 0
 --- !u!1 &3671108214043795730
 GameObject:
   m_ObjectHideFlags: 0

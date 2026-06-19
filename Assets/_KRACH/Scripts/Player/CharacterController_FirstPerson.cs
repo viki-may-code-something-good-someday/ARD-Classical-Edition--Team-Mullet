@@ -1,4 +1,3 @@
-using FMODUnity;
 using Mirror;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -58,9 +57,10 @@ public class CharacterController_FirstPerson : NetworkBehaviour
     [SerializeField] private float fovChangeSpeed = 8f;
 
     [Header("Audio")]
-    [SerializeField] private float baseStepInterval = 0.4f;
+    [SerializeField] private float baseStepInterval = 0.3f;
     [SerializeField] private float footstepTimer = 0f;
-    private string footstepEvent = "event:/SFX/Footstep";
+    [Tooltip("LuaSoundEmitter am Fußpunkt, Script-Mode. Enable Multiplayer = false — die Verteilung (lokal + RpcPlayFootstepOnOthers) macht dieses Script.")]
+    [SerializeField] private LuaSoundEmitter footstepSoundEmitter;
 
     [Header("References")]
     [Scene][SerializeField] private string gameplayScene;
@@ -178,29 +178,6 @@ public class CharacterController_FirstPerson : NetworkBehaviour
 
         bool isMoving = x != 0 || z != 0;
 
-        // FOOTSTEP SOUND: trigger FMOD event in intervals which scale with movement speed.
-        if (isGrounded && isMoving)
-        {
-            // choose effective movement speed (sprint or walk)
-            float effectiveSpeed = (sprinting && isMoving && canSprint) ? currentSprintSpeed : walkSpeed;
-
-            // Interval scales inversely with speed: faster movement => smaller interval
-            float interval = baseStepInterval * (walkSpeed / Mathf.Max(0.0001f, effectiveSpeed));
-
-            footstepTimer += Time.deltaTime;
-            if (footstepTimer >= interval)
-            {
-                // Play one-shot footstep attached to the player's GameObject so it follows the player
-                RuntimeManager.PlayOneShotAttached(footstepEvent, gameObject);
-                footstepTimer = 0f;
-            }
-        }
-        else
-        {
-            // reset timer when not moving or not grounded so footsteps start immediately when moving again
-            footstepTimer = 0f;
-        }
-
         if (sprinting && isMoving && canSprint)
         {
             sprintTimer += Time.deltaTime;
@@ -221,6 +198,32 @@ public class CharacterController_FirstPerson : NetworkBehaviour
             sprintTimer = 0f;
             currentSprintSpeed -= sprintDecaySpeed * Time.deltaTime;
             currentSprintSpeed = Mathf.Max(currentSprintSpeed, baseSprintSpeed);
+        }
+
+        // FOOTSTEP SOUND: trigger FMOD event in intervals which scale with movement speed.
+        if (isGrounded && isMoving)
+        {
+            // choose effective movement speed (sprint or walk)
+            float effectiveSpeed = (sprinting && isMoving && canSprint) ? currentSprintSpeed : walkSpeed;
+
+            // Calculate sprint multiplier dynamically: at max sprint speed, footsteps are 6x faster than walk
+            float speedMultiplier = sprinting ? 4f * walkSpeed / maxSprintSpeed : 1f;
+
+            // Interval scales inversely with speed: faster movement => smaller interval
+            float interval = baseStepInterval * (walkSpeed / Mathf.Max(0.0001f, effectiveSpeed * speedMultiplier));
+
+            footstepTimer += Time.deltaTime;
+            if (footstepTimer >= interval)
+            {
+                if (footstepSoundEmitter != null) footstepSoundEmitter.PlayOneShot(); // local sound
+                CmdBroadcastFootstep(); // to all others
+                footstepTimer = 0f;
+            }
+        }
+        else
+        {
+            // reset timer when not moving or not grounded so footsteps start immediately when moving again
+            footstepTimer = 0f;
         }
 
         float speed = sprinting && isMoving ? currentSprintSpeed : walkSpeed;
@@ -330,4 +333,18 @@ public class CharacterController_FirstPerson : NetworkBehaviour
     {
         controller.enabled = true;
     }
+
+    #region SOUND
+    [Command]
+    private void CmdBroadcastFootstep()
+    {
+        RpcPlayFootstepOnOthers();
+    }
+
+    [ClientRpc(includeOwner = false)]
+    private void RpcPlayFootstepOnOthers()
+    {
+        if (footstepSoundEmitter != null) footstepSoundEmitter.PlayOneShot();
+    }
+    #endregion
 }

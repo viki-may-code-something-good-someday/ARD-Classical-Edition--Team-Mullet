@@ -172,6 +172,9 @@
 		</property>
 	</object>
 	<object class="SingleSound" id="{3a308db4-dc47-44c5-8515-5b046417f488}">
+		<property name="startOffset">
+			<value>19.5</value>
+		</property>
 		<property name="volume">
 			<value>-3</value>
 		</property>
@@ -180,6 +183,9 @@
 		</relationship>
 	</object>
 	<object class="SingleSound" id="{d403ceed-2029-423b-908c-577b3fd5cd87}">
+		<property name="startOffset">
+			<value>6.5</value>
+		</property>
 		<property name="volume">
 			<value>-3.5</value>
 		</property>
@@ -188,13 +194,19 @@
 		</relationship>
 	</object>
 	<object class="SingleSound" id="{482cc6ef-8497-4b6a-be48-07159b110ca2}">
+		<property name="startOffset">
+			<value>7.5</value>
+		</property>
 		<relationship name="audioFile">
 			<destination>{0cf93c52-b8f5-4697-b3e6-5cff2f2c530e}</destination>
 		</relationship>
 	</object>
 	<object class="SingleSound" id="{32c52a97-4ebb-4483-93ad-f7c90639217a}">
+		<property name="startOffset">
+			<value>2</value>
+		</property>
 		<property name="volume">
-			<value>-5</value>
+			<value>-8</value>
 		</property>
 		<property name="pitch">
 			<value>1</value>

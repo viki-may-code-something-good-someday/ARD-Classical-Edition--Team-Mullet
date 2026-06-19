@@ -9,9 +9,12 @@ public class SoundBox : NetworkBehaviour, IDestructable
     [SerializeField] private StudioEventEmitter musicEmitter;
     [SerializeField] private GameObject hitAnimsContainer;
     [SerializeField] private ParticleSystem hitParticles;
+    [SerializeField] private LuaSoundEmitter hitSoundEmitter;
+    [SerializeField] private LuaSoundEmitter destroySoundEmitter;
 
     [Header("Settings")]
     [SerializeField] private float health;
+    [SerializeField] private float destroyDelay = 2f;
 
     public ParticleSystem HitParticles => hitParticles;
 
@@ -46,28 +49,17 @@ public class SoundBox : NetworkBehaviour, IDestructable
         {
             Instantiate(hitParticles, _hitPoint, Quaternion.LookRotation(_hitNormal));
         }
+
+        if (hitSoundEmitter != null)
+            hitSoundEmitter.PlayOneShot();
     }
 
     [Server]
     private void GetDestroyed()
     {
-        RpcOnDestroyed();
         SoundBoxSpawner.Instance.NotifySoundBoxDestroyed(this);
+        destroySoundEmitter.PlayOneShot();
 
         NetworkServer.Destroy(gameObject);
-    }
-
-    [ClientRpc]
-    private void RpcOnDestroyed()
-    {
-        RuntimeManager.PlayOneShot("event:/SFX/SpeakerDestroy", transform.position);
-        if (musicEmitter == null)
-        {
-            Debug.LogWarning($"[SoundBox] musicEmitter on '{name}' is unassigned in the Inspector.");
-        }
-        else
-        {
-            musicEmitter.Stop();
-        }
     }
 }

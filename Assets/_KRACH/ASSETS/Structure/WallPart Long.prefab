@@ -84,8 +84,102 @@ PrefabInstance:
       propertyPath: m_Size.z
       value: 5.68
       objectReference: {fileID: 0}
+    - target: {fileID: 8904730114808629814, guid: fbddb5bcaae4dfc4fb5a678f78546259, type: 3}
+      propertyPath: indestructable
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8904730114808629814, guid: fbddb5bcaae4dfc4fb5a678f78546259, type: 3}
+      propertyPath: wallHitSoundEmitter
+      value: 
+      objectReference: {fileID: 1921887360289924718}
+    - target: {fileID: 8904730114808629814, guid: fbddb5bcaae4dfc4fb5a678f78546259, type: 3}
+      propertyPath: wallMetalSoundEmitter
+      value: 
+      objectReference: {fileID: -293704639154427236}
+    - target: {fileID: 8904730114808629814, guid: fbddb5bcaae4dfc4fb5a678f78546259, type: 3}
+      propertyPath: wallBreakdownSoundEmitter
+      value: 
+      objectReference: {fileID: 8700705567309624618}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2824690471612819058, guid: fbddb5bcaae4dfc4fb5a678f78546259, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -293704639154427236}
   m_SourcePrefab: {fileID: 100100000, guid: fbddb5bcaae4dfc4fb5a678f78546259, type: 3}
+--- !u!1 &262726739556109024 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2824690471612819058, guid: fbddb5bcaae4dfc4fb5a678f78546259, type: 3}
+  m_PrefabInstance: {fileID: 2636353555616017554}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &-293704639154427236
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 262726739556109024}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c60bff4681f50cf439e1012be0041733, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LuaSoundEmitter
+  CollisionTag: 
+  enableMultiplayer: 1
+  mirrorSyncMode: 1
+  targetClientId: 0
+  EventReference:
+    Guid:
+      Data1: 514370236
+      Data2: 1260148097
+      Data3: -297335874
+      Data4: -180814793
+    Path: event:/SFX/Walls/WallMetal
+  EventPlayTrigger: 0
+  EventStopTrigger: 0
+  OneShotTrigger: 100
+  AllowFadeout: 1
+  TriggerOnce: 1
+  Preload: 0
+  NonRigidbodyVelocity: 0
+  OverrideAttenuation: 0
+  OverrideMinDistance: 2
+  OverrideMaxDistance: 3
+  Params: []
+  enableOcclusion: 1
+  obstacleLayer:
+    serializedVersion: 2
+    m_Bits: 513
+  maxDistance: 20
+  maxParameterDistance: 30
+  invertFadeRange: 0
+  stopAudioWhenOutOfRange: 0
+  nonOcclusionTag: NoOcclusion
+  selectedMaterial: 1
+  enableOneShotCooldown: 0
+  oneShotCooldownDuration: 1
+  scaledValue: 0
+  isObstructed: 0
+--- !u!114 &1921887360289924718 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: -4738385181215274244, guid: fbddb5bcaae4dfc4fb5a678f78546259, type: 3}
+  m_PrefabInstance: {fileID: 2636353555616017554}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 262726739556109024}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c60bff4681f50cf439e1012be0041733, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LuaSoundEmitter
+--- !u!114 &8700705567309624618 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6640883149923703224, guid: fbddb5bcaae4dfc4fb5a678f78546259, type: 3}
+  m_PrefabInstance: {fileID: 2636353555616017554}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 262726739556109024}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c60bff4681f50cf439e1012be0041733, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LuaSoundEmitter

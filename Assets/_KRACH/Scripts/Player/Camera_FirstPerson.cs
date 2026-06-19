@@ -32,6 +32,12 @@ public class Camera_FirstPerson : NetworkBehaviour
             // AudioListener auch ausschalten falls vorhanden
             AudioListener listener = GetComponentInChildren<AudioListener>();
             if (listener != null) { listener.enabled = false; }
+
+            // FMOD-Listener für andere Spieler ausschalten — sonst hat FMOD auf jedem Client
+            // mehrere Listener und spatialisiert (inkl. Occlusion) vom nächstgelegenen Spieler
+            // statt vom eigenen. So bleibt pro Client genau ein Listener: der lokale Spieler.
+            FMODUnity.StudioListener fmodListener = GetComponentInChildren<FMODUnity.StudioListener>();
+            if (fmodListener != null) { fmodListener.enabled = false; }
         }
     }
 

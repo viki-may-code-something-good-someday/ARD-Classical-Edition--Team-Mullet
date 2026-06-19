@@ -28,6 +28,30 @@ PrefabInstance:
       propertyPath: EventReference.Guid.Data4
       value: 1099231494
       objectReference: {fileID: 0}
+    - target: {fileID: 143707511126151037, guid: 85459ab20452abc488469f13c66a14a4, type: 3}
+      propertyPath: EventReference.Path
+      value: event:/SFX/Props/PropColl_Glass
+      objectReference: {fileID: 0}
+    - target: {fileID: 143707511126151037, guid: 85459ab20452abc488469f13c66a14a4, type: 3}
+      propertyPath: oneShotCooldownDuration
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 143707511126151037, guid: 85459ab20452abc488469f13c66a14a4, type: 3}
+      propertyPath: EventReference.Guid.Data1
+      value: 1549912873
+      objectReference: {fileID: 0}
+    - target: {fileID: 143707511126151037, guid: 85459ab20452abc488469f13c66a14a4, type: 3}
+      propertyPath: EventReference.Guid.Data2
+      value: 1176287652
+      objectReference: {fileID: 0}
+    - target: {fileID: 143707511126151037, guid: 85459ab20452abc488469f13c66a14a4, type: 3}
+      propertyPath: EventReference.Guid.Data3
+      value: 681873298
+      objectReference: {fileID: 0}
+    - target: {fileID: 143707511126151037, guid: 85459ab20452abc488469f13c66a14a4, type: 3}
+      propertyPath: EventReference.Guid.Data4
+      value: 1099231494
+      objectReference: {fileID: 0}
     - target: {fileID: 2028305312509862660, guid: 85459ab20452abc488469f13c66a14a4, type: 3}
       propertyPath: m_Sprite
       value: 

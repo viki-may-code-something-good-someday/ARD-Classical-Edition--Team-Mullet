@@ -1,5 +1,4 @@
 using DG.Tweening;
-using FMODUnity;
 using Mirror;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,6 +11,11 @@ public class PlayerInteract : NetworkBehaviour
     [Header("Interaction Settings")]
     [SerializeField] private float hitRange;
     [SerializeField] private float hitDamage;
+
+    [Header("Sound")]
+    [Tooltip("LuaSoundEmitter am Player, Script-Mode. Enable Multiplayer = false — der ClientRpc (includeOwner) verteilt bereits an alle.")]
+    [SerializeField] private LuaSoundEmitter punchSoundEmitter;
+    [SerializeField] private LuaSoundEmitter punchAirSoundEmitter;
 
     private bool rightArmPunching;
 
@@ -38,20 +42,14 @@ public class PlayerInteract : NetworkBehaviour
 
         bool hitSomething = Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, hitRange, LayerMask.GetMask("Interactable", "Destructable", "Default"), QueryTriggerInteraction.Ignore);
 
-        // Sounds can not be found -> uncomment when fixed
-        // if (hitSomething)
-        //     RuntimeManager.PlayOneShot("event:/SFX/Punch");
-        // else
-        //     RuntimeManager.PlayOneShot("event:/SFX/PunchAir");
-
-        CmdTryInteract(playerCamera.transform.position, playerCamera.transform.forward);
+        CmdTryInteract(playerCamera.transform.position, playerCamera.transform.forward, hitSomething);
     }
 
     [Command]
-    private void CmdTryInteract(Vector3 origin, Vector3 direction)
+    private void CmdTryInteract(Vector3 origin, Vector3 direction, bool predictedHit)
     {
         Debug.Log("Sending interaction");
-        bool hitSomething = false;
+        bool hitSomething = predictedHit;
 
         if (Physics.Raycast(origin, direction, out RaycastHit hitinfo, hitRange, LayerMask.GetMask("Interactable"), QueryTriggerInteraction.Ignore))
         {
@@ -101,16 +99,22 @@ public class PlayerInteract : NetworkBehaviour
     }
 
     // [ClientRpc] wird vom Server aufgerufen, aber auf ALLEN CLIENTS ausgefuehrt.
-    // includeOwner = false verhindert, dass der lokale Spieler den Sound/Animation doppelt abspielt.
-    [ClientRpc(includeOwner = false)]
+    // includeOwner = true stellt sicher, dass der Punch für ALLE Spieler (einschliesslich des Angreifers) synchron abgespielt wird.
+    [ClientRpc(includeOwner = true)]
     private void RpcPlayPunchEffects(bool hitSomething)
     {
-        PunchAnimation();
+        // Nur der lokale Spieler muss die Animation noch mal abspielen, da sie bereits in LocalPunch() aufgerufen wurde
+        // Aber wir spielen sie hier nicht ab, weil sie bereits lokal ausgefuehrt wurde
+        // Alle Remote-Spieler bekommen die Animation hier
+        if (!isLocalPlayer)
+        {
+            PunchAnimation();
+        }
 
-        if (hitSomething)
-            RuntimeManager.PlayOneShot("event:/SFX/Punch");
-        else
-            RuntimeManager.PlayOneShot("event:/SFX/PunchAir");
+        // SOUND
+        LuaSoundEmitter punchEmitter = hitSomething ? punchSoundEmitter : punchAirSoundEmitter;
+        if (punchEmitter != null)
+            punchEmitter.PlayOneShot();
     }
 
     private void PunchAnimation()

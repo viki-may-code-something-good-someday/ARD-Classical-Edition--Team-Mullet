@@ -28,6 +28,26 @@ PrefabInstance:
       propertyPath: EventReference.Guid.Data4
       value: 1962376819
       objectReference: {fileID: 0}
+    - target: {fileID: 143707511126151037, guid: 85459ab20452abc488469f13c66a14a4, type: 3}
+      propertyPath: EventReference.Path
+      value: event:/SFX/Props/PropColl_Plastic
+      objectReference: {fileID: 0}
+    - target: {fileID: 143707511126151037, guid: 85459ab20452abc488469f13c66a14a4, type: 3}
+      propertyPath: EventReference.Guid.Data1
+      value: -1366175969
+      objectReference: {fileID: 0}
+    - target: {fileID: 143707511126151037, guid: 85459ab20452abc488469f13c66a14a4, type: 3}
+      propertyPath: EventReference.Guid.Data2
+      value: 1246796757
+      objectReference: {fileID: 0}
+    - target: {fileID: 143707511126151037, guid: 85459ab20452abc488469f13c66a14a4, type: 3}
+      propertyPath: EventReference.Guid.Data3
+      value: 667356306
+      objectReference: {fileID: 0}
+    - target: {fileID: 143707511126151037, guid: 85459ab20452abc488469f13c66a14a4, type: 3}
+      propertyPath: EventReference.Guid.Data4
+      value: 1421458892
+      objectReference: {fileID: 0}
     - target: {fileID: 2028305312509862660, guid: 85459ab20452abc488469f13c66a14a4, type: 3}
       propertyPath: m_Sprite
       value: 
