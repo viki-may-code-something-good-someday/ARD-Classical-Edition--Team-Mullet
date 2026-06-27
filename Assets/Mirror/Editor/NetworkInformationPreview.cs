@@ -303,5 +303,10 @@ namespace Mirror
                 value = new GUIContent((value ? "Yes" : "No"))
             };
         }
+
+        public override void Cleanup()
+        {
+            base.Cleanup();
+        }
     }
 }

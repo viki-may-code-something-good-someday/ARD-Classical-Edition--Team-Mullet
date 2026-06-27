@@ -8,7 +8,7 @@ public class CustomNetworkManager : NetworkManager
 {
     [Header("References")]
     [SerializeField] private PlayerObjectController gamePlayerPrefab;
-    [Scene][SerializeField] private string lobbyScene;
+    //[Scene][SerializeField] private string lobbyScene;
     [Scene][SerializeField] private string gameplayScene;
 
 
@@ -17,7 +17,7 @@ public class CustomNetworkManager : NetworkManager
 
     public override void OnServerAddPlayer(NetworkConnectionToClient conn)
     {
-        if (SceneManager.GetActiveScene().path == lobbyScene)
+        if (SceneManager.GetActiveScene().path == onlineScene)
         {
             PlayerObjectController gamePlayerInstance = Instantiate(gamePlayerPrefab);
 

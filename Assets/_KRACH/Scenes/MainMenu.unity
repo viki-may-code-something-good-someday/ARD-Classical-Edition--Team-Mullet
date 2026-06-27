@@ -271,37 +271,13 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 1553995806723939279, guid: 010f9f2d3e7e94e4d8fb45f44020db0b, type: 3}
-      propertyPath: lobbyScene
-      value: Assets/_KRACH/Scenes/Lobby.unity
-      objectReference: {fileID: 0}
-    - target: {fileID: 1553995806723939279, guid: 010f9f2d3e7e94e4d8fb45f44020db0b, type: 3}
-      propertyPath: onlineScene
-      value: Assets/_KRACH/Scenes/Lobby.unity
-      objectReference: {fileID: 0}
-    - target: {fileID: 1553995806723939279, guid: 010f9f2d3e7e94e4d8fb45f44020db0b, type: 3}
-      propertyPath: offlineScene
-      value: Assets/_KRACH/Scenes/MainMenu.unity
-      objectReference: {fileID: 0}
-    - target: {fileID: 1553995806723939279, guid: 010f9f2d3e7e94e4d8fb45f44020db0b, type: 3}
-      propertyPath: playerPrefab
-      value: 
-      objectReference: {fileID: 1284623599324396773, guid: ed3c3a30a3acff34fbfc3c7bc5cb86ec, type: 3}
-    - target: {fileID: 1553995806723939279, guid: 010f9f2d3e7e94e4d8fb45f44020db0b, type: 3}
-      propertyPath: autoCreatePlayer
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1553995806723939279, guid: 010f9f2d3e7e94e4d8fb45f44020db0b, type: 3}
-      propertyPath: gamePlayerPrefab
-      value: 
-      objectReference: {fileID: 6191122419052942345, guid: 0b36d0b65afa0484eaa2d7eb23d89c46, type: 3}
-    - target: {fileID: 1553995806723939279, guid: 010f9f2d3e7e94e4d8fb45f44020db0b, type: 3}
       propertyPath: spawnPrefabs.Array.size
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 1553995806723939279, guid: 010f9f2d3e7e94e4d8fb45f44020db0b, type: 3}
-      propertyPath: 'spawnPrefabs.Array.data[0]'
+      propertyPath: 'spawnPrefabs.Array.data[1]'
       value: 
-      objectReference: {fileID: 4346577877502998422, guid: 0b36d0b65afa0484eaa2d7eb23d89c46, type: 3}
+      objectReference: {fileID: 7177501436395251289, guid: e9103ae1e6fd72d4080e8920dd5b0794, type: 3}
     - target: {fileID: 4838965611117972004, guid: 010f9f2d3e7e94e4d8fb45f44020db0b, type: 3}
       propertyPath: m_Name
       value: NetworkManager
@@ -349,39 +325,19 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 4838965611117972004, guid: 010f9f2d3e7e94e4d8fb45f44020db0b, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 801796185}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 010f9f2d3e7e94e4d8fb45f44020db0b, type: 3}
 --- !u!114 &801796182 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5758287367900486385, guid: 010f9f2d3e7e94e4d8fb45f44020db0b, type: 3}
   m_PrefabInstance: {fileID: 801796181}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 801796183}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5029e636f55b7094abe8091ab0e4eff4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SteamLobby
---- !u!1 &801796183 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4838965611117972004, guid: 010f9f2d3e7e94e4d8fb45f44020db0b, type: 3}
-  m_PrefabInstance: {fileID: 801796181}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &801796185
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 801796183}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3ce68beccfd5b8341a7e3c2d727aad36, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ConsoleToGUI
 --- !u!1 &1044288123
 GameObject:
   m_ObjectHideFlags: 0

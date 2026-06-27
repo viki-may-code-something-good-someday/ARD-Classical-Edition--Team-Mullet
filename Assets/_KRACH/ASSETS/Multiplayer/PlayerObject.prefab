@@ -549,8 +549,10 @@ GameObject:
   - component: {fileID: 6191122419052942345}
   - component: {fileID: 6315722134740732025}
   - component: {fileID: 8166971595331418044}
-  - component: {fileID: 5128184422578144709}
+  - component: {fileID: 8290204621693117385}
   - component: {fileID: 3612966290959217811}
+  - component: {fileID: 3917315865842863130}
+  - component: {fileID: 3009034205981873339}
   m_Layer: 6
   m_Name: PlayerObject
   m_TagString: Player
@@ -645,6 +647,7 @@ MonoBehaviour:
   playerSteamID: 0
   playerName: 
   ready: 0
+  playerRole: 1
 --- !u!136 &6315722134740732025
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -693,7 +696,7 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &5128184422578144709
+--- !u!114 &8290204621693117385
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -702,41 +705,22 @@ MonoBehaviour:
   m_GameObject: {fileID: 4346577877502998422}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 90fc1d88028b1e14b9c0107d5be9fefb, type: 3}
+  m_Script: {fileID: 11500000, guid: c1d520b2d3976bf4494df5776f9a9d7a, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  walkSpeed: 6
+  controller: {fileID: 8166971595331418044}
   groundCheck: {fileID: 6826781417353443385}
+  playerCamera: {fileID: 4680851988968097038}
+  cameraHolder: {fileID: 4809818173979025313}
   groundMask:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 8
   groundDistance: 0.4
-  jumpHeight: 2
-  jumpHoldTime: 0.2
-  jumpHoldGravityMultiplier: 0.5
-  baseFallGravity: 10
-  maxFallGravity: 50
-  fallGravityScaling: 1.5
-  canSprint: 0
-  baseSprintSpeed: 9
-  maxSprintSpeed: 15
-  sprintBurstThreshold: 2.5
-  sprintAcceleration: 1.7
-  sprintBurstAcceleration: 14
-  sprintDecaySpeed: 3
-  playerCamera: {fileID: 5574050046996855397, guid: a2faea5b8dd51f3489349b73f5d418fe, type: 3}
-  normalFOV: 60
-  maxSprintFOV: 70
-  fovChangeSpeed: 8
-  baseStepInterval: 0.4
-  footstepTimer: 0
+  baseStepInterval: 0.3
   footstepSoundEmitter: {fileID: 8697879425367623895}
-  gameplayScene: Assets/_KRACH/Scenes/MainLevel_Test.unity
-  controller: {fileID: 8166971595331418044}
-  playerModel: {fileID: 2698249127586981476}
 --- !u!114 &3612966290959217811
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -760,6 +744,49 @@ MonoBehaviour:
   hitDamage: 1
   punchSoundEmitter: {fileID: 3449724432928271097}
   punchAirSoundEmitter: {fileID: 1290949500620203656}
+--- !u!114 &3917315865842863130
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4346577877502998422}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 65e09026b6fd616499e1b8e080a1cf0a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HunterAccuse
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  accuseRange: 6
+  playerLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  playerCamera: {fileID: 4680851988968097038}
+  accuseReadyIndicator: {fileID: 0}
+--- !u!114 &3009034205981873339
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4346577877502998422}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f95bba0b06710ff4ba4b5077b51fdb4c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerRoleSetup
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  gameplayScene: Assets/_KRACH/Scenes/MainLevel_Test.unity
+  hunterConfig: {fileID: 11400000, guid: b3682a53163ef154c8ab2433ed86dc84, type: 2}
+  vandalistConfig: {fileID: 11400000, guid: 6ff1cfa0216d6f64bb5aeef324df4887, type: 2}
+  movement: {fileID: 8290204621693117385}
+  interact: {fileID: 3612966290959217811}
+  accuse: {fileID: 3917315865842863130}
+  playerModel: {fileID: 3246556604880896844}
 --- !u!1 &5363979060368924945
 GameObject:
   m_ObjectHideFlags: 0

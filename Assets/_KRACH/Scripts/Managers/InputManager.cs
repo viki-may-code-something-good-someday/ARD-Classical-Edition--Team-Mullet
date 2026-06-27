@@ -4,13 +4,14 @@ using UnityEngine.InputSystem;
 // Input snapshot for a single frame, consumed by gameplay systems.
 public struct InputData
 {
-    public Vector2 MoveInput;       // WASD / left stick
-    public Vector2 LookInput;       // Mouse delta / right stick
+    public Vector2 MoveInput;
+    public Vector2 LookInput;
     public bool SprintHeld;
-    public bool ActionPressed;      // Schlagen / Zeigen (one-shot)
-    public bool InteractPressed;    // one-shot
-    public bool JumpPressed;        // one-shot
+    public bool ActionPressed;
+    public bool InteractPressed;
+    public bool JumpPressed;
     public bool CrouchHeld;
+    public bool JumpHeld;
     public PlayerRole Role;
 }
 

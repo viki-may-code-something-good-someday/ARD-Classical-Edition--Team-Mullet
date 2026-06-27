@@ -8,8 +8,14 @@ public class PlayerObjectController : NetworkBehaviour
     [SyncVar] public int connectionID;
     [SyncVar] public int playerIdNumber;
     [SyncVar] public ulong playerSteamID;
+
     [SyncVar(hook = nameof(PlayerNameUpdate))] public string playerName;
     [SyncVar(hook = nameof(PlayerReadyUpdate))] public bool ready;
+
+    [SyncVar(hook = nameof(OnPlayerRoleChanged))]
+
+    public PlayerRole playerRole = PlayerRole.Vandalist;
+
 
     private CustomNetworkManager networkManager;
 
@@ -125,5 +131,22 @@ public class PlayerObjectController : NetworkBehaviour
     public void CmdCanStartGame(string sceneName, bool useCustomNetworkGameplayScene)
     {
         NetworkManager.StartGame(sceneName, useCustomNetworkGameplayScene);
+    }
+
+    public void SetPlayerRole(PlayerRole role)
+    {
+        if (!NetworkServer.active)
+        {
+            Debug.LogWarning("[PlayerObjectController] SetPlayerRole darf nur auf dem Server aufgerufen werden.");
+            return;
+        }
+        playerRole = role; // SyncVar → wird automatisch an alle Clients repliziert
+    }
+
+    private void OnPlayerRoleChanged(PlayerRole oldRole, PlayerRole newRole)
+    {
+        // Wird auf allen Clients ausgeführt wenn sich die Rolle ändert.
+        // Kann hier genutzt werden um UI oder Visuals zu aktualisieren.
+        Debug.Log($"[PlayerObjectController] {playerName}: {oldRole} → {newRole}");
     }
 }
