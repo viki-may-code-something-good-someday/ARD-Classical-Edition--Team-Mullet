@@ -9,7 +9,15 @@ public class CustomNetworkManager : NetworkManager
     [Header("References")]
     [SerializeField] private PlayerObjectController gamePlayerPrefab;
     //[Scene][SerializeField] private string lobbyScene;
-    [Scene][SerializeField] private string gameplayScene;
+    [Scene]
+    [SerializeField]
+    private string gameplayScene;
+
+    /// <summary>
+    /// Gibt den Pfad der Gameplay-Scene zurück.
+    /// Wird von CameraController und PlayerRoleSetup verwendet.
+    /// </summary>
+    public string GameplayScene => gameplayScene;
 
 
     public List<PlayerObjectController> gamePlayers { get; } = new List<PlayerObjectController>();

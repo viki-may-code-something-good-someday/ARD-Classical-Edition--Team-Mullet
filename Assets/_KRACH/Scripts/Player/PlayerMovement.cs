@@ -108,6 +108,8 @@ public class PlayerMovement : NetworkBehaviour
         HandleJump();
         HandleCrouch();
         HandleFOV();
+
+        controller.Move(velocity * Time.deltaTime);
     }
 
     // ── Bewegung ─────────────────────────────────────────────────────────────
@@ -167,7 +169,6 @@ public class PlayerMovement : NetworkBehaviour
 
         Vector3 move = transform.right * x + transform.forward * z;
         controller.Move(move * speed * Time.deltaTime);
-        controller.Move(velocity * Time.deltaTime);
     }
 
     // ── Springen ─────────────────────────────────────────────────────────────

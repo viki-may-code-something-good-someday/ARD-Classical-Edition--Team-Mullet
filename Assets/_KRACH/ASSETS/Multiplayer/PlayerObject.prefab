@@ -265,6 +265,7 @@ MonoBehaviour:
   cameraPivot: {fileID: 4809818173979025313}
   playerCamera: {fileID: 4680851988968097038}
   mouseSensitivity: 0.1
+  gameplayScene: Assets/_KRACH/Scenes/MainLevel_Test.unity
 --- !u!114 &7272808432725617656
 MonoBehaviour:
   m_ObjectHideFlags: 0

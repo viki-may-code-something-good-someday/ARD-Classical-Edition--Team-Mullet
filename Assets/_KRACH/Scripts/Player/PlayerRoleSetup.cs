@@ -3,43 +3,64 @@ using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-/// <summary>
-/// Liest die zugewiesene Rolle aus PlayerObjectController (SyncVar),
-/// konfiguriert PlayerMovement mit dem passenden RoleMovementConfig und
-/// aktiviert die rollenspezifische Aktion (PlayerInteract oder HunterAccuse).
-///
-/// Läuft auf ALLEN Clients (nicht nur Owner):
-///   – Komponentenaktivierung gilt für alle (Mirror-RPCs brauchen aktive Komponenten).
-///   – Config, Spawn und Modell-Aktivierung nur für den Owner.
-/// </summary>
 public class PlayerRoleSetup : NetworkBehaviour
 {
-    [Header("Scene")]
-    [Scene][SerializeField] private string gameplayScene;
-
     [Header("Movement Configs")]
-    [Tooltip("RoleMovementConfig Asset für die Hunter-Rolle.")]
     [SerializeField] private RoleMovementConfig hunterConfig;
-    [Tooltip("RoleMovementConfig Asset für die Vandalist-Rolle.")]
     [SerializeField] private RoleMovementConfig vandalistConfig;
 
     [Header("References")]
     [SerializeField] private PlayerMovement movement;
-    [SerializeField] private PlayerInteract interact;        // Vandalist-Aktion
-    [SerializeField] private HunterAccuse accuse;            // Hunter-Aktion
+    [SerializeField] private PlayerInteract interact;
+    [SerializeField] private HunterAccuse accuse;
     [SerializeField] private GameObject playerModel;
+
+    // Gameplay-Scene-Pfad kommt direkt vom NetworkManager – kein doppeltes Feld nötig.
+    private string GameplayScene => (NetworkManager.singleton as CustomNetworkManager)?.GameplayScene ?? string.Empty;
 
     private bool initialized = false;
 
-    // ── Update: warten bis Scene + LevelManager bereit ───────────────────────
+    // ── Start: Lobby-Zustand herstellen ──────────────────────────────────────
+
+    private void Start()
+    {
+        // Modell sofort verstecken – InitializeRole() blendet es wieder ein
+        // sobald die Gameplay-Scene geladen ist.
+        if (playerModel != null)
+            playerModel.SetActive(false);
+    }
+
+    // ── Update ───────────────────────────────────────────────────────────────
 
     void Update()
     {
-        if (initialized) return;
-        if (SceneManager.GetActiveScene().path != gameplayScene) return;
+        bool inGameplay = SceneManager.GetActiveScene().path == GameplayScene;
+
+        if (initialized)
+        {
+            // Gameplay-Scene verlassen → zurücksetzen für nächsten Spielstart
+            if (!inGameplay)
+                ResetToLobbyState();
+            return;
+        }
+
+        if (!inGameplay) return;
         if (LevelManager.Instance == null) return;
 
         InitializeRole();
+    }
+
+    // ── Lobby-Reset ───────────────────────────────────────────────────────────
+
+    private void ResetToLobbyState()
+    {
+        initialized = false;
+
+        if (playerModel != null)
+            playerModel.SetActive(false);
+
+        if (interact != null) interact.OnRoleDeactivated();
+        if (accuse != null) accuse.OnRoleDeactivated();
     }
 
     // ── Rolle initialisieren ──────────────────────────────────────────────────
@@ -51,24 +72,23 @@ public class PlayerRoleSetup : NetworkBehaviour
         PlayerObjectController poc = GetComponent<PlayerObjectController>();
         if (poc == null)
         {
-            Debug.LogError("[PlayerRoleSetup] Kein PlayerObjectController auf diesem GameObject gefunden!");
+            Debug.LogError("[PlayerRoleSetup] Kein PlayerObjectController auf diesem GameObject!");
             return;
         }
 
         PlayerRole role = poc.playerRole;
 
-        // Rollenspezifische Aktion aktivieren – auf allen Clients
+        // Rollenspezifische Aktion – auf allen Clients
         ActivateRoleAction(role);
 
-        // Modell einblenden – auf allen Clients (andere Spieler sollen das Modell sehen)
+        // Modell für alle Clients einblenden
         if (playerModel != null)
             playerModel.SetActive(true);
 
-        // Bewegungskonfiguration und Spawn nur für den lokalen Spieler
+        // Config und Spawn nur für den lokalen Spieler
         if (!isOwned) return;
 
         RoleMovementConfig config = role == PlayerRole.Hunter ? hunterConfig : vandalistConfig;
-
         if (config == null)
         {
             Debug.LogError($"[PlayerRoleSetup] Kein RoleMovementConfig für Rolle {role} zugewiesen!");
@@ -83,17 +103,16 @@ public class PlayerRoleSetup : NetworkBehaviour
 
     private void ActivateRoleAction(PlayerRole role)
     {
-        // IRoleAction-Callbacks aufrufen (Komponenten aktivieren/deaktivieren)
         if (interact != null)
         {
-            if (role == PlayerRole.Vandalist) ((IRoleAction)interact).OnRoleActivated();
-            else ((IRoleAction)interact).OnRoleDeactivated();
+            if (role == PlayerRole.Vandalist) interact.OnRoleActivated();
+            else interact.OnRoleDeactivated();
         }
 
         if (accuse != null)
         {
-            if (role == PlayerRole.Hunter) ((IRoleAction)accuse).OnRoleActivated();
-            else ((IRoleAction)accuse).OnRoleDeactivated();
+            if (role == PlayerRole.Hunter) accuse.OnRoleActivated();
+            else accuse.OnRoleDeactivated();
         }
     }
 
@@ -107,12 +126,11 @@ public class PlayerRoleSetup : NetworkBehaviour
 
         if (spawnPoints == null || spawnPoints.Length == 0)
         {
-            Debug.LogWarning($"[PlayerRoleSetup] Keine Spawn-Positionen für Rolle {role} konfiguriert!");
+            Debug.LogWarning($"[PlayerRoleSetup] Keine Spawn-Positionen für {role} im LevelManager!");
             return;
         }
 
-        Vector3 spawnPosition = spawnPoints[Random.Range(0, spawnPoints.Length)].position;
-        movement.TeleportTo(spawnPosition);
+        movement.TeleportTo(spawnPoints[Random.Range(0, spawnPoints.Length)].position);
     }
 
     // ── Debug ─────────────────────────────────────────────────────────────────
@@ -121,14 +139,20 @@ public class PlayerRoleSetup : NetworkBehaviour
     [Button("Validate Setup")]
     private void ValidateSetup()
     {
-        if (hunterConfig == null) Debug.LogError("[PlayerRoleSetup] hunterConfig fehlt!");
-        if (vandalistConfig == null) Debug.LogError("[PlayerRoleSetup] vandalistConfig fehlt!");
-        if (movement == null) Debug.LogError("[PlayerRoleSetup] PlayerMovement-Referenz fehlt!");
-        if (interact == null) Debug.LogWarning("[PlayerRoleSetup] PlayerInteract-Referenz fehlt (Vandalist schlägt nicht).");
-        if (accuse == null) Debug.LogWarning("[PlayerRoleSetup] HunterAccuse-Referenz fehlt (Hunter kann nicht anklagen).");
-        if (playerModel == null) Debug.LogWarning("[PlayerRoleSetup] playerModel-Referenz fehlt.");
-        if (string.IsNullOrEmpty(gameplayScene)) Debug.LogError("[PlayerRoleSetup] gameplayScene nicht gesetzt!");
-        else Debug.Log("[PlayerRoleSetup] Setup sieht gut aus.");
+        bool ok = true;
+
+        CustomNetworkManager mgr = NetworkManager.singleton as CustomNetworkManager;
+        if (mgr == null) { Debug.LogWarning("[PlayerRoleSetup] NetworkManager nicht gefunden (nur im Play Mode verfügbar)."); }
+        else if (string.IsNullOrEmpty(mgr.GameplayScene)) { Debug.LogError("[PlayerRoleSetup] GameplayScene im NetworkManager nicht gesetzt!"); ok = false; }
+
+        if (hunterConfig == null) { Debug.LogError("[PlayerRoleSetup] hunterConfig fehlt!"); ok = false; }
+        if (vandalistConfig == null) { Debug.LogError("[PlayerRoleSetup] vandalistConfig fehlt!"); ok = false; }
+        if (movement == null) { Debug.LogError("[PlayerRoleSetup] PlayerMovement fehlt!"); ok = false; }
+        if (playerModel == null) { Debug.LogWarning("[PlayerRoleSetup] playerModel nicht gesetzt."); }
+        if (interact == null) { Debug.LogWarning("[PlayerRoleSetup] PlayerInteract fehlt."); }
+        if (accuse == null) { Debug.LogWarning("[PlayerRoleSetup] HunterAccuse fehlt."); }
+
+        if (ok) Debug.Log("[PlayerRoleSetup] Setup ist vollständig.");
     }
 #endif
 }
