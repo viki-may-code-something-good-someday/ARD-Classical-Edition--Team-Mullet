@@ -1,3 +1,4 @@
+using Mirror;
 using UnityEngine;
 
 public class Door : MonoBehaviour
@@ -11,13 +12,54 @@ public class Door : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("Player entered the door trigger: " + other.name);
+        NetworkIdentity networkIdentity = other.GetComponent<NetworkIdentity>();
+        if (networkIdentity == null) return;
+
+        // Nur der lokale Spieler (Besitzer des Objekts) darf den Teleport ausführen
+        if (!networkIdentity.isLocalPlayer) return;
+
+        CharacterController_FirstPerson character = other.GetComponent<CharacterController_FirstPerson>();
+        if (character != null)
+        {
+            Debug.Log("Local player entered the door trigger: " + other.name);
+            MovePlayerToOtherDoor(character);
+        }
     }
 
     private void Awake()
     {
         closestDoor = FindClosestDoor();
         doorCollider = GetComponentInChildren<Collider>();
+    }
+
+    public void MovePlayerToOtherDoor(CharacterController_FirstPerson character)
+    {
+        if (closestDoor != null)
+        {
+            Vector3 newPosition = closestDoor.transform.position + closestDoor.transform.forward * 2f;
+
+            // 3. WICHTIG: Character Controller vor dem Teleportieren deaktivieren
+            CharacterController cc = character.GetComponent<CharacterController>();
+            if (cc != null)
+            {
+                cc.enabled = false;
+            }
+
+            // Position aktualisieren
+            character.transform.position = newPosition;
+
+            // Character Controller wieder aktivieren
+            if (cc != null)
+            {
+                cc.enabled = true;
+            }
+
+            Debug.Log("Player moved to the closest door: " + closestDoor.name);
+        }
+        else
+        {
+            Debug.LogWarning("No closest door found.");
+        }
     }
 
     public Door FindClosestDoor()
