@@ -1,5 +1,6 @@
 using Mirror;
 using UnityEngine;
+using DG.Tweening;
 
 /// <summary>
 /// Hunter-Aktion: Anklagen.
@@ -22,6 +23,7 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
 
     [Header("References")]
     [SerializeField] private Camera playerCamera;
+    [SerializeField] private GameObject armVisual;
 
     [Header("UI Feedback")]
     [Tooltip("Wird eingeblendet wenn ein Vandalist im Fadenkreuz und in Reichweite ist.")]
@@ -100,6 +102,8 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
     [Command]
     private void CmdTryAccuse(NetworkIdentity target)
     {
+        AccuseAnimation();
+
         if (target == null) return;
 
         // Server-seitige Validierung: Rolle prüfen
@@ -127,5 +131,21 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
     {
         // Ereignis für GameManager etc. auslösen
         OnVandalistCaught?.Invoke(caughtPlayer);
+    }
+
+    // ── Animation ─────────────────────────────────────────────────────────────
+
+    private void AccuseAnimation()
+    {
+        DOTweenAnimation[] anims = armVisual.GetComponents<DOTweenAnimation>();
+        if (anims.Length > 0)
+        {
+            foreach (DOTweenAnimation anim in anims)
+                anim.DORestart();
+        }
+        else
+        {
+            Debug.LogError("[HunterAccuse] DOTweenAnimation fehlt auf: " + armVisual.name);
+        }
     }
 }

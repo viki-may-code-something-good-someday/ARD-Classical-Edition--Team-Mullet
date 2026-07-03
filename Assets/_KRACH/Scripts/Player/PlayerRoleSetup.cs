@@ -21,6 +21,12 @@ public class PlayerRoleSetup : NetworkBehaviour
              " Wird in der Lobby komplett deaktiviert.")]
     [SerializeField] private GameObject playerVisuals;
 
+    [Header("Rollen-Modelle")]
+    [Tooltip("Modell/Hierarchie die nur beim Hunter aktiv sein soll (z.B. Hunter-Mesh, Arme, Ausrüstung).")]
+    [SerializeField] private GameObject hunterModel;
+    [Tooltip("Modell/Hierarchie die nur beim Vandalist aktiv sein soll (z.B. Vandalist-Mesh, Arme, Ausrüstung).")]
+    [SerializeField] private GameObject vandalistModel;
+
     private string GameplayScene =>
         (NetworkManager.singleton as CustomNetworkManager)?.GameplayScene ?? string.Empty;
 
@@ -63,6 +69,10 @@ public class PlayerRoleSetup : NetworkBehaviour
         if (playerVisuals != null)
             playerVisuals.SetActive(false);
 
+        // Beide Rollen-Modelle in der Lobby ausblenden
+        if (hunterModel != null) hunterModel.SetActive(false);
+        if (vandalistModel != null) vandalistModel.SetActive(false);
+
         // Aktionen deaktivieren
         if (interact != null) interact.OnRoleDeactivated();
         if (accuse != null) accuse.OnRoleDeactivated();
@@ -85,6 +95,7 @@ public class PlayerRoleSetup : NetworkBehaviour
         if (playerVisuals != null)
             playerVisuals.SetActive(true);
 
+        ActivateRoleModel(role);
         ActivateRoleAction(role);
 
         // Config und Spawn nur für den lokalen Spieler
@@ -99,6 +110,14 @@ public class PlayerRoleSetup : NetworkBehaviour
 
         movement.ApplyConfig(config);
         TeleportToSpawn(role);
+    }
+
+    private void ActivateRoleModel(PlayerRole role)
+    {
+        bool isHunter = role == PlayerRole.Hunter;
+
+        if (hunterModel != null) hunterModel.SetActive(isHunter);
+        if (vandalistModel != null) vandalistModel.SetActive(!isHunter);
     }
 
     private void ActivateRoleAction(PlayerRole role)
@@ -152,6 +171,8 @@ public class PlayerRoleSetup : NetworkBehaviour
         if (vandalistConfig == null) { Debug.LogError("[PlayerRoleSetup] vandalistConfig fehlt!"); ok = false; }
         if (movement == null) { Debug.LogError("[PlayerRoleSetup] PlayerMovement fehlt!"); ok = false; }
         if (playerVisuals == null) { Debug.LogWarning("[PlayerRoleSetup] playerVisuals nicht gesetzt – Lobby-Hiding funktioniert nicht."); }
+        if (hunterModel == null) { Debug.LogWarning("[PlayerRoleSetup] hunterModel nicht gesetzt – Hunter-Modell wird nicht umgeschaltet."); }
+        if (vandalistModel == null) { Debug.LogWarning("[PlayerRoleSetup] vandalistModel nicht gesetzt – Vandalist-Modell wird nicht umgeschaltet."); }
         if (interact == null) { Debug.LogWarning("[PlayerRoleSetup] PlayerInteract fehlt."); }
         if (accuse == null) { Debug.LogWarning("[PlayerRoleSetup] HunterAccuse fehlt."); }
 
