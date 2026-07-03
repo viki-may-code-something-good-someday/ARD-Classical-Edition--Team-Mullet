@@ -5,6 +5,7 @@ public class Door : MonoBehaviour
 {
     private Door closestDoor;
     private Collider doorCollider;
+    private Wall linkedWall;
     void Start()
     {
 
@@ -30,6 +31,7 @@ public class Door : MonoBehaviour
     {
         closestDoor = FindClosestDoor();
         doorCollider = GetComponentInChildren<Collider>();
+        linkedWall = FindClosestWall();
     }
 
     public void MovePlayerToOtherDoor(CharacterController_FirstPerson character)
@@ -75,5 +77,20 @@ public class Door : MonoBehaviour
             }
         }
         return d;
+    }
+
+    public Wall FindClosestWall()
+    {
+        Wall[] allWalls = GameObject.FindObjectsByType<Wall>(FindObjectsSortMode.InstanceID);
+        Wall closestWall = null;
+        foreach (Wall wall in allWalls)
+        {
+            float dist = Vector3.Distance(wall.transform.position, transform.position);
+            if (closestWall == null || dist < Vector3.Distance(closestWall.transform.position, transform.position))
+            {
+                closestWall = wall;
+            }
+        }
+        return closestWall;
     }
 }
