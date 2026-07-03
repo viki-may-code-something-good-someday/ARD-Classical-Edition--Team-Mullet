@@ -72,7 +72,7 @@ public class PlayerMovement : NetworkBehaviour
         currentFallGravity = config.baseFallGravity;
 
         controller.height = config.standHeight;
-        controller.center = new Vector3(0f, config.standHeight / 2f, 0f);
+        controller.center = CalculateCenter(config.standHeight);
 
         if (cameraHolder != null)
         {
@@ -85,6 +85,16 @@ public class PlayerMovement : NetworkBehaviour
             playerCamera.fieldOfView = config.normalFOV;
 
         controller.enabled = true;
+    }
+
+    /// <summary>
+    /// Berechnet den Kapsel-Mittelpunkt so, dass die Kapsel-Unterkante
+    /// immer exakt auf Höhe von groundCheck liegt (= echte Füße).
+    /// </summary>
+    private Vector3 CalculateCenter(float height)
+    {
+        float feetY = groundCheck.localPosition.y;
+        return new Vector3(0f, feetY + height / 2f, 0f);
     }
 
     /// <summary>
@@ -248,7 +258,7 @@ public class PlayerMovement : NetworkBehaviour
         isCrouching = crouch;
         float height = crouch ? config.crouchHeight : config.standHeight;
         controller.height = height;
-        controller.center = new Vector3(0f, height / 2f, 0f);
+        controller.center = CalculateCenter(height);
     }
 
     private bool CanStandUp()
