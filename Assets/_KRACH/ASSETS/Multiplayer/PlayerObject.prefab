@@ -26,11 +26,11 @@ Transform:
   m_GameObject: {fileID: 193832817252020501}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.08855, y: -0.32, z: 0.58}
+  m_LocalPosition: {x: 0.13255, y: 0.078999996, z: 0.98499995}
   m_LocalScale: {x: 1, y: 1.1111112, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 3118677935725421019}
+  m_Father: {fileID: 7115139135493471771}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3449724432928271097
 MonoBehaviour:
@@ -106,11 +106,11 @@ Transform:
   m_GameObject: {fileID: 776163430782707734}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.08855, y: -0.32, z: 0.58}
+  m_LocalPosition: {x: 0.13255, y: 0.078999996, z: 0.98499995}
   m_LocalScale: {x: 1, y: 1.1111112, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 3118677935725421019}
+  m_Father: {fileID: 7115139135493471771}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1290949500620203656
 MonoBehaviour:
@@ -265,7 +265,6 @@ MonoBehaviour:
   cameraPivot: {fileID: 4809818173979025313}
   playerCamera: {fileID: 4680851988968097038}
   mouseSensitivity: 0.1
-  gameplayScene: Assets/_KRACH/Scenes/MainLevel_Test.unity
 --- !u!114 &7272808432725617656
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -466,6 +465,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8193241898969094959}
+  - {fileID: 7669985030270898423}
   m_Father: {fileID: 7115139135493471771}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3967360123766540786
@@ -515,10 +515,10 @@ GameObject:
   - component: {fileID: 6191122419052942345}
   - component: {fileID: 6315722134740732025}
   - component: {fileID: 8166971595331418044}
+  - component: {fileID: 3009034205981873339}
   - component: {fileID: 8290204621693117385}
   - component: {fileID: 3612966290959217811}
   - component: {fileID: 3917315865842863130}
-  - component: {fileID: 3009034205981873339}
   m_Layer: 6
   m_Name: PlayerObject
   m_TagString: Player
@@ -543,6 +543,8 @@ Transform:
   - {fileID: 6826781417353443385}
   - {fileID: 5430228758386733611}
   - {fileID: 5023133851415914603}
+  - {fileID: 3473469714625389914}
+  - {fileID: 2584805308470275173}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4017868926526249065
@@ -665,6 +667,27 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &3009034205981873339
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4346577877502998422}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f95bba0b06710ff4ba4b5077b51fdb4c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerRoleSetup
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  hunterConfig: {fileID: 11400000, guid: b3682a53163ef154c8ab2433ed86dc84, type: 2}
+  vandalistConfig: {fileID: 11400000, guid: 6ff1cfa0216d6f64bb5aeef324df4887, type: 2}
+  movement: {fileID: 8290204621693117385}
+  interact: {fileID: 3612966290959217811}
+  accuse: {fileID: 3917315865842863130}
+  playerModel: {fileID: 3246556604880896844}
 --- !u!114 &8290204621693117385
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -734,28 +757,6 @@ MonoBehaviour:
     m_Bits: 64
   playerCamera: {fileID: 4680851988968097038}
   accuseReadyIndicator: {fileID: 0}
---- !u!114 &3009034205981873339
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4346577877502998422}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f95bba0b06710ff4ba4b5077b51fdb4c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerRoleSetup
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0
-  gameplayScene: Assets/_KRACH/Scenes/MainLevel_Test.unity
-  hunterConfig: {fileID: 11400000, guid: b3682a53163ef154c8ab2433ed86dc84, type: 2}
-  vandalistConfig: {fileID: 11400000, guid: 6ff1cfa0216d6f64bb5aeef324df4887, type: 2}
-  movement: {fileID: 8290204621693117385}
-  interact: {fileID: 3612966290959217811}
-  accuse: {fileID: 3917315865842863130}
-  playerModel: {fileID: 3246556604880896844}
 --- !u!1 &5363979060368924945
 GameObject:
   m_ObjectHideFlags: 0
@@ -786,10 +787,7 @@ Transform:
   m_LocalPosition: {x: 0.044, y: 0, z: 0.288}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 7669985030270898423}
-  - {fileID: 3473469714625389914}
-  - {fileID: 2584805308470275173}
+  m_Children: []
   m_Father: {fileID: 4809818173979025313}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!20 &5767070758058907573
@@ -1074,7 +1072,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 3118677935725421019}
+    m_TransformParent: {fileID: 5430228758386733611}
     m_Modifications:
     - target: {fileID: 1300582804126546306, guid: 36a3a2f8804316b45b867a020c11ca08, type: 3}
       propertyPath: m_CastShadows
@@ -1086,15 +1084,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5025143509897792387, guid: 36a3a2f8804316b45b867a020c11ca08, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 0.044
       objectReference: {fileID: 0}
     - target: {fileID: 5025143509897792387, guid: 36a3a2f8804316b45b867a020c11ca08, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.399
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5025143509897792387, guid: 36a3a2f8804316b45b867a020c11ca08, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.173
+      value: 0.57799995
       objectReference: {fileID: 0}
     - target: {fileID: 5025143509897792387, guid: 36a3a2f8804316b45b867a020c11ca08, type: 3}
       propertyPath: m_LocalRotation.w

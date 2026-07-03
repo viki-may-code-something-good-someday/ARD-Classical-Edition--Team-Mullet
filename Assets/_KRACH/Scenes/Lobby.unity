@@ -965,20 +965,18 @@ MonoBehaviour:
   hunterPlayerListViewContent: {fileID: 1822404554}
   vandalistPlayerListViewContent: {fileID: 1377907799}
   playerListItemPrefab: {fileID: 6862216167453053174, guid: bd0b8d264d517cd49bfcf33be2ff3acf, type: 3}
-  localPlayerObject: {fileID: 4346577877502998422, guid: 0b36d0b65afa0484eaa2d7eb23d89c46, type: 3}
   currentLobbyID: 0
   playerItemCreated: 0
   localPlayerController: {fileID: 6191122419052942345, guid: 0b36d0b65afa0484eaa2d7eb23d89c46, type: 3}
   startGameButton: {fileID: 1255447873}
+  switchSidesButton: {fileID: 1053871353}
   readyToggle: {fileID: 1373731435}
   readyToggleText: {fileID: 540419516}
   isTestMode: 1
   testModeIndicator: {fileID: 1764824200}
   hunterCurrent: {fileID: 1208369514}
-  hunterSlash: {fileID: 1160986398}
   hunterMax: {fileID: 2018256710}
   vandalistCurrent: {fileID: 166142904}
-  vandalistSlash: {fileID: 562399149}
   vandalistMax: {fileID: 2145963229}
   defaultTextColor: {r: 0.30980393, g: 0.30980393, b: 0.30980393, a: 1}
   overshootTextColor: {r: 1, g: 0.25943398, b: 0.25943398, a: 1}
@@ -1445,7 +1443,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: -0.000030517578, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 47.931, y: 51.054}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!114 &715586778
@@ -2218,7 +2216,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 417888613}
         m_TargetAssemblyTypeName: LobbyController, Assembly-CSharp
-        m_MethodName: SwapRoleButton
+        m_MethodName: ToggleLocalPlayerRole
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2453,7 +2451,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  m_IsOn: 0
+  m_IsOn: 1
 --- !u!1 &1098622372
 GameObject:
   m_ObjectHideFlags: 0
@@ -2889,7 +2887,7 @@ MonoBehaviour:
       - m_Target: {fileID: 417888613}
         m_TargetAssemblyTypeName: LobbyController, Assembly-CSharp
         m_MethodName: StartGame
-        m_Mode: 6
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -3173,7 +3171,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 417888613}
         m_TargetAssemblyTypeName: LobbyController, Assembly-CSharp
-        m_MethodName: ReadyPlayer
+        m_MethodName: ToggleReady
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3183,7 +3181,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  m_IsOn: 0
+  m_IsOn: 1
 --- !u!1 &1377907799
 GameObject:
   m_ObjectHideFlags: 0
@@ -3812,7 +3810,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: -0.000030517578, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 47.931, y: 51.054}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!114 &1509968946

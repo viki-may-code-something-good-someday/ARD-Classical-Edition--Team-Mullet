@@ -1,4 +1,5 @@
 using Mirror;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 /// <summary>
@@ -105,10 +106,11 @@ public class PlayerMovement : NetworkBehaviour
         if (config == null || !isOwned) return;
 
         HandleMovement();
-        HandleJump();
+        HandleJump();     // setzt velocity.y – muss vor dem vertikalen Move laufen
         HandleCrouch();
         HandleFOV();
 
+        // Vertikaler Move ganz am Ende: HandleJump() hat velocity.y bereits gesetzt
         controller.Move(velocity * Time.deltaTime);
     }
 
@@ -169,6 +171,7 @@ public class PlayerMovement : NetworkBehaviour
 
         Vector3 move = transform.right * x + transform.forward * z;
         controller.Move(move * speed * Time.deltaTime);
+        // velocity wird am Ende von Update() per controller.Move(velocity * Time.deltaTime) angewendet
     }
 
     // ── Springen ─────────────────────────────────────────────────────────────
@@ -179,6 +182,8 @@ public class PlayerMovement : NetworkBehaviour
 
         InputData input = InputManager.Instance.CurrentInput;
 
+        bool jumpStartedThisFrame = false;
+
         if (input.JumpPressed && isGrounded && !isCrouching)
         {
             velocity.y = Mathf.Sqrt(config.jumpHeight * 2f * config.baseFallGravity);
@@ -186,15 +191,19 @@ public class PlayerMovement : NetworkBehaviour
             isHoldingJump = true;
             jumpHoldTimer = 0f;
             currentFallGravity = config.baseFallGravity;
+            jumpStartedThisFrame = true;
         }
 
-        // Variable Sprunghöhe: Taste halten = höher springen
-        if (isHoldingJump && isJumping && velocity.y > 0f)
+        // Variable Sprunghöhe: Taste halten = höher springen.
+        // jumpStartedThisFrame verhindert dass der Schnitt (velocity.y *= 0.3f) im selben Frame
+        // greift in dem der Sprung gestartet wurde – sonst wird er sofort abgewürgt wenn
+        // JumpHeld im ersten Frame noch nicht true ist.
+        if (isHoldingJump && isJumping && velocity.y > 0f && !jumpStartedThisFrame)
         {
             if (!input.JumpHeld)
             {
                 isHoldingJump = false;
-                velocity.y *= 0.3f; // Sprung abschneiden bei frühem Loslassen
+                velocity.y *= 0.3f;
             }
             else if (jumpHoldTimer < config.jumpHoldTime)
             {
@@ -287,6 +296,24 @@ public class PlayerMovement : NetworkBehaviour
     }
 
     // ── Öffentliche API ──────────────────────────────────────────────────────
+
+#if UNITY_EDITOR
+    [Button("Debug: Jump State")]
+    private void DebugJumpState()
+    {
+        Debug.Log($"[PlayerMovement] config={config != null}, isOwned={isOwned}, isGrounded={isGrounded}");
+        Debug.Log($"[PlayerMovement] groundMask={groundMask.value} (0 = Nothing → Sprung unmöglich!)");
+        Debug.Log($"[PlayerMovement] groundCheck pos={groundCheck?.position}, groundDistance={groundDistance}");
+        Debug.Log($"[PlayerMovement] velocity.y={velocity.y}, isJumping={isJumping}, isHoldingJump={isHoldingJump}");
+
+        if (groundMask.value == 0)
+            Debug.LogError("[PlayerMovement] groundMask ist 'Nothing' – isGrounded wird nie true! Layer im Inspector setzen.");
+        if (groundCheck == null)
+            Debug.LogError("[PlayerMovement] groundCheck ist nicht zugewiesen!");
+        if (config == null)
+            Debug.LogError("[PlayerMovement] config ist null – ApplyConfig() wurde noch nicht aufgerufen.");
+    }
+#endif
 
     public void FreezeMovement()
     {

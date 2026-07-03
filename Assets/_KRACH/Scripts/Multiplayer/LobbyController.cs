@@ -9,51 +9,58 @@ public class LobbyController : MonoBehaviour
 {
     public static LobbyController instance;
 
-    // UI
+    // ── UI ───────────────────────────────────────────────────────────────────
+
     public TextMeshProUGUI lobbyNameText;
 
-    // Player Data
+    // ── Player Data ──────────────────────────────────────────────────────────
+
     public GameObject hunterPlayerListViewContent;
     public GameObject vandalistPlayerListViewContent;
     public GameObject playerListItemPrefab;
-    public GameObject localPlayerObject;
 
-    // Data
+    // ── State ────────────────────────────────────────────────────────────────
+
     public ulong currentLobbyID;
     public bool playerItemCreated = false;
+
     private List<PlayerListItem> totalPlayerbaseListItems = new List<PlayerListItem>();
     private List<PlayerListItem> hunterPlayerListItems = new List<PlayerListItem>();
     private List<PlayerListItem> vandalistPlayerListItems = new List<PlayerListItem>();
-    public PlayerObjectController localPlayerController;
 
-    // Ready
+    [HideInInspector] public PlayerObjectController localPlayerController;
+
+    // ── Ready & Start ────────────────────────────────────────────────────────
+
     public Button startGameButton;
+    public Button switchSidesButton;
     public Toggle readyToggle;
     public TextMeshProUGUI readyToggleText;
 
-    // Test-Modus
+    // ── Test-Modus ────────────────────────────────────────────────────────────
+
     [Header("Test Mode")]
     [Tooltip("Überspringt Rollenvalidierung und Ready-Check. Erlaubt Solo-Start mit COM-Dummies.")]
     [SerializeField] private bool isTestMode = false;
-    [Tooltip("Optionale UI-Anzeige die zeigt ob Test-Modus aktiv ist (z.B. ein Text oder Panel).")]
+    [Tooltip("Wird aktiviert wenn Test-Modus an ist (z.B. ein Text oder Panel).")]
     [SerializeField] private GameObject testModeIndicator;
 
-    // Player limits
+    // ── Rollenlimits ─────────────────────────────────────────────────────────
+
     private const int hunterMaxNumber = 1;
     private const int vandalistMaxNumber = 4;
 
     public TextMeshProUGUI hunterCurrent;
-    public TextMeshProUGUI hunterSlash;
     public TextMeshProUGUI hunterMax;
 
     public TextMeshProUGUI vandalistCurrent;
-    public TextMeshProUGUI vandalistSlash;
     public TextMeshProUGUI vandalistMax;
 
     public Color defaultTextColor;
     public Color overshootTextColor;
 
-    // Manager
+    // ── Manager ──────────────────────────────────────────────────────────────
+
     private CustomNetworkManager manager;
     private CustomNetworkManager Manager
     {
@@ -64,24 +71,310 @@ public class LobbyController : MonoBehaviour
         }
     }
 
-    // ── Awake ────────────────────────────────────────────────────────────────
+    // ── Awake ─────────────────────────────────────────────────────────────────
 
     private void Awake()
     {
         if (instance == null) instance = this;
+
+        // Buttons sofort deaktivieren – werden durch die jeweiligen Update-Methoden freigeschaltet
+        if (startGameButton != null)
+            startGameButton.interactable = false;
+        if (switchSidesButton != null)
+            switchSidesButton.interactable = false;
+
         UpdateTestModeIndicator();
+    }
+
+    // ── Spielstart ────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Wird vom Start-Game-Button aufgerufen.
+    /// Nutzt die Gameplay-Scene aus dem CustomNetworkManager.
+    /// </summary>
+    public void StartGame()
+    {
+        StartGameInternal(useManagerScene: true, sceneName: "");
+    }
+
+    /// <summary>
+    /// Startet das Spiel mit einer expliziten Scene (z.B. für Tests mit anderer Scene).
+    /// </summary>
+    public void StartGame(string sceneName)
+    {
+        StartGameInternal(useManagerScene: false, sceneName: sceneName);
+    }
+
+    private void StartGameInternal(bool useManagerScene, string sceneName)
+    {
+        if (!ValidateRoleLimits()) return;
+        AssignRolesToAllPlayers();
+        localPlayerController.CanStartGame(useManagerScene ? "" : sceneName, useManagerScene);
+    }
+
+    private bool ValidateRoleLimits()
+    {
+        if (isTestMode)
+        {
+            Debug.Log("[Lobby] Test-Modus – Rollenvalidierung übersprungen.");
+            return true;
+        }
+
+        if (hunterPlayerListItems.Count == 0)
+        {
+            Debug.LogWarning("[Lobby] Kein Hunter zugewiesen.");
+            return false;
+        }
+        if (vandalistPlayerListItems.Count == 0)
+        {
+            Debug.LogWarning("[Lobby] Kein Vandalist zugewiesen.");
+            return false;
+        }
+        if (hunterPlayerListItems.Count > hunterMaxNumber)
+        {
+            Debug.LogWarning($"[Lobby] Zu viele Hunter ({hunterPlayerListItems.Count}/{hunterMaxNumber}).");
+            return false;
+        }
+        if (vandalistPlayerListItems.Count > vandalistMaxNumber)
+        {
+            Debug.LogWarning($"[Lobby] Zu viele Vandalists ({vandalistPlayerListItems.Count}/{vandalistMaxNumber}).");
+            return false;
+        }
+
+        return true;
+    }
+
+    private void AssignRolesToAllPlayers()
+    {
+        foreach (PlayerListItem item in hunterPlayerListItems)
+        {
+            PlayerObjectController poc = GetPlayerControllerByConnectionID(item.connectionID);
+            poc?.SetPlayerRole(PlayerRole.Hunter);
+        }
+
+        foreach (PlayerListItem item in vandalistPlayerListItems)
+        {
+            PlayerObjectController poc = GetPlayerControllerByConnectionID(item.connectionID);
+            poc?.SetPlayerRole(PlayerRole.Vandalist);
+        }
+
+        // Test-Modus: Spieler die in keiner Liste sind bekommen Standardrolle Vandalist
+        if (isTestMode)
+        {
+            foreach (PlayerObjectController poc in Manager.gamePlayers)
+            {
+                bool assigned = hunterPlayerListItems.Any(i => i.connectionID == poc.connectionID)
+                             || vandalistPlayerListItems.Any(i => i.connectionID == poc.connectionID);
+                if (!assigned)
+                    poc.SetPlayerRole(PlayerRole.Vandalist);
+            }
+        }
+    }
+
+    private PlayerObjectController GetPlayerControllerByConnectionID(int connectionID)
+    {
+        return Manager.gamePlayers.FirstOrDefault(p => p.connectionID == connectionID);
+    }
+
+    // ── Lobby-Name ────────────────────────────────────────────────────────────
+
+    public void UpdateLobbyName()
+    {
+        currentLobbyID = Manager.GetComponent<SteamLobby>().currentLobbyID;
+        lobbyNameText.text = SteamMatchmaking.GetLobbyData(new CSteamID(currentLobbyID), "name");
+    }
+
+    // ── Lokalen Spieler finden ────────────────────────────────────────────────
+
+    public void FindLocalPlayer()
+    {
+        GameObject localPlayerObject = GameObject.Find("LocalGamePlayer");
+        if (localPlayerObject == null)
+        {
+            Debug.LogError("[Lobby] LocalGamePlayer nicht gefunden!");
+            return;
+        }
+        localPlayerController = localPlayerObject.GetComponent<PlayerObjectController>();
+    }
+
+    // ── Spielerliste ──────────────────────────────────────────────────────────
+
+    public void UpdatePlayerList()
+    {
+        if (!playerItemCreated)
+            CreateHostPlayerItem();
+        else if (totalPlayerbaseListItems.Count < Manager.gamePlayers.Count)
+            CreateClientPlayerItem();
+        else if (totalPlayerbaseListItems.Count > Manager.gamePlayers.Count)
+            RemovePlayerItem();
+        else
+            UpdatePlayerItem();
+    }
+
+    public void CreateHostPlayerItem()
+    {
+        foreach (PlayerObjectController player in Manager.gamePlayers)
+        {
+            PlayerListItem item = CreatePlayerListItem(player);
+
+            // Erster Spieler (Host) → Hunter, alle weiteren → Vandalist
+            int role = (hunterPlayerListItems.Count == 0) ? 0 : 1;
+            AddPlayerToList(role, item);
+        }
+
+        playerItemCreated = true;
+    }
+
+    public void CreateClientPlayerItem()
+    {
+        foreach (PlayerObjectController player in Manager.gamePlayers)
+        {
+            if (totalPlayerbaseListItems.Any(i => i.connectionID == player.connectionID))
+                continue;
+
+            PlayerListItem item = CreatePlayerListItem(player);
+            AddPlayerToList(1, item); // neue Spieler → Vandalist
+        }
+    }
+
+    private PlayerListItem CreatePlayerListItem(PlayerObjectController player)
+    {
+        GameObject obj = Instantiate(playerListItemPrefab);
+        PlayerListItem item = obj.GetComponent<PlayerListItem>();
+
+        item.playerName = player.playerName;
+        item.connectionID = player.connectionID;
+        item.playerSteamID = player.playerSteamID;
+        item.isReady = player.ready;
+
+        return item;
+    }
+
+    /// <param name="role">0 = Hunter, 1 = Vandalist</param>
+    public void AddPlayerToList(int role, PlayerListItem item)
+    {
+        switch (role)
+        {
+            case 0:
+                item.transform.SetParent(hunterPlayerListViewContent.transform);
+                hunterPlayerListItems.Add(item);
+                item.SetPlayerValues(PlayerRole.Hunter);
+                break;
+            default:
+                item.transform.SetParent(vandalistPlayerListViewContent.transform);
+                vandalistPlayerListItems.Add(item);
+                item.SetPlayerValues(PlayerRole.Vandalist);
+                break;
+        }
+
+        item.transform.localScale = Vector3.one;
+        totalPlayerbaseListItems.Add(item);
+        UpdateRoleCountTexts();
+    }
+
+    public void RemovePlayerFromList(PlayerListItem item)
+    {
+        totalPlayerbaseListItems.Remove(item);
+        hunterPlayerListItems.Remove(item);
+        vandalistPlayerListItems.Remove(item);
+        Destroy(item.gameObject);
+        UpdateRoleCountTexts();
+    }
+
+    public void UpdatePlayerItem()
+    {
+        foreach (PlayerObjectController player in Manager.gamePlayers)
+        {
+            PlayerListItem item = totalPlayerbaseListItems
+                .FirstOrDefault(i => i.connectionID == player.connectionID);
+
+            if (item == null) continue;
+
+            item.playerName = player.playerName;
+            item.isReady = player.ready;
+
+            PlayerRole role = hunterPlayerListItems.Contains(item)
+                ? PlayerRole.Hunter
+                : PlayerRole.Vandalist;
+
+            item.SetPlayerValues(role);
+            item.UpdateReadyStatusText();
+
+            if (player == localPlayerController)
+                UpdateReadyText();
+        }
+
+        CheckIfAllReady();
+    }
+
+    public void RemovePlayerItem()
+    {
+        List<PlayerListItem> toRemove = totalPlayerbaseListItems
+            .Where(item => item == null || !Manager.gamePlayers.Any(p => p.connectionID == item.connectionID))
+            .ToList();
+
+        foreach (PlayerListItem item in toRemove)
+        {
+            if (item == null)
+            {
+                totalPlayerbaseListItems.Remove(item);
+                hunterPlayerListItems.Remove(item);
+                vandalistPlayerListItems.Remove(item);
+            }
+            else
+            {
+                RemovePlayerFromList(item);
+            }
+        }
+
+        UpdateRoleCountTexts();
+    }
+
+    // ── Ready ─────────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Wird vom Ready-Toggle im UI aufgerufen.
+    /// </summary>
+    public void ToggleReady()
+    {
+        if (localPlayerController == null) return;
+        localPlayerController.ChangeReady();
+    }
+
+    public void UpdateReadyText()
+    {
+        if (localPlayerController == null || readyToggleText == null) return;
+        readyToggleText.text = localPlayerController.ready ? "Bereit!" : "Bereit?";
+    }
+
+    public void CheckIfAllReady()
+    {
+        if (localPlayerController == null || startGameButton == null) return;
+
+        bool isHost = localPlayerController.playerIdNumber == 1;
+
+        if (isTestMode)
+        {
+            startGameButton.interactable = isHost;
+            return;
+        }
+
+        bool allReady = Manager.gamePlayers.Count > 0
+                     && Manager.gamePlayers.All(p => p.ready);
+
+        startGameButton.interactable = allReady && isHost;
     }
 
     // ── Test-Modus ────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Wird von einem UI-Button aufgerufen um den Test-Modus ein-/auszuschalten.
+    /// Wird vom Test-Mode-Button im UI aufgerufen.
     /// </summary>
     public void ToggleTestMode()
     {
         isTestMode = !isTestMode;
         UpdateTestModeIndicator();
-        CheckIfAllReady(); // Start-Button-State sofort aktualisieren
+        CheckIfAllReady();
         Debug.Log($"[Lobby] Test-Modus: {(isTestMode ? "AN" : "AUS")}");
     }
 
@@ -93,336 +386,99 @@ public class LobbyController : MonoBehaviour
 
     public bool IsTestMode => isTestMode;
 
-    // ── Spielstart ────────────────────────────────────────────────────────────
+    // ── Rollenwechsel ─────────────────────────────────────────────────────────
 
-    public void StartGame(string sceneName, bool useCustomNetworkGameplayScene)
+    /// <summary>
+    /// Wechselt die Rolle des lokalen Spielers zwischen Hunter und Vandalist.
+    /// Wird von einem UI-Button aufgerufen.
+    /// Button wird durch UpdateSwitchSidesButton() ausgegraut wenn die Zielseite voll ist.
+    /// </summary>
+    public void ToggleLocalPlayerRole()
     {
-        if (!ValidateRoleLimits()) return;
-        AssignRolesToAllPlayers();
-        localPlayerController.CanStartGame(sceneName, useCustomNetworkGameplayScene);
-    }
+        if (localPlayerController == null) return;
+        if (!CanLocalPlayerSwitch()) return; // Sicherheitscheck auch ohne Button-Guard
 
-    public void StartGame(bool useCustomNetworkGameplayScene)
-    {
-        if (!ValidateRoleLimits()) return;
-        AssignRolesToAllPlayers();
-        localPlayerController.CanStartGame("", useCustomNetworkGameplayScene);
+        PlayerListItem localItem = totalPlayerbaseListItems
+            .FirstOrDefault(i => i.connectionID == localPlayerController.connectionID);
+
+        if (localItem != null)
+            SwitchPlayerRole(localItem);
     }
 
     /// <summary>
-    /// Prüft ob die Rollenverteilung gültig ist (min. 1 Hunter, min. 1 Vandalist, keine Überschreitung).
-    /// Im Test-Modus werden alle Checks übersprungen.
+    /// Gibt an ob der lokale Spieler die Seite wechseln kann.
+    /// Nicht möglich wenn die Zielseite bereits voll ist.
     /// </summary>
-    private bool ValidateRoleLimits()
+    private bool CanLocalPlayerSwitch()
     {
-        if (isTestMode)
-        {
-            Debug.Log("[Lobby] Test-Modus aktiv – Rollenvalidierung übersprungen.");
-            return true;
-        }
+        if (localPlayerController == null) return false;
 
-        if (hunterPlayerListItems.Count == 0)
-        {
-            Debug.LogWarning("[Lobby] Kein Hunter zugewiesen – Spiel kann nicht gestartet werden.");
-            return false;
-        }
+        PlayerListItem localItem = totalPlayerbaseListItems
+            .FirstOrDefault(i => i.connectionID == localPlayerController.connectionID);
 
-        if (vandalistPlayerListItems.Count == 0)
-        {
-            Debug.LogWarning("[Lobby] Kein Vandalist zugewiesen – Spiel kann nicht gestartet werden.");
-            return false;
-        }
+        if (localItem == null) return false;
 
-        if (hunterPlayerListItems.Count > hunterMaxNumber)
-        {
-            Debug.LogWarning($"[Lobby] Zu viele Hunter ({hunterPlayerListItems.Count}/{hunterMaxNumber}).");
-            return false;
-        }
+        if (hunterPlayerListItems.Contains(localItem))
+            return vandalistPlayerListItems.Count < vandalistMaxNumber;
 
-        if (vandalistPlayerListItems.Count > vandalistMaxNumber)
-        {
-            Debug.LogWarning($"[Lobby] Zu viele Vandalists ({vandalistPlayerListItems.Count}/{vandalistMaxNumber}).");
-            return false;
-        }
+        if (vandalistPlayerListItems.Contains(localItem))
+            return hunterPlayerListItems.Count < hunterMaxNumber;
 
-        return true;
+        return false;
     }
 
     /// <summary>
-    /// Schreibt die im Lobby-UI gewählte Rolle in den jeweiligen PlayerObjectController.
-    /// Wird direkt vor dem Spielstart aufgerufen, damit InitRole() im Character-Script
-    /// die korrekte Rolle lesen kann.
+    /// Aktualisiert den interactable-State des Switch-Sides-Buttons.
+    /// Wird immer aufgerufen wenn sich die Spielerlisten ändern.
     /// </summary>
-    private void AssignRolesToAllPlayers()
+    private void UpdateSwitchSidesButton()
     {
-        foreach (PlayerListItem item in hunterPlayerListItems)
+        if (switchSidesButton == null) return;
+        switchSidesButton.interactable = CanLocalPlayerSwitch();
+    }
+
+    public void SwitchPlayerRole(PlayerListItem item)
+    {
+        if (hunterPlayerListItems.Contains(item))
         {
-            PlayerObjectController poc = GetPlayerControllerByConnectionID(item.connectionID);
-            if (poc != null)
-            {
-                poc.SetPlayerRole(PlayerRole.Hunter);
-                Debug.Log($"[Lobby] {item.playerName} → Hunter");
-            }
+            hunterPlayerListItems.Remove(item);
+            item.transform.SetParent(vandalistPlayerListViewContent.transform);
+            vandalistPlayerListItems.Add(item);
+            item.SetPlayerValues(PlayerRole.Vandalist);
+        }
+        else if (vandalistPlayerListItems.Contains(item))
+        {
+            vandalistPlayerListItems.Remove(item);
+            item.transform.SetParent(hunterPlayerListViewContent.transform);
+            hunterPlayerListItems.Add(item);
+            item.SetPlayerValues(PlayerRole.Hunter);
         }
 
-        foreach (PlayerListItem item in vandalistPlayerListItems)
-        {
-            PlayerObjectController poc = GetPlayerControllerByConnectionID(item.connectionID);
-            if (poc != null)
-            {
-                poc.SetPlayerRole(PlayerRole.Vandalist);
-                Debug.Log($"[Lobby] {item.playerName} → Vandalist");
-            }
-        }
-    }
-
-    private PlayerObjectController GetPlayerControllerByConnectionID(int connectionID)
-    {
-        foreach (PlayerObjectController poc in Manager.gamePlayers)
-        {
-            if (poc.connectionID == connectionID)
-                return poc;
-        }
-        return null;
-    }
-
-    // ── Lobby-Name ────────────────────────────────────────────────────────────
-
-    public void UpdateLobbyName()
-    {
-        currentLobbyID = Manager.GetComponent<SteamLobby>().currentLobbyID;
-        lobbyNameText.text = SteamMatchmaking.GetLobbyData(new CSteamID(currentLobbyID), "name");
-    }
-
-    // ── Spielerliste ──────────────────────────────────────────────────────────
-
-    public void UpdatePlayerList()
-    {
-        if (!playerItemCreated) CreateHostPlayerItem();
-        if (totalPlayerbaseListItems.Count < Manager.gamePlayers.Count) CreateClientPlayerItem();
-        if (totalPlayerbaseListItems.Count > Manager.gamePlayers.Count) RemovePlayerItem();
-        if (totalPlayerbaseListItems.Count == Manager.gamePlayers.Count) UpdatePlayerItem();
-    }
-
-    public void FindLocalPlayer()
-    {
-        localPlayerObject = GameObject.Find("LocalGamePlayer");
-        localPlayerController = localPlayerObject.GetComponent<PlayerObjectController>();
-    }
-
-    public void CreateHostPlayerItem()
-    {
-        foreach (PlayerObjectController player in Manager.gamePlayers)
-        {
-            GameObject newPlayerItem = Instantiate(playerListItemPrefab);
-            PlayerListItem newPlayerItemScript = newPlayerItem.GetComponent<PlayerListItem>();
-
-            newPlayerItemScript.playerName = player.playerName;
-            newPlayerItemScript.connectionID = player.connectionID;
-            newPlayerItemScript.playerSteamID = player.playerSteamID;
-            newPlayerItemScript.isReady = player.ready;
-
-            // Standardrolle: Vandalist – erster Spieler (Host) wird Hunter
-            int defaultRole = (vandalistPlayerListItems.Count == 0 && hunterPlayerListItems.Count == 0) ? 0 : 1;
-            AddPlayerToListAndSetValues(defaultRole, newPlayerItemScript);
-
-            playerItemCreated = true;
-        }
-    }
-
-    /// <param name="isHunterOrVandalist">0 = Hunter, 1 = Vandalist</param>
-    public void AddPlayerToListAndSetValues(int isHunterOrVandalist, PlayerListItem playerItem)
-    {
-        switch (isHunterOrVandalist)
-        {
-            case 0:
-                playerItem.transform.SetParent(hunterPlayerListViewContent.transform);
-                hunterPlayerListItems.Add(playerItem);
-                playerItem.SetPlayerValues(PlayerRole.Hunter);
-                break;
-            case 1:
-                playerItem.transform.SetParent(vandalistPlayerListViewContent.transform);
-                vandalistPlayerListItems.Add(playerItem);
-                playerItem.SetPlayerValues(PlayerRole.Vandalist);
-                break;
-        }
-        playerItem.transform.localScale = Vector3.one;
-        totalPlayerbaseListItems.Add(playerItem);
+        item.transform.localScale = Vector3.one;
         UpdateRoleCountTexts();
     }
 
-    public void RemovePlayerFromList(PlayerListItem playerItem, GameObject objToRemove)
-    {
-        totalPlayerbaseListItems.Remove(playerItem);
-        hunterPlayerListItems.Remove(playerItem);
-        vandalistPlayerListItems.Remove(playerItem);
-        Destroy(objToRemove);
-        UpdateRoleCountTexts();
-    }
-
-    // ── Ready ─────────────────────────────────────────────────────────────────
-
-    public void ReadyPlayer()
-    {
-        localPlayerController.ChangeReady();
-    }
-
-    public void UpdateReadyText()
-    {
-        readyToggleText.text = localPlayerController.ready ? "Ready!" : "Ready?";
-    }
-
-    public void CheckIfAllReady()
-    {
-        bool isHost = localPlayerController.playerIdNumber == 1;
-
-        if (isTestMode)
-        {
-            // Im Test-Modus: Host kann immer starten, Ready-Status wird ignoriert
-            startGameButton.interactable = isHost;
-            return;
-        }
-
-        bool allReady = Manager.gamePlayers.Count > 0 &&
-                        Manager.gamePlayers.All(p => p.ready);
-
-        startGameButton.interactable = allReady && isHost;
-    }
-
-    // ── Rollen-Wechsel ────────────────────────────────────────────────────────
-
-    public void SwapRoleButton()
-    {
-        foreach (PlayerListItem playerListItemScript in totalPlayerbaseListItems)
-        {
-            if (playerListItemScript.connectionID == localPlayerController.connectionID)
-            {
-                SwitchPlayerToOtherRole(playerListItemScript);
-                return;
-            }
-        }
-    }
-
-    public void SwitchPlayerToOtherRole(PlayerListItem playerItem)
-    {
-        if (hunterPlayerListItems.Contains(playerItem))
-        {
-            // Hunter → Vandalist
-            hunterPlayerListItems.Remove(playerItem);
-            playerItem.transform.SetParent(vandalistPlayerListViewContent.transform);
-            vandalistPlayerListItems.Add(playerItem);
-            playerItem.SetPlayerValues(PlayerRole.Vandalist);
-        }
-        else if (vandalistPlayerListItems.Contains(playerItem))
-        {
-            // Vandalist → Hunter
-            vandalistPlayerListItems.Remove(playerItem);
-            playerItem.transform.SetParent(hunterPlayerListViewContent.transform);
-            hunterPlayerListItems.Add(playerItem);
-            playerItem.SetPlayerValues(PlayerRole.Hunter);
-        }
-
-        playerItem.transform.localScale = Vector3.one;
-        UpdateRoleCountTexts();
-    }
-
-    // ── Rollen-Anzeige ────────────────────────────────────────────────────────
+    // ── Rollenanzeige ─────────────────────────────────────────────────────────
 
     public void UpdateRoleCountTexts()
     {
-        int hunterCount = hunterPlayerListItems.Count;
-        int vandalistCount = vandalistPlayerListItems.Count;
+        int hCount = hunterPlayerListItems.Count;
+        int vCount = vandalistPlayerListItems.Count;
 
-        hunterCurrent.text = hunterCount.ToString();
+        hunterCurrent.text = hCount.ToString();
         hunterMax.text = hunterMaxNumber.ToString();
-
-        vandalistCurrent.text = vandalistCount.ToString();
+        vandalistCurrent.text = vCount.ToString();
         vandalistMax.text = vandalistMaxNumber.ToString();
 
-        Color hunterColor = hunterCount > hunterMaxNumber ? overshootTextColor : defaultTextColor;
-        Color vandalistColor = vandalistCount > vandalistMaxNumber ? overshootTextColor : defaultTextColor;
+        Color hColor = hCount > hunterMaxNumber ? overshootTextColor : defaultTextColor;
+        Color vColor = vCount > vandalistMaxNumber ? overshootTextColor : defaultTextColor;
 
-        hunterCurrent.color = hunterColor;
-        hunterMax.color = hunterColor;
+        hunterCurrent.color = hColor;
+        hunterMax.color = hColor;
+        vandalistCurrent.color = vColor;
+        vandalistMax.color = vColor;
 
-        vandalistCurrent.color = vandalistColor;
-        vandalistMax.color = vandalistColor;
-    }
-
-    // ── Create / Update / Remove ──────────────────────────────────────────────
-
-    public void CreateClientPlayerItem()
-    {
-        foreach (PlayerObjectController player in Manager.gamePlayers)
-        {
-            if (!totalPlayerbaseListItems.Any(b => b.connectionID == player.connectionID))
-            {
-                GameObject newPlayerItem = Instantiate(playerListItemPrefab);
-                PlayerListItem newPlayerItemScript = newPlayerItem.GetComponent<PlayerListItem>();
-
-                newPlayerItemScript.playerName = player.playerName;
-                newPlayerItemScript.connectionID = player.connectionID;
-                newPlayerItemScript.playerSteamID = player.playerSteamID;
-                newPlayerItemScript.isReady = player.ready;
-
-                AddPlayerToListAndSetValues(1, newPlayerItemScript); // neue Spieler → Vandalist
-            }
-        }
-    }
-
-    public void UpdatePlayerItem()
-    {
-        foreach (PlayerObjectController player in Manager.gamePlayers)
-        {
-            foreach (PlayerListItem playerListItemScript in totalPlayerbaseListItems)
-            {
-                if (playerListItemScript.connectionID == player.connectionID)
-                {
-                    playerListItemScript.playerName = player.playerName;
-
-                    PlayerRole currentRole = hunterPlayerListItems.Contains(playerListItemScript)
-                        ? PlayerRole.Hunter
-                        : PlayerRole.Vandalist;
-
-                    playerListItemScript.isReady = player.ready;
-                    playerListItemScript.SetPlayerValues(currentRole);
-                    playerListItemScript.UpdateReadyStatusText();
-
-                    if (player == localPlayerController)
-                        UpdateReadyText();
-                }
-            }
-        }
-        CheckIfAllReady();
-    }
-
-    public void RemovePlayerItem()
-    {
-        List<PlayerListItem> toRemove = new List<PlayerListItem>();
-
-        foreach (PlayerListItem item in totalPlayerbaseListItems)
-        {
-            if (item == null)
-            {
-                toRemove.Add(item);
-                continue;
-            }
-            if (!Manager.gamePlayers.Any(b => b.connectionID == item.connectionID))
-                toRemove.Add(item);
-        }
-
-        foreach (PlayerListItem item in toRemove)
-        {
-            if (item == null)
-            {
-                totalPlayerbaseListItems.Remove(item);
-                hunterPlayerListItems.Remove(item);
-                vandalistPlayerListItems.Remove(item);
-                continue;
-            }
-            RemovePlayerFromList(item, item.gameObject);
-        }
-
-        UpdateRoleCountTexts();
+        // Switch-Sides-Button nach jeder Listenänderung neu bewerten
+        UpdateSwitchSidesButton();
     }
 }

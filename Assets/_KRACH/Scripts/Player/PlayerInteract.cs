@@ -2,6 +2,7 @@ using DG.Tweening;
 using Mirror;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Vandalist-Aktion: Schlagen + Interagieren mit der Welt.
@@ -103,6 +104,8 @@ public class PlayerInteract : NetworkBehaviour, IRoleAction
     [ClientRpc]
     private void RpcPunchBillboard(GameObject billboardGameObject, Vector3 origin)
     {
+        if (!enabled) return;
+
         if (billboardGameObject.TryGetComponent(out BillboardObject billboardObject))
             billboardObject.TakePunch(origin);
     }
@@ -110,6 +113,10 @@ public class PlayerInteract : NetworkBehaviour, IRoleAction
     [ClientRpc(includeOwner = true)]
     private void RpcPlayPunchEffects(bool hitSomething)
     {
+        // Mirror führt ClientRpcs auch auf disabled Komponenten aus.
+        // Expliziter Check verhindert Sounds und Animationen in der Lobby.
+        if (!enabled) return;
+
         if (!isOwned)
             PunchAnimation();
 
