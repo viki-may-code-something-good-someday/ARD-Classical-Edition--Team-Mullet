@@ -7,9 +7,16 @@ using UnityEngine;
 /// Enthält keine Rollenlogik – wird von PlayerRoleSetup mit dem passenden
 /// RoleMovementConfig konfiguriert.
 ///
+/// Jump-System: Asymmetrische Gravity (niedrig beim Steigen, hoch beim Fallen) statt einer
+/// über Zeit wachsenden Gravity. Frühes Loslassen der Jump-Taste kappt die Restgeschwindigkeit
+/// sofort und schaltet auf die stärkste Gravity-Stufe um → kurze, präzise, knackige Hops ohne
+/// separaten Hold-Timer-Mechanismus.
+///
 /// Prefab-Rig Voraussetzung:
 ///   Player (CharacterController, NetworkTransform, PlayerMovement, ...)
-///   ├── GroundCheck          ← groundCheck-Referenz
+///   ├── GroundCheck          ← groundCheck-Referenz, MUSS auf Höhe der echten Füße sitzen
+///   │                          (wird auch zur Berechnung des CharacterController.center genutzt,
+///   │                          um Pivot-Offsets des Modells auszugleichen)
 ///   └── CameraHolder         ← cameraHolder-Referenz (leeres Transform)
 ///       └── Camera           ← playerCamera-Referenz (wird vom MouseLook-Script rotiert)
 /// </summary>
@@ -20,6 +27,8 @@ public class PlayerMovement : NetworkBehaviour
 
     [Header("References")]
     [SerializeField] private CharacterController controller;
+    [Tooltip("Muss direktes Kind des Player-Root-Objekts sein und exakt auf Höhe der Füße sitzen." +
+             " Wird auch genutzt um Pivot-Offsets des Modells beim Berechnen von controller.center auszugleichen.")]
     [SerializeField] private Transform groundCheck;
     [SerializeField] private Camera playerCamera;
     [Tooltip("Leeres Transform-Objekt das die Camera trägt. Wird für Crouch-Offset bewegt.")]
@@ -40,7 +49,6 @@ public class PlayerMovement : NetworkBehaviour
 
     private Vector3 velocity;
     private bool isGrounded;
-    private float currentFallGravity;
     private float airTime;
 
     private bool sprinting;
@@ -48,8 +56,7 @@ public class PlayerMovement : NetworkBehaviour
     private float sprintTimer;
 
     private bool isJumping;
-    private bool isHoldingJump;
-    private float jumpHoldTimer;
+    private bool jumpButtonHeld;
 
     private bool isCrouching;
     private float footstepTimer;
@@ -69,7 +76,6 @@ public class PlayerMovement : NetworkBehaviour
     {
         config = roleConfig;
         currentSprintSpeed = config.baseSprintSpeed;
-        currentFallGravity = config.baseFallGravity;
 
         controller.height = config.standHeight;
         controller.center = CalculateCenter(config.standHeight);
@@ -88,18 +94,20 @@ public class PlayerMovement : NetworkBehaviour
     }
 
     /// <summary>
-    /// Berechnet den Kapsel-Mittelpunkt so, dass die Kapsel-Unterkante
-    /// immer exakt auf Höhe von groundCheck liegt (= echte Füße).
+    /// Berechnet den Kapsel-Mittelpunkt relativ zum Root-Pivot so, dass die Kapsel-Unterkante
+    /// immer exakt auf Höhe von groundCheck liegt (= echte Füße), unabhängig davon wo der
+    /// Pivot des Modells tatsächlich sitzt.
     /// </summary>
     private Vector3 CalculateCenter(float height)
     {
-        float feetY = groundCheck.localPosition.y;
+        float feetY = groundCheck != null ? groundCheck.localPosition.y : 0f;
         return new Vector3(0f, feetY + height / 2f, 0f);
     }
 
     /// <summary>
     /// Teleportiert den Spieler zur angegebenen Position.
-    /// Wird von PlayerRoleSetup beim Spawn aufgerufen.
+    /// Wird von PlayerRoleSetup beim Spawn/Respawn aufgerufen (nur für den Owner sinnvoll,
+    /// da das Movement client-authoritative ist).
     /// </summary>
     public void TeleportTo(Vector3 position)
     {
@@ -133,15 +141,12 @@ public class PlayerMovement : NetworkBehaviour
         if (isGrounded)
         {
             if (velocity.y < 0f) velocity.y = -2f;
-            currentFallGravity = config.baseFallGravity;
             airTime = 0f;
         }
         else
         {
             airTime += Time.deltaTime;
-            currentFallGravity += config.fallGravityScaling * Time.deltaTime * currentFallGravity;
-            currentFallGravity = Mathf.Clamp(currentFallGravity, config.baseFallGravity, config.maxFallGravity);
-            velocity.y -= currentFallGravity * Time.deltaTime;
+            ApplyAirGravity();
         }
 
         Vector2 moveInput = InputManager.Instance != null
@@ -184,6 +189,31 @@ public class PlayerMovement : NetworkBehaviour
         // velocity wird am Ende von Update() per controller.Move(velocity * Time.deltaTime) angewendet
     }
 
+    /// <summary>
+    /// Asymmetrische Gravity statt einer über Zeit wachsenden: niedrig während des Aufstiegs
+    /// (vorhersehbare, direkte Sprunghöhe passend zur sqrt(2gh)-Formel in HandleJump), deutlich
+    /// stärker während des Falls (knackiges, direktes Lande-Gefühl). Frühes Loslassen der
+    /// Jump-Taste schaltet zusätzlich auf die stärkste Stufe (jumpCutGravityMultiplier) um.
+    /// </summary>
+    private void ApplyAirGravity()
+    {
+        float gravityMultiplier;
+
+        if (velocity.y > 0f)
+        {
+            gravityMultiplier = jumpButtonHeld
+                ? config.riseGravityMultiplier
+                : config.jumpCutGravityMultiplier;
+        }
+        else
+        {
+            gravityMultiplier = config.fallGravityMultiplier;
+        }
+
+        velocity.y -= config.baseFallGravity * gravityMultiplier * Time.deltaTime;
+        velocity.y = Mathf.Max(velocity.y, -config.maxFallSpeed);
+    }
+
     // ── Springen ─────────────────────────────────────────────────────────────
 
     private void HandleJump()
@@ -196,30 +226,22 @@ public class PlayerMovement : NetworkBehaviour
 
         if (input.JumpPressed && isGrounded && !isCrouching)
         {
-            velocity.y = Mathf.Sqrt(config.jumpHeight * 2f * config.baseFallGravity);
+            velocity.y = Mathf.Sqrt(config.jumpHeight * 2f * config.baseFallGravity * config.riseGravityMultiplier);
             isJumping = true;
-            isHoldingJump = true;
-            jumpHoldTimer = 0f;
-            currentFallGravity = config.baseFallGravity;
+            jumpButtonHeld = true;
             jumpStartedThisFrame = true;
         }
 
-        // Variable Sprunghöhe: Taste halten = höher springen.
-        // jumpStartedThisFrame verhindert dass der Schnitt (velocity.y *= 0.3f) im selben Frame
-        // greift in dem der Sprung gestartet wurde – sonst wird er sofort abgewürgt wenn
-        // JumpHeld im ersten Frame noch nicht true ist.
-        if (isHoldingJump && isJumping && velocity.y > 0f && !jumpStartedThisFrame)
+        // Frühes Loslassen während des Aufstiegs: sofortiger Velocity-Cut + Wechsel auf die
+        // stärkste Gravity-Stufe (siehe ApplyAirGravity) → kurze Hops fühlen sich absichtlich
+        // und knackig an, statt bis zum vollen Apex weiterzusteigen.
+        // jumpStartedThisFrame verhindert dass der Cut im selben Frame greift in dem der Sprung
+        // gestartet wurde – sonst wird er sofort abgewürgt wenn JumpHeld im ersten Frame noch
+        // nicht true ist.
+        if (isJumping && jumpButtonHeld && velocity.y > 0f && !jumpStartedThisFrame && !input.JumpHeld)
         {
-            if (!input.JumpHeld)
-            {
-                isHoldingJump = false;
-                velocity.y *= 0.3f;
-            }
-            else if (jumpHoldTimer < config.jumpHoldTime)
-            {
-                velocity.y += config.baseFallGravity * config.jumpHoldGravityMultiplier * Time.deltaTime;
-                jumpHoldTimer += Time.deltaTime;
-            }
+            jumpButtonHeld = false;
+            velocity.y *= config.jumpCutVelocityMultiplier;
         }
 
         if (velocity.y <= 0f)
@@ -314,7 +336,7 @@ public class PlayerMovement : NetworkBehaviour
         Debug.Log($"[PlayerMovement] config={config != null}, isOwned={isOwned}, isGrounded={isGrounded}");
         Debug.Log($"[PlayerMovement] groundMask={groundMask.value} (0 = Nothing → Sprung unmöglich!)");
         Debug.Log($"[PlayerMovement] groundCheck pos={groundCheck?.position}, groundDistance={groundDistance}");
-        Debug.Log($"[PlayerMovement] velocity.y={velocity.y}, isJumping={isJumping}, isHoldingJump={isHoldingJump}");
+        Debug.Log($"[PlayerMovement] velocity.y={velocity.y}, isJumping={isJumping}, jumpButtonHeld={jumpButtonHeld}");
 
         if (groundMask.value == 0)
             Debug.LogError("[PlayerMovement] groundMask ist 'Nothing' – isGrounded wird nie true! Layer im Inspector setzen.");
@@ -330,8 +352,9 @@ public class PlayerMovement : NetworkBehaviour
         controller.enabled = false;
         velocity = Vector3.zero;
         currentSprintSpeed = config != null ? config.baseSprintSpeed : 0f;
-        currentFallGravity = config != null ? config.baseFallGravity : 0f;
         airTime = 0f;
+        isJumping = false;
+        jumpButtonHeld = false;
         if (playerCamera != null && config != null)
             playerCamera.fieldOfView = config.normalFOV;
     }

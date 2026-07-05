@@ -21,9 +21,21 @@ public class RoleMovementConfig : ScriptableObject
     public float sprintDecaySpeed = 3f;
 
     [Header("Jump")]
-    public float jumpHeight = 2f;
-    public float jumpHoldTime = 0.2f;
-    public float jumpHoldGravityMultiplier = 0.5f;
+    [Tooltip("Zielhöhe des Sprungs in Metern (bei vollem Aufstieg, riseGravityMultiplier berücksichtigt).")]
+    public float jumpHeight = 1.6f;
+    [Tooltip("Gravity-Multiplikator während des Aufstiegs. 1 = normale/realistische Gravity." +
+             " Niedriger = etwas mehr Hangtime, höher = noch direkterer, kürzerer Aufstieg.")]
+    public float riseGravityMultiplier = 1f;
+    [Tooltip("Gravity-Multiplikator während des Falls. Deutlich höher als riseGravityMultiplier" +
+             " sorgt für ein knackiges, direktes Lande-Gefühl statt einem floatigen Fall.")]
+    public float fallGravityMultiplier = 2.2f;
+    [Tooltip("Gravity-Multiplikator direkt nach frühem Loslassen der Jump-Taste während des Aufstiegs." +
+             " Sollte >= fallGravityMultiplier sein, damit kurze Hops besonders knackig abgebrochen werden.")]
+    public float jumpCutGravityMultiplier = 3.2f;
+    [Tooltip("Wie viel der verbleibenden Aufwärtsgeschwindigkeit beim frühen Loslassen sofort" +
+             " gekappt wird. 1 = kein Cut, 0.4 = 60% der Restgeschwindigkeit sofort abgeschnitten.")]
+    [Range(0f, 1f)]
+    public float jumpCutVelocityMultiplier = 0.45f;
 
     [Header("Crouch")]
     public float crouchSpeedMultiplier = 0.5f;
@@ -38,9 +50,13 @@ public class RoleMovementConfig : ScriptableObject
     public float crouchTransitionSpeed = 12f;
 
     [Header("Fall")]
-    public float baseFallGravity = 10f;
-    public float maxFallGravity = 30f;
-    public float fallGravityScaling = 2f;
+    [Tooltip("Basis-Gravity in m/s². Wird mit riseGravityMultiplier / fallGravityMultiplier /" +
+             " jumpCutGravityMultiplier kombiniert – siehe Header 'Jump'.")]
+    public float baseFallGravity = 20f;
+    [Tooltip("Maximale Fallgeschwindigkeit (Terminal Velocity) in m/s. Verhindert unrealistisch" +
+             " schnelles Fallen bei langen Stürzen. ACHTUNG: Ersetzt das alte Feld 'maxFallGravity' –" +
+             " bei bereits existierenden Assets bitte den Wert einmal im Inspector neu prüfen/setzen.")]
+    public float maxFallSpeed = 25f;
 
     [Header("Camera FOV")]
     public float normalFOV = 60f;

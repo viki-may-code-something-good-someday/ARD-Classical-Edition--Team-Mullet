@@ -109,7 +109,10 @@ public class LobbyController : MonoBehaviour
     {
         if (!ValidateRoleLimits()) return;
         AssignRolesToAllPlayers();
-        localPlayerController.CanStartGame(useManagerScene ? "" : sceneName, useManagerScene);
+
+        // isTestMode wird hier explizit durchgereicht, da CustomNetworkManager (Server) diesen
+        // Wert nicht direkt von LobbyController (nur client-seitig, nur Lobby-Scene) lesen kann.
+        localPlayerController.CanStartGame(useManagerScene ? "" : sceneName, useManagerScene, isTestMode);
     }
 
     private bool ValidateRoleLimits()

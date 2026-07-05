@@ -22,6 +22,15 @@ public class CustomNetworkManager : NetworkManager
 
     public List<PlayerObjectController> gamePlayers { get; } = new List<PlayerObjectController>();
 
+    /// <summary>
+    /// Server-autoritativer Spiegel von LobbyController.IsTestMode zum Startzeitpunkt.
+    /// Wird über StartGame() gesetzt (LobbyController existiert nur client-seitig in der
+    /// Lobby-Scene und kann daher nicht direkt vom Server ausgelesen werden – der Wert muss
+    /// über die bestehende Command-Kette durchgereicht werden).
+    /// Von TestDummySpawner genutzt um zu entscheiden ob Dummies gespawnt werden.
+    /// </summary>
+    public bool IsTestMode { get; private set; }
+
 
     public override void OnServerAddPlayer(NetworkConnectionToClient conn)
     {
@@ -37,13 +46,18 @@ public class CustomNetworkManager : NetworkManager
         }
     }
 
-    public void StartGame(string sceneName, bool useCustomNetworkGameplazScene)
+    /// <param name="testMode">
+    /// Spiegelt LobbyController.IsTestMode zum Startzeitpunkt. Muss über die Command-Kette
+    /// (PlayerObjectController.CanStartGame → hier) durchgereicht werden.
+    /// </param>
+    public void StartGame(string sceneName, bool useCustomNetworkGameplazScene, bool testMode)
     {
         if (useCustomNetworkGameplazScene)
         {
             sceneName = gameplayScene;
         }
 
+        IsTestMode = testMode;
         ServerChangeScene(sceneName);
     }
 }

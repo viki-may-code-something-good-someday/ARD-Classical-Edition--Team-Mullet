@@ -8,10 +8,11 @@ using DG.Tweening;
 ///
 /// Funktionsweise:
 ///   – Jeder Frame: Raycast vorwärts gegen den "Player"-Layer.
-///   – Trifft ein Vandalist: accuseReadyIndicator einblenden.
-///   – ActionPressed: CmdTryAccuse → Server validiert (Distanz + Rolle) → Ereignis auslösen.
+///   – Trifft ein Vandalist der weder gefangen noch unverwundbar ist: accuseReadyIndicator einblenden.
+///   – ActionPressed (mit Client-seitigem Cooldown): lokale Animation sofort abspielen (Responsiveness)
+///     + CmdTryAccuse → Server validiert (Cooldown, Rolle, Caught/Invuln-Status, Distanz) → Ereignis auslösen.
 ///
-/// Auf OnVandalistCaught abonnieren um das Fangereignis zu verarbeiten (z.B. GameManager):
+/// Auf OnVandalistCaught abonnieren um das Fangereignis zu verarbeiten (z.B. PlayerRoleSetup, GameManager):
 ///   HunterAccuse.OnVandalistCaught += HandleCaught;
 /// </summary>
 public class HunterAccuse : NetworkBehaviour, IRoleAction
@@ -20,6 +21,11 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
     [SerializeField] private float accuseRange = 6f;
     [Tooltip("Layer auf dem sich Spieler-Collider befinden (z.B. 'Player').")]
     [SerializeField] private LayerMask playerLayer;
+
+    [Header("Cooldown")]
+    [Tooltip("Mindestzeit zwischen zwei Anklage-Versuchen. Wird zusätzlich Server-seitig " +
+             "durchgesetzt (Anti-Cheat) – der Client-Wert dient nur der Responsiveness/Traffic-Reduktion.")]
+    [SerializeField] private float accuseCooldown = 1.5f;
 
     [Header("References")]
     [SerializeField] private Camera playerCamera;
@@ -34,6 +40,12 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
     public static event System.Action<NetworkIdentity> OnVandalistCaught;
 
     private NetworkIdentity currentTarget;
+
+    // Nur lokal auf dem Owner-Client relevant – reduziert unnötigen Cmd-Traffic.
+    private float localNextAllowedAccuseTime = 0f;
+
+    // Nur Server-seitig relevant – eigentliche Anti-Cheat-Durchsetzung.
+    private float serverNextAllowedAccuseTime = 0f;
 
     // ── IRoleAction ───────────────────────────────────────────────────────────
 
@@ -58,8 +70,14 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
 
         if (InputManager.Instance == null) return;
 
-        if (InputManager.Instance.CurrentInput.ActionPressed && currentTarget != null)
+        if (InputManager.Instance.CurrentInput.ActionPressed
+            && currentTarget != null
+            && Time.time >= localNextAllowedAccuseTime)
         {
+            localNextAllowedAccuseTime = Time.time + accuseCooldown;
+
+            // Sofortiges lokales Feedback, damit der Owner keine Latenz beim Anim-Start spürt.
+            AccuseAnimation();
             CmdTryAccuse(currentTarget);
         }
     }
@@ -74,7 +92,10 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
             out RaycastHit hit, accuseRange, playerLayer, QueryTriggerInteraction.Ignore))
         {
             PlayerObjectController poc = hit.collider.GetComponent<PlayerObjectController>();
-            if (poc != null && poc.playerRole == PlayerRole.Vandalist)
+            PlayerRoleSetup targetSetup = hit.collider.GetComponent<PlayerRoleSetup>();
+            bool unavailable = targetSetup != null && (targetSetup.IsCaught || targetSetup.IsInvulnerable);
+
+            if (poc != null && poc.playerRole == PlayerRole.Vandalist && !unavailable)
             {
                 currentTarget = poc.GetComponent<NetworkIdentity>();
                 SetIndicator(true);
@@ -102,7 +123,16 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
     [Command]
     private void CmdTryAccuse(NetworkIdentity target)
     {
-        AccuseAnimation();
+        // Server-seitiger Cooldown – unabhängig vom Client-Wert, verhindert Spam durch modifizierte Clients.
+        if (Time.time < serverNextAllowedAccuseTime)
+        {
+            Debug.LogWarning("[HunterAccuse] Anklage im Cooldown ignoriert (evtl. Client-Manipulation).");
+            return;
+        }
+        serverNextAllowedAccuseTime = Time.time + accuseCooldown;
+
+        // Andere Clients sehen die Animation ebenfalls (der Owner hat sie bereits lokal abgespielt).
+        RpcPlayAccuseAnimationOnOthers();
 
         if (target == null) return;
 
@@ -111,6 +141,14 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
         if (targetPoc == null || targetPoc.playerRole != PlayerRole.Vandalist)
         {
             Debug.LogWarning("[HunterAccuse] Ziel ist kein Vandalist.");
+            return;
+        }
+
+        // Server-seitige Validierung: bereits gefangen oder gerade unverwundbar (frischer Respawn)?
+        PlayerRoleSetup targetSetup = target.GetComponent<PlayerRoleSetup>();
+        if (targetSetup != null && (targetSetup.IsCaught || targetSetup.IsInvulnerable))
+        {
+            Debug.LogWarning("[HunterAccuse] Ziel ist bereits gefangen oder unverwundbar.");
             return;
         }
 
@@ -129,11 +167,17 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
     [ClientRpc]
     private void RpcOnVandalistCaught(NetworkIdentity caughtPlayer)
     {
-        // Ereignis für GameManager etc. auslösen
+        // Ereignis für PlayerRoleSetup, GameManager etc. auslösen
         OnVandalistCaught?.Invoke(caughtPlayer);
     }
 
     // ── Animation ─────────────────────────────────────────────────────────────
+
+    [ClientRpc(includeOwner = false)]
+    private void RpcPlayAccuseAnimationOnOthers()
+    {
+        AccuseAnimation();
+    }
 
     private void AccuseAnimation()
     {

@@ -1,52 +1,45 @@
+using System.Collections.Generic;
 using Mirror;
 using UnityEngine;
 
-/// <summary>
-/// Spawnt im Test-Modus stationäre Dummy-Vandalists die sich nicht bewegen,
-/// aber geschlagen (PlayerInteract) und angeklagt (HunterAccuse) werden können.
-///
-/// SETUP:
-/// 1. Dieses Script auf ein leeres GameObject in der Gameplay-Scene legen.
-/// 2. Ein Dummy-Prefab erstellen (siehe unten) und in dummyPrefab ziehen.
-/// 3. TestDummySpawner läuft nur wenn LobbyController.IsTestMode = true.
-///
-/// DUMMY-PREFAB SETUP:
-///   ┌─ DummyPlayer (leeres GameObject)
-///   │    ├─ NetworkIdentity           (Mirror – für Netzwerk-Sync)
-///   │    ├─ PlayerObjectController    (playerRole wird in Awake auf Vandalist gesetzt)
-///   │    ├─ CapsuleCollider           (Layer: "Player" → für HunterAccuse-Raycast)
-///   │    └─ MeshRenderer + MeshFilter (Capsule-Mesh zur Sichtbarkeit)
-///   │
-///   Danach: NetworkManager → Registered Spawnable Prefabs → Dummy-Prefab eintragen.
-///
-/// LAYER-HINWEIS:
-///   HunterAccuse sucht auf dem in playerLayer eingestellten Layer (z.B. "Player").
-///   PlayerInteract sucht auf "Interactable", "Destructable", "Default".
-///   → Dummy auf "Player" setzen UND im HunterAccuse-Inspector playerLayer = "Player".
-///   → Für Punch-Tests: Kind-Objekt mit zweitem Collider auf "Default" hinzufügen.
-/// </summary>
 public class TestDummySpawner : NetworkBehaviour
 {
+    [System.Serializable]
+    public struct DummySpawnGroup
+    {
+        public PlayerRole role;
+        public int count;
+    }
+
     [Header("Dummy Settings")]
-    [Tooltip("Prefab mit NetworkIdentity + PlayerObjectController + CapsuleCollider.")]
+    [Tooltip("Prefab mit NetworkIdentity + PlayerObjectController + PlayerRoleSetup + CapsuleCollider." +
+             " PlayerRoleSetup wird für Modell-Sichtbarkeit UND Catch/Respawn-Verhalten benötigt.")]
     [SerializeField] private GameObject dummyPrefab;
 
-    [Tooltip("Wie viele Dummies gespawnt werden.")]
-    [SerializeField] private int dummyCount = 2;
-
-    [Tooltip("Rolle die den Dummies zugewiesen wird.")]
-    [SerializeField] private PlayerRole dummyRole = PlayerRole.Vandalist;
+    [Tooltip("Welche Rollen mit wie vielen Dummies gespawnt werden. So lassen sich z.B. gleichzeitig " +
+             "Vandalist- und Hunter-Dummies für unterschiedliche Testszenarien erzeugen.")]
+    [SerializeField]
+    private DummySpawnGroup[] spawnGroups = new DummySpawnGroup[]
+    {
+        new DummySpawnGroup { role = PlayerRole.Vandalist, count = 2 }
+    };
 
     [Tooltip("Offset damit Dummies nicht exakt auf dem Spawnpunkt stehen.")]
     [SerializeField] private float spawnSpread = 1.5f;
+
+    private readonly List<GameObject> spawnedDummies = new List<GameObject>();
 
     // ── Server-Start ──────────────────────────────────────────────────────────
 
     public override void OnStartServer()
     {
-        // Nur spawnen wenn Test-Modus aktiv
-        if (LobbyController.instance == null) // || !LobbyController.instance.IsTestMode
+        CustomNetworkManager mgr = NetworkManager.singleton as CustomNetworkManager;
+
+        if (mgr == null || !mgr.IsTestMode)
+        {
+            Debug.Log("[TestDummySpawner] Test-Modus nicht aktiv – Dummy-Spawn übersprungen.");
             return;
+        }
 
         if (dummyPrefab == null)
         {
@@ -56,6 +49,18 @@ public class TestDummySpawner : NetworkBehaviour
 
         // Kurz warten bis LevelManager sicher geladen ist
         StartCoroutine(SpawnAfterDelay());
+    }
+
+    public override void OnStopServer()
+    {
+        // Verhindert Ghost-Dummies bei mehrfachem Play-Test im Editor (v.a. bei deaktiviertem Domain Reload).
+        foreach (GameObject dummy in spawnedDummies)
+        {
+            if (dummy != null)
+                NetworkServer.Destroy(dummy);
+        }
+
+        spawnedDummies.Clear();
     }
 
     private System.Collections.IEnumerator SpawnAfterDelay()
@@ -69,24 +74,27 @@ public class TestDummySpawner : NetworkBehaviour
             yield break;
         }
 
-        SpawnDummies();
+        foreach (DummySpawnGroup group in spawnGroups)
+        {
+            SpawnDummies(group.role, group.count);
+        }
     }
 
     // ── Spawn-Logik ───────────────────────────────────────────────────────────
 
-    private void SpawnDummies()
+    private void SpawnDummies(PlayerRole role, int count)
     {
-        Transform[] spawnPoints = dummyRole == PlayerRole.Hunter
+        Transform[] spawnPoints = role == PlayerRole.Hunter
             ? LevelManager.Instance.hunterSpawnPositions
             : LevelManager.Instance.vandalistSpawnPositions;
 
         if (spawnPoints == null || spawnPoints.Length == 0)
         {
-            Debug.LogWarning($"[TestDummySpawner] Keine Spawn-Positionen für Rolle {dummyRole} im LevelManager konfiguriert!");
+            Debug.LogWarning($"[TestDummySpawner] Keine Spawn-Positionen für Rolle {role} im LevelManager konfiguriert!");
             return;
         }
 
-        for (int i = 0; i < dummyCount; i++)
+        for (int i = 0; i < count; i++)
         {
             // Spawnpunkt zyklisch nutzen, leichten Offset damit Dummies nicht übereinander stehen
             Transform spawnPoint = spawnPoints[i % spawnPoints.Length];
@@ -103,15 +111,23 @@ public class TestDummySpawner : NetworkBehaviour
             PlayerObjectController poc = dummy.GetComponent<PlayerObjectController>();
             if (poc != null)
             {
-                poc.playerRole = dummyRole;
+                poc.playerRole = role;
             }
             else
             {
                 Debug.LogWarning("[TestDummySpawner] Dummy-Prefab hat keinen PlayerObjectController!");
             }
 
+            if (dummy.GetComponent<PlayerRoleSetup>() == null)
+            {
+                Debug.LogWarning("[TestDummySpawner] Dummy-Prefab hat kein PlayerRoleSetup – " +
+                                  "Modell bleibt unsichtbar und Catch/Respawn funktioniert nicht für diesen Dummy!");
+            }
+
             NetworkServer.Spawn(dummy);
-            Debug.Log($"[TestDummySpawner] Dummy #{i + 1} gespawnt bei {spawnPos}");
+            spawnedDummies.Add(dummy);
+
+            Debug.Log($"[TestDummySpawner] {role}-Dummy #{i + 1} gespawnt bei {spawnPos}");
         }
     }
 }

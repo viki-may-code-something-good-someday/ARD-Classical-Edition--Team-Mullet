@@ -119,18 +119,23 @@ public class PlayerObjectController : NetworkBehaviour
     }
 
 
-    public void CanStartGame(string sceneName, bool useCustomNetworkGameplayScene)
+    /// <param name="testMode">
+    /// Spiegelt LobbyController.IsTestMode zum Startzeitpunkt. Wird bis zum Server
+    /// (CustomNetworkManager.StartGame) durchgereicht, da LobbyController nur client-seitig
+    /// existiert und der Server diesen Wert nicht direkt auslesen kann.
+    /// </param>
+    public void CanStartGame(string sceneName, bool useCustomNetworkGameplayScene, bool testMode)
     {
         if (isOwned)
         {
-            CmdCanStartGame(sceneName, useCustomNetworkGameplayScene);
+            CmdCanStartGame(sceneName, useCustomNetworkGameplayScene, testMode);
         }
     }
 
     [Command]
-    public void CmdCanStartGame(string sceneName, bool useCustomNetworkGameplayScene)
+    public void CmdCanStartGame(string sceneName, bool useCustomNetworkGameplayScene, bool testMode)
     {
-        NetworkManager.StartGame(sceneName, useCustomNetworkGameplayScene);
+        NetworkManager.StartGame(sceneName, useCustomNetworkGameplayScene, testMode);
     }
 
     public void SetPlayerRole(PlayerRole role)
