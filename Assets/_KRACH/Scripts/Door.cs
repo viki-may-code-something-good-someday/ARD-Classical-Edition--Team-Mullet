@@ -19,7 +19,7 @@ public class Door : MonoBehaviour
         // Nur der lokale Spieler (Besitzer des Objekts) darf den Teleport ausführen
         if (!networkIdentity.isLocalPlayer) return;
 
-        CharacterController_FirstPerson character = other.GetComponent<CharacterController_FirstPerson>();
+        PlayerMovement character = other.GetComponent<PlayerMovement>();
         if (character != null)
         {
             Debug.Log("Local player entered the door trigger: " + other.name);
@@ -34,11 +34,11 @@ public class Door : MonoBehaviour
         linkedWall = FindClosestWall();
     }
 
-    public void MovePlayerToOtherDoor(CharacterController_FirstPerson character)
+    public void MovePlayerToOtherDoor(PlayerMovement character)
     {
         if (closestDoor != null)
         {
-            Vector3 newPosition = closestDoor.transform.position + closestDoor.transform.forward * 2f;
+            Vector3 newPosition = closestDoor.transform.position + character.transform.forward * 2f;
 
             // 3. WICHTIG: Character Controller vor dem Teleportieren deaktivieren
             CharacterController cc = character.GetComponent<CharacterController>();

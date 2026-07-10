@@ -1,5 +1,6 @@
 using Mirror;
 using Steamworks;
+using TMPro;
 using UnityEngine;
 
 public class PlayerObjectController : NetworkBehaviour
@@ -18,6 +19,9 @@ public class PlayerObjectController : NetworkBehaviour
 
 
     private CustomNetworkManager networkManager;
+
+    public TMP_Text nameText;
+    public Canvas nameCanvas;
 
     private CustomNetworkManager NetworkManager
     {
@@ -92,6 +96,11 @@ public class PlayerObjectController : NetworkBehaviour
         networkManager.gamePlayers.Add(this);
         LobbyController.instance.UpdateLobbyName();
         LobbyController.instance.UpdatePlayerList();
+
+        if (isOwned || isLocalPlayer)
+        {
+            nameCanvas.gameObject.SetActive(false);
+        }
     }
 
     public override void OnStopClient()
@@ -106,6 +115,7 @@ public class PlayerObjectController : NetworkBehaviour
         this.PlayerNameUpdate(this.playerName, playerName);
     }
 
+
     public void PlayerNameUpdate(string oldValue, string newValue)
     {
         if (isServer)
@@ -115,6 +125,11 @@ public class PlayerObjectController : NetworkBehaviour
         if (isClient)
         {
             LobbyController.instance.UpdatePlayerList();
+
+            if (nameText != null)
+            {
+                nameText.text = newValue;
+            }
         }
     }
 
@@ -138,6 +153,12 @@ public class PlayerObjectController : NetworkBehaviour
         NetworkManager.StartGame(sceneName, useCustomNetworkGameplayScene, testMode);
     }
 
+    [Command]
+    public void CmdChangeRole(PlayerRole newRole)
+    {
+        SetPlayerRole(newRole);
+    }
+
     public void SetPlayerRole(PlayerRole role)
     {
         if (!NetworkServer.active)
@@ -150,8 +171,12 @@ public class PlayerObjectController : NetworkBehaviour
 
     private void OnPlayerRoleChanged(PlayerRole oldRole, PlayerRole newRole)
     {
-        // Wird auf allen Clients ausgeführt wenn sich die Rolle ändert.
-        // Kann hier genutzt werden um UI oder Visuals zu aktualisieren.
         Debug.Log($"[PlayerObjectController] {playerName}: {oldRole} → {newRole}");
+
+        if (isClient && LobbyController.instance != null)
+        {
+            // Wenn die Rolle im Netzwerk geändert wurde, UI aktualisieren!
+            LobbyController.instance.UpdatePlayerList();
+        }
     }
 }

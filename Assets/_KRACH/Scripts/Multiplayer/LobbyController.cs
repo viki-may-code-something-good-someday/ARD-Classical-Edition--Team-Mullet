@@ -296,18 +296,33 @@ public class LobbyController : MonoBehaviour
             item.playerName = player.playerName;
             item.isReady = player.ready;
 
-            PlayerRole role = hunterPlayerListItems.Contains(item)
-                ? PlayerRole.Hunter
-                : PlayerRole.Vandalist;
-
-            item.SetPlayerValues(role);
+            // WICHTIG: Wir lesen die echte Rolle direkt aus dem Netzwerk (SyncVar)!
+            PlayerRole networkedRole = player.playerRole;
+            item.SetPlayerValues(networkedRole);
             item.UpdateReadyStatusText();
+
+            // UI-Element in die richtige Scroll-Liste (Parent) verschieben
+            if (networkedRole == PlayerRole.Hunter && !hunterPlayerListItems.Contains(item))
+            {
+                if (vandalistPlayerListItems.Contains(item)) vandalistPlayerListItems.Remove(item);
+                hunterPlayerListItems.Add(item);
+                item.transform.SetParent(hunterPlayerListViewContent.transform);
+                item.transform.localScale = Vector3.one;
+            }
+            else if (networkedRole == PlayerRole.Vandalist && !vandalistPlayerListItems.Contains(item))
+            {
+                if (hunterPlayerListItems.Contains(item)) hunterPlayerListItems.Remove(item);
+                vandalistPlayerListItems.Add(item);
+                item.transform.SetParent(vandalistPlayerListViewContent.transform);
+                item.transform.localScale = Vector3.one;
+            }
 
             if (player == localPlayerController)
                 UpdateReadyText();
         }
 
         CheckIfAllReady();
+        UpdateRoleCountTexts();
     }
 
     public void RemovePlayerItem()
@@ -399,13 +414,17 @@ public class LobbyController : MonoBehaviour
     public void ToggleLocalPlayerRole()
     {
         if (localPlayerController == null) return;
-        if (!CanLocalPlayerSwitch()) return; // Sicherheitscheck auch ohne Button-Guard
+        if (!CanLocalPlayerSwitch()) return;
 
         PlayerListItem localItem = totalPlayerbaseListItems
             .FirstOrDefault(i => i.connectionID == localPlayerController.connectionID);
 
         if (localItem != null)
-            SwitchPlayerRole(localItem);
+        {
+            PlayerRole newRole = hunterPlayerListItems.Contains(localItem) ? PlayerRole.Vandalist : PlayerRole.Hunter;
+
+            localPlayerController.CmdChangeRole(newRole);
+        }
     }
 
     /// <summary>
