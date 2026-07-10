@@ -2,7 +2,6 @@ using DG.Tweening;
 using Mirror;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Vandalist-Aktion: Schlagen + Interagieren mit der Welt.
@@ -49,6 +48,39 @@ public class PlayerInteract : NetworkBehaviour, IRoleAction
             LocalPunch();
         }
     }
+
+    public override void OnStartLocalPlayer()
+    {
+        base.OnStartLocalPlayer();
+
+        SetLayerRecursively(armsVisuals, LayerMask.NameToLayer("Arms"));
+    }
+
+    private void SetLayerRecursively(List<GameObject> objects, int newLayer)
+    {
+        if (objects == null) return;
+
+        // Gehe durch jedes Objekt in der Liste (z.B. linker Arm, rechter Arm)
+        foreach (GameObject obj in objects)
+        {
+            SetLayerRecursively(obj, newLayer);
+        }
+    }
+
+    // 2. Das ist die "Arbeiter"-Methode, die die eigentliche Rekursion macht
+    private void SetLayerRecursively(GameObject obj, int newLayer)
+    {
+        if (obj == null) return;
+
+        obj.layer = newLayer; // Ändert den Layer des aktuellen Objekts
+
+        // Geht durch alle Kinder (Finger, Knochen, Waffen-Attachments)
+        foreach (Transform child in obj.transform)
+        {
+            SetLayerRecursively(child.gameObject, newLayer);
+        }
+    }
+
 
     // ── Punch-Logik ───────────────────────────────────────────────────────────
 
