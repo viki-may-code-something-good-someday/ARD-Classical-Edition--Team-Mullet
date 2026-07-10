@@ -53,7 +53,7 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
     [Tooltip("Eingeblendet wenn ein Vandalist im Fadenkreuz und in Reichweite ist.")]
     [SerializeField] private GameObject accuseReadyIndicator;
 
-    [Header("Arm Pullback (Charge)")]
+    [Header("Accuse Animation")]
     [Tooltip("Lokale Z-Verschiebung des Arms während des Aufladens (negativ = zurückziehen).")]
     [SerializeField] private float pullbackDistance = -0.15f;
     [Tooltip("Wie lange der Arm braucht um die Pullback-Position zu erreichen. Sollte chargeTime entsprechen.")]
