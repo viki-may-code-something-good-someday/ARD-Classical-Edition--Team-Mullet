@@ -8,10 +8,11 @@ public struct InputData
     public Vector2 LookInput;
     public bool SprintHeld;
     public bool ActionPressed;
+    public bool ActionHeld;
     public bool InteractPressed;
     public bool JumpPressed;
-    public bool CrouchHeld;
     public bool JumpHeld;
+    public bool CrouchHeld;
     public PlayerRole Role;
 }
 
@@ -79,8 +80,10 @@ public class InputManager : MonoBehaviour
             LookInput = lookAction.ReadValue<Vector2>(),
             SprintHeld = sprintAction.IsPressed(),
             ActionPressed = actionAction.WasPressedThisFrame(),
+            ActionHeld = actionAction.IsPressed(),
             InteractPressed = interactAction.WasPressedThisFrame(),
             JumpPressed = jumpAction.WasPressedThisFrame(),
+            JumpHeld = jumpAction.IsPressed(),
             CrouchHeld = crouchAction.IsPressed(),
             Role = CurrentInput.Role  // Role wird lokal gehalten, nicht überschrieben
         };
@@ -98,8 +101,10 @@ public class InputManager : MonoBehaviour
             || _previous.LookInput != _current.LookInput
             || _previous.SprintHeld != _current.SprintHeld
             || _previous.ActionPressed != _current.ActionPressed
+            || _previous.ActionHeld != _current.ActionHeld
             || _previous.InteractPressed != _current.InteractPressed
             || _previous.JumpPressed != _current.JumpPressed
+            || _previous.JumpHeld != _current.JumpHeld
             || _previous.CrouchHeld != _current.CrouchHeld;
     }
 }

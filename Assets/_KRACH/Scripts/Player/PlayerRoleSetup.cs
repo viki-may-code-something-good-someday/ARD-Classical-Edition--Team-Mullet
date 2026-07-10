@@ -153,7 +153,6 @@ public class PlayerRoleSetup : NetworkBehaviour
     private void ActivateRoleModel(PlayerRole role)
     {
         bool isHunter = role == PlayerRole.Hunter;
-
         if (hunterModel != null) hunterModel.SetActive(isHunter);
         if (vandalistModel != null) vandalistModel.SetActive(!isHunter);
     }
@@ -210,13 +209,9 @@ public class PlayerRoleSetup : NetworkBehaviour
         Vector3 spawnPos = PickSpawnPosition(role);
 
         if (connectionToClient != null && movement != null)
-        {
             TargetTeleport(connectionToClient, spawnPos);
-        }
         else
-        {
             transform.position = spawnPos;
-        }
     }
 
     [TargetRpc]
@@ -247,8 +242,8 @@ public class PlayerRoleSetup : NetworkBehaviour
         if (eliminated)
         {
             Debug.Log($"[PlayerRoleSetup] {name} wurde endgültig eliminiert (Catch #{catchCount}).");
-            // TODO: Hier später an einen Round-/GameManager melden für Win-Condition-Check (z.B.
-            // "alle Vandalisten eliminiert" → Hunter gewinnt).
+            // TODO: Hier später an einen Round-/GameManager melden für Win-Condition-Check
+            // (z.B. "alle Vandalisten eliminiert" → Hunter gewinnt).
             return;
         }
 
@@ -306,20 +301,18 @@ public class PlayerRoleSetup : NetworkBehaviour
         if (mgr == null)
             Debug.LogWarning("[PlayerRoleSetup] NetworkManager nicht gefunden (nur im Play Mode prüfbar).");
         else if (string.IsNullOrEmpty(mgr.GameplayScene))
-        {
-            Debug.LogError("[PlayerRoleSetup] GameplayScene im NetworkManager nicht gesetzt!");
-            ok = false;
-        }
+        { Debug.LogError("[PlayerRoleSetup] GameplayScene im NetworkManager nicht gesetzt!"); ok = false; }
 
         if (hunterConfig == null) { Debug.LogError("[PlayerRoleSetup] hunterConfig fehlt!"); ok = false; }
         if (vandalistConfig == null) { Debug.LogError("[PlayerRoleSetup] vandalistConfig fehlt!"); ok = false; }
         if (movement == null) { Debug.LogError("[PlayerRoleSetup] PlayerMovement fehlt!"); ok = false; }
-        if (playerVisuals == null) { Debug.LogWarning("[PlayerRoleSetup] playerVisuals nicht gesetzt – Lobby-Hiding funktioniert nicht."); }
-        if (hunterModel == null) { Debug.LogWarning("[PlayerRoleSetup] hunterModel nicht gesetzt – Hunter-Modell wird nicht umgeschaltet."); }
-        if (vandalistModel == null) { Debug.LogWarning("[PlayerRoleSetup] vandalistModel nicht gesetzt – Vandalist-Modell wird nicht umgeschaltet."); }
-        if (interact == null) { Debug.LogWarning("[PlayerRoleSetup] PlayerInteract fehlt."); }
-        if (accuse == null) { Debug.LogWarning("[PlayerRoleSetup] HunterAccuse fehlt."); }
-        if (allowRespawn && respawnDelay <= 0f) { Debug.LogWarning("[PlayerRoleSetup] respawnDelay ist 0 oder negativ – Spieler respawnt sofort."); }
+        if (playerVisuals == null) Debug.LogWarning("[PlayerRoleSetup] playerVisuals nicht gesetzt – Lobby-Hiding funktioniert nicht.");
+        if (hunterModel == null) Debug.LogWarning("[PlayerRoleSetup] hunterModel nicht gesetzt – Hunter-Modell wird nicht umgeschaltet.");
+        if (vandalistModel == null) Debug.LogWarning("[PlayerRoleSetup] vandalistModel nicht gesetzt – Vandalist-Modell wird nicht umgeschaltet.");
+        if (interact == null) Debug.LogWarning("[PlayerRoleSetup] PlayerInteract fehlt.");
+        if (accuse == null) Debug.LogWarning("[PlayerRoleSetup] HunterAccuse fehlt.");
+        if (allowRespawn && respawnDelay <= 0f)
+            Debug.LogWarning("[PlayerRoleSetup] respawnDelay ist 0 oder negativ – Spieler respawnt sofort.");
 
         if (ok) Debug.Log("[PlayerRoleSetup] Setup vollständig.");
     }
