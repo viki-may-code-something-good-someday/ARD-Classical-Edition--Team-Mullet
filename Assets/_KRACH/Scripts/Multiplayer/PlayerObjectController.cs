@@ -8,8 +8,14 @@ public class PlayerObjectController : NetworkBehaviour
     [SyncVar] public int connectionID;
     [SyncVar] public int playerIdNumber;
     [SyncVar] public ulong playerSteamID;
+
     [SyncVar(hook = nameof(PlayerNameUpdate))] public string playerName;
     [SyncVar(hook = nameof(PlayerReadyUpdate))] public bool ready;
+
+    [SyncVar(hook = nameof(OnPlayerRoleChanged))]
+
+    public PlayerRole playerRole = PlayerRole.Vandalist;
+
 
     private CustomNetworkManager networkManager;
 
@@ -113,17 +119,39 @@ public class PlayerObjectController : NetworkBehaviour
     }
 
 
-    public void CanStartGame(string sceneName, bool useCustomNetworkGameplayScene)
+    /// <param name="testMode">
+    /// Spiegelt LobbyController.IsTestMode zum Startzeitpunkt. Wird bis zum Server
+    /// (CustomNetworkManager.StartGame) durchgereicht, da LobbyController nur client-seitig
+    /// existiert und der Server diesen Wert nicht direkt auslesen kann.
+    /// </param>
+    public void CanStartGame(string sceneName, bool useCustomNetworkGameplayScene, bool testMode)
     {
         if (isOwned)
         {
-            CmdCanStartGame(sceneName, useCustomNetworkGameplayScene);
+            CmdCanStartGame(sceneName, useCustomNetworkGameplayScene, testMode);
         }
     }
 
     [Command]
-    public void CmdCanStartGame(string sceneName, bool useCustomNetworkGameplayScene)
+    public void CmdCanStartGame(string sceneName, bool useCustomNetworkGameplayScene, bool testMode)
     {
-        NetworkManager.StartGame(sceneName, useCustomNetworkGameplayScene);
+        NetworkManager.StartGame(sceneName, useCustomNetworkGameplayScene, testMode);
+    }
+
+    public void SetPlayerRole(PlayerRole role)
+    {
+        if (!NetworkServer.active)
+        {
+            Debug.LogWarning("[PlayerObjectController] SetPlayerRole darf nur auf dem Server aufgerufen werden.");
+            return;
+        }
+        playerRole = role; // SyncVar → wird automatisch an alle Clients repliziert
+    }
+
+    private void OnPlayerRoleChanged(PlayerRole oldRole, PlayerRole newRole)
+    {
+        // Wird auf allen Clients ausgeführt wenn sich die Rolle ändert.
+        // Kann hier genutzt werden um UI oder Visuals zu aktualisieren.
+        Debug.Log($"[PlayerObjectController] {playerName}: {oldRole} → {newRole}");
     }
 }

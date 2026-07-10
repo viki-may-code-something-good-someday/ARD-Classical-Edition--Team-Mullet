@@ -2,32 +2,46 @@ using DG.Tweening;
 using Mirror;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
-public class PlayerInteract : NetworkBehaviour
+/// <summary>
+/// Vandalist-Aktion: Schlagen + Interagieren mit der Welt.
+/// Wird von PlayerRoleSetup aktiviert/deaktiviert über IRoleAction.
+/// </summary>
+public class PlayerInteract : NetworkBehaviour, IRoleAction
 {
     [Header("References")]
     [SerializeField] private List<GameObject> armsVisuals = new List<GameObject>();
     [SerializeField] private Camera playerCamera;
+
     [Header("Interaction Settings")]
-    [SerializeField] private float hitRange;
-    [SerializeField] private float hitDamage;
+    [SerializeField] private float hitRange = 2f;
+    [SerializeField] private float hitDamage = 10f;
 
     [Header("Sound")]
-    [Tooltip("LuaSoundEmitter am Player, Script-Mode. Enable Multiplayer = false — der ClientRpc (includeOwner) verteilt bereits an alle.")]
+    [Tooltip("LuaSoundEmitter am Player, Script-Mode. Enable Multiplayer = false.")]
     [SerializeField] private LuaSoundEmitter punchSoundEmitter;
     [SerializeField] private LuaSoundEmitter punchAirSoundEmitter;
 
     private bool rightArmPunching;
 
-    void Update()
-    {
-        if (!isLocalPlayer) return;
+    // ── IRoleAction ───────────────────────────────────────────────────────────
 
-        HandleActionInput();
+    public void OnRoleActivated()
+    {
+        enabled = true;
     }
 
-    private void HandleActionInput()
+    public void OnRoleDeactivated()
     {
+        enabled = false;
+    }
+
+    // ── Update ────────────────────────────────────────────────────────────────
+
+    void Update()
+    {
+        if (!isOwned) return;
         if (InputManager.Instance == null) return;
 
         if (InputManager.Instance.CurrentInput.ActionPressed)
@@ -36,11 +50,19 @@ public class PlayerInteract : NetworkBehaviour
         }
     }
 
+    // ── Punch-Logik ───────────────────────────────────────────────────────────
+
     private void LocalPunch()
     {
         PunchAnimation();
 
-        bool hitSomething = Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, hitRange, LayerMask.GetMask("Interactable", "Destructable", "Default"), QueryTriggerInteraction.Ignore);
+        bool hitSomething = Physics.Raycast(
+            playerCamera.transform.position,
+            playerCamera.transform.forward,
+            hitRange,
+            LayerMask.GetMask("Interactable", "Destructable", "Default"),
+            QueryTriggerInteraction.Ignore
+        );
 
         CmdTryInteract(playerCamera.transform.position, playerCamera.transform.forward, hitSomething);
     }
@@ -48,40 +70,30 @@ public class PlayerInteract : NetworkBehaviour
     [Command]
     private void CmdTryInteract(Vector3 origin, Vector3 direction, bool predictedHit)
     {
-        Debug.Log("Sending interaction");
         bool hitSomething = predictedHit;
 
-        if (Physics.Raycast(origin, direction, out RaycastHit hitinfo, hitRange, LayerMask.GetMask("Interactable"), QueryTriggerInteraction.Ignore))
+        if (Physics.Raycast(origin, direction, out RaycastHit hitInteractable, hitRange, LayerMask.GetMask("Interactable"), QueryTriggerInteraction.Ignore))
         {
-            if (hitinfo.collider.TryGetComponent<Interactable>(out Interactable interactableObj))
+            if (hitInteractable.collider.TryGetComponent(out Interactable interactableObj))
             {
                 interactableObj.Interact();
                 hitSomething = true;
             }
         }
-        else if (Physics.Raycast(origin, direction, out RaycastHit hitinfoDestructable, hitRange, LayerMask.GetMask("Destructable"), QueryTriggerInteraction.Ignore))
+        else if (Physics.Raycast(origin, direction, out RaycastHit hitDestructable, hitRange, LayerMask.GetMask("Destructable"), QueryTriggerInteraction.Ignore))
         {
-            /*
-             if (hitinfoDestructable.collider.TryGetComponent<IDestructable>(out IDestructable destructableObject))
-            {
-                destructableObject.TakeDamage(hitDamage, hitinfoDestructable.point, hitinfoDestructable.normal);
-                hitSomething = true;
-            }
-            */
-
-            IDestructable destructableObject = hitinfoDestructable.collider.GetComponentInParent<IDestructable>();
+            IDestructable destructableObject = hitDestructable.collider.GetComponentInParent<IDestructable>();
             if (destructableObject != null)
             {
-                destructableObject.TakeDamage(hitDamage, hitinfoDestructable.point, hitinfoDestructable.normal);
+                destructableObject.TakeDamage(hitDamage, hitDestructable.point, hitDestructable.normal);
                 hitSomething = true;
             }
         }
-        else if (Physics.Raycast(origin, direction, out RaycastHit hitinfoBillboard, hitRange, LayerMask.GetMask("Default"), QueryTriggerInteraction.Ignore))
+        else if (Physics.Raycast(origin, direction, out RaycastHit hitBillboard, hitRange, LayerMask.GetMask("Default"), QueryTriggerInteraction.Ignore))
         {
-            if (hitinfoBillboard.collider.TryGetComponent<BillboardObject>(out BillboardObject billboardObject))
+            if (hitBillboard.collider.TryGetComponent(out BillboardObject _))
             {
-                // Punch-Position an alle Clients senden -> die führen TakePunch lokal aus
-                RpcPunchBillboard(hitinfoBillboard.collider.gameObject, origin);
+                RpcPunchBillboard(hitBillboard.collider.gameObject, origin);
                 hitSomething = true;
             }
         }
@@ -90,56 +102,50 @@ public class PlayerInteract : NetworkBehaviour
     }
 
     [ClientRpc]
-    private void RpcPunchBillboard(GameObject _billboardGameObject, Vector3 _origin)
+    private void RpcPunchBillboard(GameObject billboardGameObject, Vector3 origin)
     {
-        if (_billboardGameObject.TryGetComponent<BillboardObject>(out BillboardObject billboardObject))
-        {
-            billboardObject.TakePunch(_origin);
-        }
+        if (!enabled) return;
+
+        if (billboardGameObject.TryGetComponent(out BillboardObject billboardObject))
+            billboardObject.TakePunch(origin);
     }
 
-    // [ClientRpc] wird vom Server aufgerufen, aber auf ALLEN CLIENTS ausgefuehrt.
-    // includeOwner = true stellt sicher, dass der Punch für ALLE Spieler (einschliesslich des Angreifers) synchron abgespielt wird.
     [ClientRpc(includeOwner = true)]
     private void RpcPlayPunchEffects(bool hitSomething)
     {
-        // Nur der lokale Spieler muss die Animation noch mal abspielen, da sie bereits in LocalPunch() aufgerufen wurde
-        // Aber wir spielen sie hier nicht ab, weil sie bereits lokal ausgefuehrt wurde
-        // Alle Remote-Spieler bekommen die Animation hier
-        if (!isLocalPlayer)
-        {
-            PunchAnimation();
-        }
+        // Mirror führt ClientRpcs auch auf disabled Komponenten aus.
+        // Expliziter Check verhindert Sounds und Animationen in der Lobby.
+        if (!enabled) return;
 
-        // SOUND
-        LuaSoundEmitter punchEmitter = hitSomething ? punchSoundEmitter : punchAirSoundEmitter;
-        if (punchEmitter != null)
-            punchEmitter.PlayOneShot();
+        if (!isOwned)
+            PunchAnimation();
+
+        LuaSoundEmitter emitter = hitSomething ? punchSoundEmitter : punchAirSoundEmitter;
+        if (emitter != null) emitter.PlayOneShot();
     }
+
+    // ── Animation ─────────────────────────────────────────────────────────────
 
     private void PunchAnimation()
     {
         if (armsVisuals.Count != 2)
         {
-            Debug.LogWarning("PunchAnimation: Expected 2 arms, got " + armsVisuals.Count);
+            Debug.LogWarning("[PlayerInteract] PunchAnimation: 2 Arme erwartet, gefunden: " + armsVisuals.Count);
             return;
         }
 
         int selectedArm = rightArmPunching ? 0 : 1;
         rightArmPunching = !rightArmPunching;
 
-        List<DOTweenAnimation> dotweenAnims = new List<DOTweenAnimation>(armsVisuals[selectedArm].GetComponents<DOTweenAnimation>());
-        if (dotweenAnims.Count > 0)
+        DOTweenAnimation[] anims = armsVisuals[selectedArm].GetComponents<DOTweenAnimation>();
+        if (anims.Length > 0)
         {
-            foreach (DOTweenAnimation anim in dotweenAnims)
-            {
+            foreach (DOTweenAnimation anim in anims)
                 anim.DORestart();
-            }
         }
         else
         {
-            Debug.LogError("PunchAnimation: DOTweenAnimation component missing on " + armsVisuals[selectedArm].name);
+            Debug.LogError("[PlayerInteract] DOTweenAnimation fehlt auf: " + armsVisuals[selectedArm].name);
         }
     }
-
 }

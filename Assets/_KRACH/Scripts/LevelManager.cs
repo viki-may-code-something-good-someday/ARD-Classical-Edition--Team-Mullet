@@ -4,8 +4,9 @@ public class LevelManager : MonoBehaviour
 {
     public static LevelManager Instance { get; private set; }
 
-    public Transform[] hunterSpawnPositions;
+    [Header("Spawn Positions")]
     public Transform[] vandalistSpawnPositions;
+    public Transform[] hunterSpawnPositions;
 
     private void Awake()
     {
