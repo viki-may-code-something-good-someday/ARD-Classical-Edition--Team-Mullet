@@ -16,6 +16,10 @@ public class PlayerInteract : NetworkBehaviour, IRoleAction
     [Header("Interaction Settings")]
     [SerializeField] private float hitRange = 2f;
     [SerializeField] private float hitDamage = 10f;
+    [SerializeField] private float pointBlankRadius = 1.5f;
+    [SerializeField] private float pointBlankMinDot = 0.3f; // must be roughly in front (~72°) (in welche Richtung getroffen wird von der Blick-Richtung ausgehend 0=> 180° range, 1 => 0° exakt geradeaus)
+    [SerializeField] private float pointBlankContactRadius = 0.8f; // Within this distance the billboard is punchable regardless of where you look
+
 
     [Header("Sound")]
     [Tooltip("LuaSoundEmitter am Player, Script-Mode. Enable Multiplayer = false.")]
@@ -23,6 +27,7 @@ public class PlayerInteract : NetworkBehaviour, IRoleAction
     [SerializeField] private LuaSoundEmitter punchAirSoundEmitter;
 
     private bool rightArmPunching;
+
 
     // ── IRoleAction ───────────────────────────────────────────────────────────
 
@@ -82,7 +87,7 @@ public class PlayerInteract : NetworkBehaviour, IRoleAction
     }
 
 
-    // ── Punch-Logik ───────────────────────────────────────────────────────────
+    // ── Punch logic ────────────────────────────────────────────────────────────
 
     private void LocalPunch()
     {
@@ -92,9 +97,14 @@ public class PlayerInteract : NetworkBehaviour, IRoleAction
             playerCamera.transform.position,
             playerCamera.transform.forward,
             hitRange,
-            LayerMask.GetMask("Interactable", "Destructable", "Default"),
-            QueryTriggerInteraction.Ignore
+            LayerMask.GetMask("Interactable", "Destructable", "Billboard"),
+            QueryTriggerInteraction.Collide
         );
+
+        // Point-blank prediction: if the ray missed but we're standing in/next to a billboard,
+        // still predict a hit so the hit-sound plays instead of the whiff.
+        if (!hitSomething && FindPointBlankBillboard(playerCamera.transform.forward) != null)
+            hitSomething = true;
 
         CmdTryInteract(playerCamera.transform.position, playerCamera.transform.forward, hitSomething);
     }
@@ -121,11 +131,22 @@ public class PlayerInteract : NetworkBehaviour, IRoleAction
                 hitSomething = true;
             }
         }
-        else if (Physics.Raycast(origin, direction, out RaycastHit hitBillboard, hitRange, LayerMask.GetMask("Default"), QueryTriggerInteraction.Ignore))
+        else if (Physics.Raycast(origin, direction, out RaycastHit hitBillboard, hitRange, LayerMask.GetMask("Billboard"), QueryTriggerInteraction.Collide))
         {
-            if (hitBillboard.collider.TryGetComponent(out BillboardObject _))
+            if (hitBillboard.collider.TryGetComponent(out BillboardObject billboardObject))
             {
-                RpcPunchBillboard(hitBillboard.collider.gameObject, origin);
+                billboardObject.ServerTakePunch(transform.position);
+                hitSomething = true;
+            }
+        }
+
+        // Point-blank fallback: when you stand inside the billboard's trigger
+        if (!hitSomething)
+        {
+            BillboardObject pointBlank = FindPointBlankBillboard(direction);
+            if (pointBlank != null)
+            {
+                pointBlank.ServerTakePunch(transform.position);
                 hitSomething = true;
             }
         }
@@ -133,20 +154,47 @@ public class PlayerInteract : NetworkBehaviour, IRoleAction
         RpcPlayPunchEffects(hitSomething);
     }
 
-    [ClientRpc]
-    private void RpcPunchBillboard(GameObject billboardGameObject, Vector3 origin)
+    // Finds the best billboard at point-blank range. Runs on both client (prediction) and
+    // server (authoritative), so both agree. Returns null if nothing suitable is around.
+    private BillboardObject FindPointBlankBillboard(Vector3 forward)
     {
-        if (!enabled) return;
+        Collider[] nearby = Physics.OverlapSphere(
+            transform.position, pointBlankRadius,
+            LayerMask.GetMask("Billboard"), QueryTriggerInteraction.Collide);
 
-        if (billboardGameObject.TryGetComponent(out BillboardObject billboardObject))
-            billboardObject.TakePunch(origin);
+        BillboardObject closest = null;
+        float bestFacing = pointBlankMinDot;
+
+        Vector3 flatForward = new Vector3(forward.x, 0f, forward.z);
+        bool haveForward = flatForward.sqrMagnitude > 0.0001f;
+        if (haveForward) flatForward.Normalize();
+
+        foreach (Collider col in nearby)
+        {
+            BillboardObject billboard = col.GetComponentInParent<BillboardObject>();
+            if (billboard == null) continue;
+
+            Vector3 to = billboard.transform.position - transform.position;
+            to.y = 0f;
+            float dist = to.magnitude;
+
+            // Standing inside / touching it -> punchable no matter where you look.
+            if (dist <= pointBlankContactRadius) return billboard;
+
+            if (!haveForward) continue;
+
+            float facing = Vector3.Dot(to / dist, flatForward);
+            if (facing > bestFacing) { bestFacing = facing; closest = billboard; }
+        }
+
+        return closest;
     }
 
     [ClientRpc(includeOwner = true)]
     private void RpcPlayPunchEffects(bool hitSomething)
     {
-        // Mirror führt ClientRpcs auch auf disabled Komponenten aus.
-        // Expliziter Check verhindert Sounds und Animationen in der Lobby.
+        // Mirror runs ClientRpcs even on disabled components.
+        // Explicit check prevents sounds and animations in the lobby.
         if (!enabled) return;
 
         if (!isOwned)

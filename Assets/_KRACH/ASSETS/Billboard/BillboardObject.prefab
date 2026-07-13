@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2398233507360955838}
   - component: {fileID: 6572622372612838990}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Sprite
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -101,11 +101,11 @@ GameObject:
   m_Component:
   - component: {fileID: 8647497576118087877}
   - component: {fileID: 3847888004710153319}
+  - component: {fileID: 3424137129307923684}
   - component: {fileID: 2373518318598767925}
   - component: {fileID: 3234403350367809677}
-  - component: {fileID: 3444666412621817683}
   - component: {fileID: 143707511126151037}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: BillboardObject
   m_TagString: NoOcclusion
   m_Icon: {fileID: 0}
@@ -145,6 +145,40 @@ MonoBehaviour:
   serverOnly: 0
   visibility: 0
   hasSpawned: 0
+--- !u!114 &3424137129307923684
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6281945527010714970}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a553cb17010b2403e8523b558bffbc14, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Mirror.Components::Mirror.NetworkTransformUnreliable
+  syncDirection: 1
+  syncMode: 0
+  syncInterval: 0
+  target: {fileID: 8647497576118087877}
+  syncPosition: 1
+  syncRotation: 0
+  syncScale: 0
+  onlySyncOnChange: 1
+  compressRotation: 1
+  interpolatePosition: 1
+  interpolateRotation: 1
+  interpolateScale: 1
+  coordinateSpace: 0
+  timelineOffset: 1
+  showGizmos: 0
+  showOverlay: 0
+  overlayColor: {r: 0, g: 0, b: 0, a: 0.5}
+  bufferResetMultiplier: 3
+  useFixedUpdate: 0
+  positionSensitivity: 0.01
+  rotationSensitivity: 0.01
+  scaleSensitivity: 0.01
 --- !u!114 &2373518318598767925
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -157,12 +191,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83c1220ad38d7fb41b2524a693bb2bf2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BillboardFacingCamera
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  spriteTransform: {fileID: 2398233507360955838}
   flippedSprite: 0
   knockbackEnabled: 1
-  knockbackForce: 3
-  punchKnockbackMultiplier: 3
-  knockbackDuration: 0.3
+  punchForce: 12
+  punchUpForce: 9
+  punchRandomRange: {x: 0.95, y: 1.05}
+  shoveEnabled: 1
+  shoveRadius: 1.2
+  shoveForce: 12
+  shoveUpForce: 8
+  shoveSideSharpness: 2
+  minApproachSpeed: 1
+  shoveCooldown: 0.35
+  playerMask:
+    serializedVersion: 2
+    m_Bits: 64
+  gravity: 25
+  groundDrag: 9
+  airDrag: 0.6
+  groundCheckDistance: 3
+  groundOffset: 0.5
+  environmentMask:
+    serializedVersion: 2
+    m_Bits: 3007
+  blockedByWalls: 1
+  collideRadius: 0.35
   punchParticles: {fileID: 286782459826712307, guid: 13a3073cf91489d4d9e9e0cce9785d96, type: 3}
+  particleOffset: {x: 0, y: 0.6, z: 0}
 --- !u!136 &3234403350367809677
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -178,41 +237,14 @@ CapsuleCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.5
-  m_Height: 1.7982738
+  m_Radius: 2.3
+  m_Height: 6
   m_Direction: 1
-  m_Center: {x: 0, y: 0.3991369, z: 0}
---- !u!54 &3444666412621817683
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6281945527010714970}
-  serializedVersion: 5
-  m_Mass: 0.1
-  m_LinearDamping: 1
-  m_AngularDamping: 30
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 80
-  m_CollisionDetection: 0
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &143707511126151037
 MonoBehaviour:
   m_ObjectHideFlags: 0
