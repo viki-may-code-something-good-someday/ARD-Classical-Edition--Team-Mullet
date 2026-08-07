@@ -43,8 +43,12 @@ public class RoleMovementConfig : ScriptableObject
     public float crouchHeight = 1.0f;
     [Tooltip("CharacterController-Höhe im Stehzustand.")]
     public float standHeight = 2.0f;
-    [Tooltip("Lokale Y-Position des CameraHolders im Hockzustand.")]
-    public float crouchCameraY = 0.3f;
+    [Tooltip("Lokale Y-Position des CameraHolders im Hockzustand – relativ zum Root-Pivot, der" +
+             " nicht an den Füßen sitzt. Muss klein genug sein, dass die Kamera in der Hockkapsel" +
+             " bleibt, sonst schaut man unter niedrigen Decken hindurch. Grenze:" +
+             " crouchCameraY - groundCheck.localPosition.y < crouchHeight." +
+             " PlayerMovement.ApplyConfig warnt wenn der Wert nicht passt.")]
+    public float crouchCameraY = -0.04f;
     [Tooltip("Lokale Y-Position des CameraHolders im Stehzustand.")]
     public float standCameraY = 0.75f;
     public float crouchTransitionSpeed = 12f;

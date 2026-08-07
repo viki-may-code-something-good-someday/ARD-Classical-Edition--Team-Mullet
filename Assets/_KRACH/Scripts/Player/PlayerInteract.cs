@@ -5,7 +5,10 @@ using UnityEngine;
 
 /// <summary>
 /// Vandalist-Aktion: Schlagen + Interagieren mit der Welt.
-/// Wird von PlayerRoleSetup aktiviert/deaktiviert über IRoleAction.
+/// Wird von PlayerRoleSetup über IRoleAction aktiviert/deaktiviert.
+///
+/// Der Client sagt den Treffer nur für den Sound voraus – die eigentliche Wirkung
+/// (Interact / Damage / Billboard-Punch) entscheidet ausschließlich der Server.
 /// </summary>
 public class PlayerInteract : NetworkBehaviour, IRoleAction
 {
@@ -15,11 +18,20 @@ public class PlayerInteract : NetworkBehaviour, IRoleAction
 
     [Header("Interaction Settings")]
     [SerializeField] private float hitRange = 2f;
-    [SerializeField] private float hitDamage = 10f;
+    [SerializeField] private float hitDamage = 1f;
+    [Tooltip("Radius in dem Billboards auch ohne Raycast-Treffer geschlagen werden können.")]
     [SerializeField] private float pointBlankRadius = 1.5f;
-    [SerializeField] private float pointBlankMinDot = 0.3f; // must be roughly in front (~72°) (in welche Richtung getroffen wird von der Blick-Richtung ausgehend 0=> 180° range, 1 => 0° exakt geradeaus)
-    [SerializeField] private float pointBlankContactRadius = 0.8f; // Within this distance the billboard is punchable regardless of where you look
+    [Tooltip("Blickrichtungs-Toleranz: 0 = 180°-Kegel, 1 = exakt geradeaus. 0.3 ≈ 72°.")]
+    [SerializeField] private float pointBlankMinDot = 0.3f;
+    [Tooltip("Innerhalb dieser Distanz zählt der Treffer unabhängig von der Blickrichtung.")]
+    [SerializeField] private float pointBlankContactRadius = 0.8f;
 
+    [Header("Anti-Cheat")]
+    [Tooltip("Mindestzeit zwischen zwei Schlägen. Wird Server-seitig durchgesetzt.")]
+    [SerializeField] private float punchCooldown = 0.15f;
+    [Tooltip("Wie weit der vom Client gemeldete Raycast-Ursprung maximal vom Spieler entfernt " +
+             "sein darf. Muss die Kamerahöhe abdecken, sonst werden legitime Schläge verworfen.")]
+    [SerializeField] private float maxOriginDistance = 2f;
 
     [Header("Sound")]
     [Tooltip("LuaSoundEmitter am Player, Script-Mode. Enable Multiplayer = false.")]
@@ -27,120 +39,144 @@ public class PlayerInteract : NetworkBehaviour, IRoleAction
     [SerializeField] private LuaSoundEmitter punchAirSoundEmitter;
 
     private bool rightArmPunching;
+    private float serverNextAllowedPunchTime;
 
+    private int interactableMask;
+    private int destructableMask;
+    private int billboardMask;
+
+    private void Awake()
+    {
+        interactableMask = LayerMask.GetMask("Interactable");
+        destructableMask = LayerMask.GetMask("Destructable");
+        billboardMask = LayerMask.GetMask("Billboard");
+    }
 
     // ── IRoleAction ───────────────────────────────────────────────────────────
 
-    public void OnRoleActivated()
-    {
-        enabled = true;
-    }
-
-    public void OnRoleDeactivated()
-    {
-        enabled = false;
-    }
+    public void OnRoleActivated() => enabled = true;
+    public void OnRoleDeactivated() => enabled = false;
 
     // ── Update ────────────────────────────────────────────────────────────────
 
     void Update()
     {
-        if (!isOwned) return;
-        if (InputManager.Instance == null) return;
+        if (!isOwned || InputManager.Instance == null) return;
 
         if (InputManager.Instance.CurrentInput.ActionPressed)
-        {
             LocalPunch();
-        }
     }
 
     public override void OnStartLocalPlayer()
     {
         base.OnStartLocalPlayer();
 
-        SetLayerRecursively(armsVisuals, LayerMask.NameToLayer("Arms"));
-    }
-
-    private void SetLayerRecursively(List<GameObject> objects, int newLayer)
-    {
-        if (objects == null) return;
-
-        // Gehe durch jedes Objekt in der Liste (z.B. linker Arm, rechter Arm)
-        foreach (GameObject obj in objects)
+        int armsLayer = LayerMask.NameToLayer("Arms");
+        if (armsLayer < 0)
         {
-            SetLayerRecursively(obj, newLayer);
+            Debug.LogError("[PlayerInteract] Layer 'Arms' existiert nicht – Arme bleiben auf ihrem Layer.");
+            return;
         }
+
+        foreach (GameObject arm in armsVisuals)
+            SetLayerRecursively(arm, armsLayer);
     }
 
-    // 2. Das ist die "Arbeiter"-Methode, die die eigentliche Rekursion macht
-    private void SetLayerRecursively(GameObject obj, int newLayer)
+    private static void SetLayerRecursively(GameObject obj, int layer)
     {
         if (obj == null) return;
 
-        obj.layer = newLayer; // Ändert den Layer des aktuellen Objekts
-
-        // Geht durch alle Kinder (Finger, Knochen, Waffen-Attachments)
+        obj.layer = layer;
         foreach (Transform child in obj.transform)
-        {
-            SetLayerRecursively(child.gameObject, newLayer);
-        }
+            SetLayerRecursively(child.gameObject, layer);
     }
 
-
-    // ── Punch logic ────────────────────────────────────────────────────────────
+    // ── Punch ─────────────────────────────────────────────────────────────────
 
     private void LocalPunch()
     {
+        if (playerCamera == null)
+        {
+            Debug.LogError("[PlayerInteract] playerCamera ist nicht zugewiesen.");
+            return;
+        }
+
         PunchAnimation();
 
-        bool hitSomething = Physics.Raycast(
-            playerCamera.transform.position,
-            playerCamera.transform.forward,
-            hitRange,
-            LayerMask.GetMask("Interactable", "Destructable", "Billboard"),
-            QueryTriggerInteraction.Collide
-        );
+        Vector3 origin = playerCamera.transform.position;
+        Vector3 direction = playerCamera.transform.forward;
 
-        // Point-blank prediction: if the ray missed but we're standing in/next to a billboard,
-        // still predict a hit so the hit-sound plays instead of the whiff.
-        if (!hitSomething && FindPointBlankBillboard(playerCamera.transform.forward) != null)
-            hitSomething = true;
+        CmdTryInteract(origin, direction, PredictHit(origin, direction));
+    }
 
-        CmdTryInteract(playerCamera.transform.position, playerCamera.transform.forward, hitSomething);
+    /// <summary>
+    /// Reine Sound-Vorhersage für den Owner. Bildet die Abfragekette von CmdTryInteract exakt
+    /// nach (gleiche Masken, gleiche Trigger-Behandlung, gleiche Reihenfolge), damit der lokal
+    /// gespielte Sound zu dem passt was der Server tatsächlich als Treffer wertet.
+    /// </summary>
+    private bool PredictHit(Vector3 origin, Vector3 direction)
+    {
+        if (Physics.Raycast(origin, direction, out RaycastHit hit, hitRange, interactableMask, QueryTriggerInteraction.Ignore))
+            return hit.collider.GetComponent<Interactable>() != null;
+
+        if (Physics.Raycast(origin, direction, out hit, hitRange, destructableMask, QueryTriggerInteraction.Ignore))
+            return hit.collider.GetComponentInParent<IDestructable>() != null;
+
+        if (Physics.Raycast(origin, direction, out hit, hitRange, billboardMask, QueryTriggerInteraction.Collide))
+            return hit.collider.GetComponent<BillboardObject>() != null;
+
+        return FindPointBlankBillboard(direction) != null;
     }
 
     [Command]
     private void CmdTryInteract(Vector3 origin, Vector3 direction, bool predictedHit)
     {
+        // ── Server-seitige Validierung (Anti-Cheat) ──
+        // Origin und Direction kommen vom Client und sind damit grundsätzlich manipulierbar.
+
+        if (Time.time < serverNextAllowedPunchTime) return;
+        serverNextAllowedPunchTime = Time.time + punchCooldown;
+
+        float originDistance = Vector3.Distance(origin, transform.position);
+        if (originDistance > maxOriginDistance)
+        {
+            Debug.LogWarning($"[PlayerInteract] Raycast-Ursprung {originDistance:F1}m vom Spieler entfernt " +
+                             $"(Max: {maxOriginDistance}m) – Schlag verworfen.");
+            return;
+        }
+
+        if (direction.sqrMagnitude < 0.0001f) return;
+        direction.Normalize();
+
         bool hitSomething = predictedHit;
 
-        if (Physics.Raycast(origin, direction, out RaycastHit hitInteractable, hitRange, LayerMask.GetMask("Interactable"), QueryTriggerInteraction.Ignore))
+        if (Physics.Raycast(origin, direction, out RaycastHit interactableHit, hitRange, interactableMask, QueryTriggerInteraction.Ignore))
         {
-            if (hitInteractable.collider.TryGetComponent(out Interactable interactableObj))
+            if (interactableHit.collider.TryGetComponent(out Interactable interactableObj))
             {
                 interactableObj.Interact();
                 hitSomething = true;
             }
         }
-        else if (Physics.Raycast(origin, direction, out RaycastHit hitDestructable, hitRange, LayerMask.GetMask("Destructable"), QueryTriggerInteraction.Ignore))
+        else if (Physics.Raycast(origin, direction, out RaycastHit destructableHit, hitRange, destructableMask, QueryTriggerInteraction.Ignore))
         {
-            IDestructable destructableObject = hitDestructable.collider.GetComponentInParent<IDestructable>();
-            if (destructableObject != null)
+            IDestructable destructable = destructableHit.collider.GetComponentInParent<IDestructable>();
+            if (destructable != null)
             {
-                destructableObject.TakeDamage(hitDamage, hitDestructable.point, hitDestructable.normal);
+                destructable.TakeDamage(hitDamage, destructableHit.point, destructableHit.normal);
                 hitSomething = true;
             }
         }
-        else if (Physics.Raycast(origin, direction, out RaycastHit hitBillboard, hitRange, LayerMask.GetMask("Billboard"), QueryTriggerInteraction.Collide))
+        else if (Physics.Raycast(origin, direction, out RaycastHit billboardHit, hitRange, billboardMask, QueryTriggerInteraction.Collide))
         {
-            if (hitBillboard.collider.TryGetComponent(out BillboardObject billboardObject))
+            if (billboardHit.collider.TryGetComponent(out BillboardObject billboardObject))
             {
                 billboardObject.ServerTakePunch(transform.position);
                 hitSomething = true;
             }
         }
 
-        // Point-blank fallback: when you stand inside the billboard's trigger
+        // Fallback wenn man direkt im Trigger des Billboards steht.
         if (!hitSomething)
         {
             BillboardObject pointBlank = FindPointBlankBillboard(direction);
@@ -154,20 +190,21 @@ public class PlayerInteract : NetworkBehaviour, IRoleAction
         RpcPlayPunchEffects(hitSomething);
     }
 
-    // Finds the best billboard at point-blank range. Runs on both client (prediction) and
-    // server (authoritative), so both agree. Returns null if nothing suitable is around.
+    /// <summary>
+    /// Bestes Billboard auf Tuchfühlung. Läuft identisch auf Client (Vorhersage) und
+    /// Server (autoritativ), damit beide zum selben Ergebnis kommen.
+    /// </summary>
     private BillboardObject FindPointBlankBillboard(Vector3 forward)
     {
         Collider[] nearby = Physics.OverlapSphere(
-            transform.position, pointBlankRadius,
-            LayerMask.GetMask("Billboard"), QueryTriggerInteraction.Collide);
-
-        BillboardObject closest = null;
-        float bestFacing = pointBlankMinDot;
+            transform.position, pointBlankRadius, billboardMask, QueryTriggerInteraction.Collide);
 
         Vector3 flatForward = new Vector3(forward.x, 0f, forward.z);
         bool haveForward = flatForward.sqrMagnitude > 0.0001f;
         if (haveForward) flatForward.Normalize();
+
+        BillboardObject bestAligned = null;
+        float bestFacing = pointBlankMinDot;
 
         foreach (Collider col in nearby)
         {
@@ -178,27 +215,28 @@ public class PlayerInteract : NetworkBehaviour, IRoleAction
             to.y = 0f;
             float dist = to.magnitude;
 
-            // Standing inside / touching it -> punchable no matter where you look.
-            if (dist <= pointBlankContactRadius) return billboard;
-
+            if (dist <= pointBlankContactRadius) return billboard; // direkt dran → immer treffbar
             if (!haveForward) continue;
 
             float facing = Vector3.Dot(to / dist, flatForward);
-            if (facing > bestFacing) { bestFacing = facing; closest = billboard; }
+            if (facing > bestFacing)
+            {
+                bestFacing = facing;
+                bestAligned = billboard;
+            }
         }
 
-        return closest;
+        return bestAligned;
     }
 
     [ClientRpc(includeOwner = true)]
     private void RpcPlayPunchEffects(bool hitSomething)
     {
-        // Mirror runs ClientRpcs even on disabled components.
-        // Explicit check prevents sounds and animations in the lobby.
+        // Mirror führt ClientRpcs auch auf deaktivierten Komponenten aus –
+        // ohne diesen Check gäbe es Sounds/Animationen in der Lobby.
         if (!enabled) return;
 
-        if (!isOwned)
-            PunchAnimation();
+        if (!isOwned) PunchAnimation();
 
         LuaSoundEmitter emitter = hitSomething ? punchSoundEmitter : punchAirSoundEmitter;
         if (emitter != null) emitter.PlayOneShot();
@@ -214,18 +252,17 @@ public class PlayerInteract : NetworkBehaviour, IRoleAction
             return;
         }
 
-        int selectedArm = rightArmPunching ? 0 : 1;
+        GameObject arm = armsVisuals[rightArmPunching ? 0 : 1];
         rightArmPunching = !rightArmPunching;
 
-        DOTweenAnimation[] anims = armsVisuals[selectedArm].GetComponents<DOTweenAnimation>();
-        if (anims.Length > 0)
+        DOTweenAnimation[] anims = arm.GetComponents<DOTweenAnimation>();
+        if (anims.Length == 0)
         {
-            foreach (DOTweenAnimation anim in anims)
-                anim.DORestart();
+            Debug.LogError("[PlayerInteract] DOTweenAnimation fehlt auf: " + arm.name);
+            return;
         }
-        else
-        {
-            Debug.LogError("[PlayerInteract] DOTweenAnimation fehlt auf: " + armsVisuals[selectedArm].name);
-        }
+
+        foreach (DOTweenAnimation anim in anims)
+            anim.DORestart();
     }
 }

@@ -20,7 +20,7 @@ MonoBehaviour:
   sprintAcceleration: 1.7
   sprintBurstAcceleration: 14
   sprintDecaySpeed: 3
-  jumpHeight: 14
+  jumpHeight: 1.5
   riseGravityMultiplier: 1
   fallGravityMultiplier: 1.8
   jumpCutGravityMultiplier: 2.6
@@ -28,7 +28,7 @@ MonoBehaviour:
   crouchSpeedMultiplier: 0.5
   crouchHeight: 1
   standHeight: 2
-  crouchCameraY: 0.3
+  crouchCameraY: -0.04
   standCameraY: 0.75
   crouchTransitionSpeed: 12
   baseFallGravity: 7

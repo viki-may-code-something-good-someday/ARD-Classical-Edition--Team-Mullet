@@ -14,8 +14,14 @@ public class PlayerObjectController : NetworkBehaviour
     [SyncVar(hook = nameof(PlayerReadyUpdate))] public bool ready;
 
     [SyncVar(hook = nameof(OnPlayerRoleChanged))]
-
     public PlayerRole playerRole = PlayerRole.Vandalist;
+
+    /// <summary>
+    /// Feuert auf jedem Client sobald die Rolle über die SyncVar ankommt oder sich ändert.
+    /// PlayerRoleSetup hängt sich hier ein, damit eine spät eintreffende Rolle (Lag, Late Join)
+    /// nicht verschluckt wird.
+    /// </summary>
+    public event System.Action<PlayerRole> RoleChanged;
 
 
     private CustomNetworkManager networkManager;
@@ -46,7 +52,7 @@ public class PlayerObjectController : NetworkBehaviour
         {
             this.ready = newValue;
         }
-        if (isClient)
+        if (isClient && LobbyController.instance != null)
         {
             LobbyController.instance.UpdatePlayerList();
         }
@@ -94,10 +100,16 @@ public class PlayerObjectController : NetworkBehaviour
         }
 
         networkManager.gamePlayers.Add(this);
-        LobbyController.instance.UpdateLobbyName();
-        LobbyController.instance.UpdatePlayerList();
 
-        if (isOwned || isLocalPlayer)
+        // Der LobbyController lebt nur in der Lobby-Scene. Test-Dummies werden erst in der
+        // Gameplay-Scene gespawnt – ohne diese Prüfung wirft jeder Dummy-Spawn hier.
+        if (LobbyController.instance != null)
+        {
+            LobbyController.instance.UpdateLobbyName();
+            LobbyController.instance.UpdatePlayerList();
+        }
+
+        if ((isOwned || isLocalPlayer) && nameCanvas != null)
         {
             nameCanvas.gameObject.SetActive(false);
         }
@@ -105,8 +117,8 @@ public class PlayerObjectController : NetworkBehaviour
 
     public override void OnStopClient()
     {
-        networkManager.gamePlayers.Remove(this);
-        LobbyController.instance.UpdatePlayerList();
+        if (networkManager != null) networkManager.gamePlayers.Remove(this);
+        if (LobbyController.instance != null) LobbyController.instance.UpdatePlayerList();
     }
 
     [Command]
@@ -124,7 +136,7 @@ public class PlayerObjectController : NetworkBehaviour
         }
         if (isClient)
         {
-            LobbyController.instance.UpdatePlayerList();
+            if (LobbyController.instance != null) LobbyController.instance.UpdatePlayerList();
 
             if (nameText != null)
             {
@@ -178,5 +190,7 @@ public class PlayerObjectController : NetworkBehaviour
             // Wenn die Rolle im Netzwerk geändert wurde, UI aktualisieren!
             LobbyController.instance.UpdatePlayerList();
         }
+
+        RoleChanged?.Invoke(newRole);
     }
 }

@@ -27,6 +27,13 @@ public class TestDummySpawner : NetworkBehaviour
     [Tooltip("Offset damit Dummies nicht exakt auf dem Spawnpunkt stehen.")]
     [SerializeField] private float spawnSpread = 1.5f;
 
+    [Tooltip("Dummies per Raycast auf dem Boden absetzen. Spawnpunkte sind für Spieler gesetzt," +
+             " die nach dem Spawn herunterfallen – ein Dummy ohne Physik bliebe sonst in der Luft" +
+             " stehen und wäre für einen Hunter am Boden nicht erreichbar.")]
+    [SerializeField] private bool dropToGround = true;
+    [Tooltip("Layer die als Boden gelten. Sollte der groundMask von PlayerMovement entsprechen.")]
+    [SerializeField] private LayerMask groundMask = 8;
+
     private readonly List<GameObject> spawnedDummies = new List<GameObject>();
 
     // ── Server-Start ──────────────────────────────────────────────────────────
@@ -104,6 +111,9 @@ public class TestDummySpawner : NetworkBehaviour
                 Random.Range(-spawnSpread, spawnSpread)
             );
             Vector3 spawnPos = spawnPoint.position + offset;
+
+            if (dropToGround && dummyPrefab.TryGetComponent(out CapsuleCollider body))
+                spawnPos = SpawnPlacement.DropToGround(spawnPos, body, groundMask);
 
             GameObject dummy = Instantiate(dummyPrefab, spawnPos, spawnPoint.rotation);
 

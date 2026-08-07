@@ -5,28 +5,12 @@ using DG.Tweening;
 /// <summary>
 /// Hunter-Aktion: Anklagen mit Charge-Mechanik.
 ///
-/// FUNKTIONSWEISE:
-///   1. Jeder Frame: Raycast vorwärts gegen den "Player"-Layer (accuseRange).
-///   2. Trifft ein Vandalist der weder gefangen noch unverwundbar ist: accuseReadyIndicator einblenden.
-///   3. ActionHeld → Arm zieht sich zurück (DOTween Pullback), chargeTimer läuft. Charging ist
-///      IMMER möglich, unabhängig davon ob gerade ein Ziel im Fadenkreuz ist.
-///   4. Nach chargeTime Sekunden ist der Charge voll (isFullyCharged) – der Arm bleibt in der
-///      Pullback-Pose, es passiert noch nichts. Es wird NICHT automatisch ausgelöst.
-///   5. Erst beim Loslassen der Taste: War der Charge voll → Anklage wird ausgeführt (Arm schlägt
-///      vor, Server prüft ob aktuell ein gültiges Ziel getroffen wird). War der Charge noch nicht
-///      voll → Charge bricht ab, Arm kehrt zurück, keine Anklage.
+/// Taste halten → Arm zieht zurück, chargeTimer läuft (auch ohne Ziel im Fadenkreuz).
+/// Nach chargeTime ist der Charge voll, ausgelöst wird aber erst beim Loslassen –
+/// vorher losgelassen bricht ab. Der Server prüft Rolle, Zustand, Distanz und Cooldown
+/// erneut, der Client-Cooldown dient nur der Responsiveness.
 ///
-/// ARM-SETUP:
-///   armVisual: enthält DOTweenAnimation-Komponenten für die Schlag-Animation (Execute).
-///   Der Pullback-Weg läuft über programmatisches DOTween (localPosition Z).
-///   Beide arbeiten unabhängig – der Pullback wird vor Execute gekillt.
-///
-/// ANTI-CHEAT:
-///   Client-Cooldown reduziert Cmd-Traffic und dient der Responsiveness.
-///   Server-Cooldown ist die eigentliche Durchsetzung – unabhängig vom Client-Wert.
-///
-/// Auf OnVandalistCaught abonnieren um das Fangereignis zu verarbeiten (z.B. PlayerRoleSetup, GameManager):
-///   HunterAccuse.OnVandalistCaught += HandleCaught;
+/// Fangereignis abonnieren: HunterAccuse.OnVandalistCaught += HandleCaught;
 /// </summary>
 public class HunterAccuse : NetworkBehaviour, IRoleAction
 {
@@ -36,8 +20,7 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
     [SerializeField] private LayerMask playerLayer;
 
     [Header("Cooldown")]
-    [Tooltip("Mindestzeit zwischen zwei Anklagen. Wird zusätzlich Server-seitig durchgesetzt " +
-             "(Anti-Cheat) – der Client-Wert dient nur der Responsiveness/Traffic-Reduktion.")]
+    [Tooltip("Mindestzeit zwischen zwei Anklagen. Wird zusätzlich Server-seitig durchgesetzt.")]
     [SerializeField] private float accuseCooldown = 1.5f;
 
     [Header("Charge")]
@@ -46,7 +29,7 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
 
     [Header("References")]
     [SerializeField] private Camera playerCamera;
-    [Tooltip("Arm-GameObject mit DOTweenAnimation-Komponenten für die Execute-Animation.")]
+    [Tooltip("Arm-GameObject mit DOTweenAnimation-Komponenten für die Schlag-Animation.")]
     [SerializeField] private GameObject armVisual;
 
     [Header("UI Feedback")]
@@ -54,30 +37,26 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
     [SerializeField] private GameObject accuseReadyIndicator;
 
     [Header("Accuse Animation")]
-    [Tooltip("Lokale Z-Verschiebung des Arms während des Aufladens (negativ = zurückziehen).")]
+    [Tooltip("Lokale Z-Verschiebung des Arms während des Aufladens (negativ = zurückziehen)." +
+             " Die Dauer entspricht immer chargeTime, damit der Arm genau dann hinten ist" +
+             " wenn der Charge voll ist.")]
     [SerializeField] private float pullbackDistance = -0.15f;
-    [Tooltip("Wie lange der Arm braucht um die Pullback-Position zu erreichen. Sollte chargeTime entsprechen.")]
-    [SerializeField] private float pullbackDuration = 1.0f;
     [Tooltip("Wie schnell der Arm nach Abbruch zurückkehrt.")]
     [SerializeField] private float returnDuration = 0.2f;
     [SerializeField] private Ease pullbackEase = Ease.InQuad;
     [SerializeField] private Ease returnEase = Ease.OutQuad;
 
-    // ── Statisches Ereignis – GameManager oder andere Systeme können sich einklinken ──
     public static event System.Action<NetworkIdentity> OnVandalistCaught;
 
     // ── State ─────────────────────────────────────────────────────────────────
+
     private NetworkIdentity currentTarget;
+    private float localNextAllowedAccuseTime;   // nur Owner-Client
+    private float serverNextAllowedAccuseTime;  // nur Server (Anti-Cheat)
 
-    // Nur lokal auf dem Owner-Client relevant – reduziert unnötigen Cmd-Traffic.
-    private float localNextAllowedAccuseTime = 0f;
-
-    // Nur Server-seitig relevant – eigentliche Anti-Cheat-Durchsetzung.
-    private float serverNextAllowedAccuseTime = 0f;
-
-    private bool isCharging = false;
-    private bool isFullyCharged = false;
-    private float chargeTimer = 0f;
+    private bool isCharging;
+    private bool isFullyCharged;
+    private float chargeTimer;
     private Tween pullbackTween;
     private Vector3 armRestPosition;
 
@@ -88,6 +67,10 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
         enabled = true;
         if (armVisual != null)
             armRestPosition = armVisual.transform.localPosition;
+
+        if (isOwned && accuseReadyIndicator == null)
+            Debug.LogWarning("[HunterAccuse] accuseReadyIndicator ist nicht zugewiesen – " +
+                             "der Hunter bekommt kein Feedback ob ein Ziel im Fadenkreuz ist.");
     }
 
     public void OnRoleDeactivated()
@@ -107,36 +90,21 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
 
         if (InputManager.Instance == null) return;
 
-        bool actionHeld = InputManager.Instance.CurrentInput.ActionHeld;
-        bool cooldownOk = Time.time >= localNextAllowedAccuseTime;
+        if (InputManager.Instance.CurrentInput.ActionHeld)
+        {
+            if (isFullyCharged) return; // voll geladen → auf Loslassen warten
 
-        if (actionHeld)
-        {
-            // Charging ist immer möglich, unabhängig von einem aktuellen Ziel.
-            if (!isCharging && !isFullyCharged && cooldownOk)
+            if (!isCharging)
             {
-                StartCharge();
+                if (Time.time >= localNextAllowedAccuseTime) StartCharge();
+                return;
             }
-            else if (isCharging && !isFullyCharged)
-            {
-                chargeTimer += Time.deltaTime;
-                if (chargeTimer >= chargeTime)
-                {
-                    // Voll aufgeladen: Arm bleibt in Pullback-Pose, wartet auf Loslassen.
-                    isFullyCharged = true;
-                }
-            }
-            // isFullyCharged && weiterhin gehalten → nichts tun, einfach warten.
+
+            chargeTimer += Time.deltaTime;
+            if (chargeTimer >= chargeTime) isFullyCharged = true;
         }
-        else
-        {
-            // Taste losgelassen: nur bei vollem Charge wird tatsächlich angeklagt (Ziel-Check
-            // passiert dabei serverseitig mit dem Ziel, das im Moment des Loslassens anvisiert ist).
-            if (isFullyCharged)
-                ExecuteAccuse();
-            else if (isCharging)
-                CancelCharge();
-        }
+        else if (isFullyCharged) ExecuteAccuse();
+        else if (isCharging) CancelCharge();
     }
 
     // ── Charge ────────────────────────────────────────────────────────────────
@@ -145,52 +113,46 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
     {
         isCharging = true;
         chargeTimer = 0f;
-
-        if (armVisual != null)
-        {
-            pullbackTween?.Kill();
-            Vector3 target = armRestPosition + new Vector3(0f, 0f, pullbackDistance);
-            pullbackTween = armVisual.transform
-                .DOLocalMove(target, pullbackDuration)
-                .SetEase(pullbackEase);
-        }
+        TweenArmTo(armRestPosition + Vector3.forward * pullbackDistance, chargeTime, pullbackEase);
     }
 
     private void CancelCharge()
     {
         if (!isCharging) return;
 
-        isCharging = false;
-        isFullyCharged = false;
-        chargeTimer = 0f;
-
-        if (armVisual != null)
-        {
-            pullbackTween?.Kill();
-            pullbackTween = armVisual.transform
-                .DOLocalMove(armRestPosition, returnDuration)
-                .SetEase(returnEase);
-        }
+        ResetChargeState();
+        TweenArmTo(armRestPosition, returnDuration, returnEase);
     }
 
     private void ExecuteAccuse()
     {
-        isCharging = false;
-        isFullyCharged = false;
-        chargeTimer = 0f;
+        ResetChargeState();
 
-        // Pullback beenden, Execute-Animation (DOTweenAnimation-Komponenten) abspielen
         if (armVisual != null)
         {
             pullbackTween?.Kill();
-            armVisual.transform.localPosition = armRestPosition; // Arm zurück vor Execute-Anim
+            armVisual.transform.localPosition = armRestPosition; // vor der Execute-Anim zurücksetzen
         }
 
         localNextAllowedAccuseTime = Time.time + accuseCooldown;
 
-        // Sofortiges lokales Feedback, damit der Owner keine Latenz beim Anim-Start spürt.
-        AccuseAnimation();
+        AccuseAnimation(); // sofortiges lokales Feedback ohne Latenz
         CmdTryAccuse(currentTarget);
+    }
+
+    private void ResetChargeState()
+    {
+        isCharging = false;
+        isFullyCharged = false;
+        chargeTimer = 0f;
+    }
+
+    private void TweenArmTo(Vector3 localTarget, float duration, Ease ease)
+    {
+        if (armVisual == null) return;
+
+        pullbackTween?.Kill();
+        pullbackTween = armVisual.transform.DOLocalMove(localTarget, duration).SetEase(ease);
     }
 
     // ── Ziel-Erkennung ────────────────────────────────────────────────────────
@@ -205,21 +167,22 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
                 out RaycastHit hit,
                 accuseRange,
                 playerLayer,
-                QueryTriggerInteraction.Ignore))
+                QueryTriggerInteraction.Ignore)
+            && IsValidTarget(hit.collider.GetComponentInParent<PlayerObjectController>(),
+                             hit.collider.GetComponentInParent<PlayerRoleSetup>()))
         {
-            PlayerObjectController poc = hit.collider.GetComponent<PlayerObjectController>();
-            PlayerRoleSetup targetSetup = hit.collider.GetComponent<PlayerRoleSetup>();
-            bool unavailable = targetSetup != null && (targetSetup.IsCaught || targetSetup.IsInvulnerable);
-
-            if (poc != null && poc.playerRole == PlayerRole.Vandalist && !unavailable)
-            {
-                currentTarget = poc.GetComponent<NetworkIdentity>();
-                SetIndicator(true);
-                return;
-            }
+            currentTarget = hit.collider.GetComponentInParent<NetworkIdentity>();
+            SetIndicator(true);
+            return;
         }
 
         ClearTarget();
+    }
+
+    private static bool IsValidTarget(PlayerObjectController poc, PlayerRoleSetup setup)
+    {
+        if (poc == null || poc.playerRole != PlayerRole.Vandalist) return false;
+        return setup == null || (!setup.IsCaught && !setup.IsInvulnerable);
     }
 
     private void ClearTarget()
@@ -239,7 +202,6 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
     [Command]
     private void CmdTryAccuse(NetworkIdentity target)
     {
-        // Server-seitiger Cooldown – unabhängig vom Client-Wert, verhindert Spam durch modifizierte Clients.
         if (Time.time < serverNextAllowedAccuseTime)
         {
             Debug.LogWarning("[HunterAccuse] Anklage im Cooldown ignoriert (evtl. Client-Manipulation).");
@@ -247,12 +209,10 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
         }
         serverNextAllowedAccuseTime = Time.time + accuseCooldown;
 
-        // Andere Clients sehen die Execute-Animation (Owner hat sie bereits lokal abgespielt).
         RpcPlayAccuseAnimationOnOthers();
 
         if (target == null) return;
 
-        // Server-seitige Validierung: Rolle prüfen
         PlayerObjectController targetPoc = target.GetComponent<PlayerObjectController>();
         if (targetPoc == null || targetPoc.playerRole != PlayerRole.Vandalist)
         {
@@ -260,7 +220,6 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
             return;
         }
 
-        // Server-seitige Validierung: bereits gefangen oder gerade unverwundbar (frischer Respawn)?
         PlayerRoleSetup targetSetup = target.GetComponent<PlayerRoleSetup>();
         if (targetSetup != null && (targetSetup.IsCaught || targetSetup.IsInvulnerable))
         {
@@ -268,7 +227,6 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
             return;
         }
 
-        // Server-seitige Validierung: Distanz prüfen
         float dist = Vector3.Distance(transform.position, target.transform.position);
         if (dist > accuseRange)
         {
@@ -276,22 +234,14 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
             return;
         }
 
-        // Validierung bestanden → alle Clients benachrichtigen
         RpcOnVandalistCaught(target);
     }
 
     [ClientRpc]
-    private void RpcOnVandalistCaught(NetworkIdentity caughtPlayer)
-    {
-        // Ereignis für PlayerRoleSetup, GameManager etc. auslösen
-        OnVandalistCaught?.Invoke(caughtPlayer);
-    }
+    private void RpcOnVandalistCaught(NetworkIdentity caughtPlayer) => OnVandalistCaught?.Invoke(caughtPlayer);
 
     [ClientRpc(includeOwner = false)]
-    private void RpcPlayAccuseAnimationOnOthers()
-    {
-        AccuseAnimation();
-    }
+    private void RpcPlayAccuseAnimationOnOthers() => AccuseAnimation();
 
     // ── Animation ─────────────────────────────────────────────────────────────
 
@@ -300,14 +250,13 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
         if (armVisual == null) return;
 
         DOTweenAnimation[] anims = armVisual.GetComponents<DOTweenAnimation>();
-        if (anims.Length > 0)
-        {
-            foreach (DOTweenAnimation anim in anims)
-                anim.DORestart();
-        }
-        else
+        if (anims.Length == 0)
         {
             Debug.LogError("[HunterAccuse] DOTweenAnimation fehlt auf: " + armVisual.name);
+            return;
         }
+
+        foreach (DOTweenAnimation anim in anims)
+            anim.DORestart();
     }
 }

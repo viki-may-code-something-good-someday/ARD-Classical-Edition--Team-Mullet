@@ -1711,6 +1711,9 @@ MonoBehaviour:
   playerCamera: {fileID: 4680851988968097038}
   hitRange: 2
   hitDamage: 1
+  pointBlankRadius: 1.5
+  pointBlankMinDot: 0.3
+  pointBlankContactRadius: 0.8
   punchSoundEmitter: {fileID: 3449724432928271097}
   punchAirSoundEmitter: {fileID: 1290949500620203656}
 --- !u!114 &3917315865842863130
@@ -1733,7 +1736,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   accuseCooldown: 1.5
-  chargeTime: 1
+  chargeTime: 0.7
   playerCamera: {fileID: 4680851988968097038}
   armVisual: {fileID: 4051449148857083925}
   accuseReadyIndicator: {fileID: 0}

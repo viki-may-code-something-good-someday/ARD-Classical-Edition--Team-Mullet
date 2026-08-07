@@ -16,7 +16,7 @@ public class Door : MonoBehaviour
         NetworkIdentity networkIdentity = other.GetComponent<NetworkIdentity>();
         if (networkIdentity == null) return;
 
-        // Nur der lokale Spieler (Besitzer des Objekts) darf den Teleport ausf�hren
+        // Nur der lokale Spieler (Besitzer des Objekts) darf den Teleport ausf�hren
         if (!networkIdentity.isLocalPlayer) return;
 
         PlayerMovement character = other.GetComponent<PlayerMovement>();
@@ -36,61 +36,56 @@ public class Door : MonoBehaviour
 
     public void MovePlayerToOtherDoor(PlayerMovement character)
     {
-        if (closestDoor != null)
-        {
-            Vector3 newPosition = closestDoor.transform.position + character.transform.forward * 2f;
-
-            // 3. WICHTIG: Character Controller vor dem Teleportieren deaktivieren
-            CharacterController cc = character.GetComponent<CharacterController>();
-            if (cc != null)
-            {
-                cc.enabled = false;
-            }
-
-            // Position aktualisieren
-            character.transform.position = newPosition;
-
-            // Character Controller wieder aktivieren
-            if (cc != null)
-            {
-                cc.enabled = true;
-            }
-
-            Debug.Log("Player moved to the closest door: " + closestDoor.name);
-        }
-        else
+        if (closestDoor == null)
         {
             Debug.LogWarning("No closest door found.");
+            return;
         }
+
+        // TeleportTo kümmert sich um das Deaktivieren des Controllers und setzt die
+        // Restgeschwindigkeit zurück – sonst nimmt man seinen Fall-Impuls mit durch die Tür.
+        character.TeleportTo(closestDoor.transform.position + character.transform.forward * 2f);
+
+        Debug.Log("Player moved to the closest door: " + closestDoor.name);
     }
 
     public Door FindClosestDoor()
     {
-        Door[] allDors = GameObject.FindObjectsByType<Door>(FindObjectsSortMode.InstanceID);
-        Door d = null;
-        foreach (Door door in allDors)
+        Door[] allDoors = FindObjectsByType<Door>(FindObjectsSortMode.InstanceID);
+        Door closest = null;
+        float closestDistance = float.MaxValue;
+
+        foreach (Door door in allDoors)
         {
+            if (door == this) continue;
+
             float dist = Vector3.Distance(door.transform.position, transform.position);
-            if (closestDoor == null || dist < Vector3.Distance(closestDoor.transform.position, transform.position))
+            if (dist < closestDistance)
             {
-                d = door;
+                closestDistance = dist;
+                closest = door;
             }
         }
-        return d;
+
+        return closest;
     }
 
     public Wall FindClosestWall()
     {
-        Wall[] allWalls = GameObject.FindObjectsByType<Wall>(FindObjectsSortMode.InstanceID);
-        Wall closestWall = null;
+        Wall[] allWalls = FindObjectsByType<Wall>(FindObjectsSortMode.InstanceID);
+        Wall closest = null;
+        float closestDistance = float.MaxValue;
+
         foreach (Wall wall in allWalls)
         {
             float dist = Vector3.Distance(wall.transform.position, transform.position);
-            if (closestWall == null || dist < Vector3.Distance(closestWall.transform.position, transform.position))
+            if (dist < closestDistance)
             {
-                closestWall = wall;
+                closestDistance = dist;
+                closest = wall;
             }
         }
-        return closestWall;
+
+        return closest;
     }
 }
