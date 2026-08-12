@@ -23,10 +23,11 @@ public class PlayerRoleSetup : NetworkBehaviour
     [SerializeField] private GameObject playerVisuals;
 
     [Header("Rollen-Modelle")]
-    [Tooltip("Hierarchie die nur beim Hunter aktiv sein soll (Mesh, Arme, Ausrüstung).")]
     [SerializeField] private GameObject hunterModel;
-    [Tooltip("Hierarchie die nur beim Vandalist aktiv sein soll (Mesh, Arme, Ausrüstung).")]
     [SerializeField] private GameObject vandalistModel;
+    [SerializeField] private GameObject hunterModelLocalOnlyShadow;
+    [SerializeField] private GameObject vandalistModelLocalOnlyShadow;
+
 
     [Header("Respawn Settings")]
     [Tooltip("Ob gefangene Vandalisten respawnen. Wenn false, bleiben sie dauerhaft gefangen.")]
@@ -188,6 +189,10 @@ public class PlayerRoleSetup : NetworkBehaviour
         // Für ownerlose Objekte (Test-Dummies) übernimmt TestDummySpawner die Startposition.
         if (!isOwned) return;
 
+        // Hide own body mesh for the local camera, but keep the shadow.
+        // Scoped to this instance only (isOwned is per-instance), so other players' models stay visible.
+        ApplyLocalPlayerVisibility();
+
         RoleMovementConfig config = assignedRole == PlayerRole.Hunter ? hunterConfig : vandalistConfig;
         if (config == null || movement == null)
         {
@@ -204,6 +209,35 @@ public class PlayerRoleSetup : NetworkBehaviour
         bool isHunter = role == PlayerRole.Hunter;
         if (hunterModel != null) hunterModel.SetActive(isHunter);
         if (vandalistModel != null) vandalistModel.SetActive(!isHunter);
+    }
+
+    /// <summary>
+    /// Hides this player's own renderers from their own view while keeping the shadow visible.
+    /// Only ever called on the active local player
+    /// </summary>
+    private void ApplyLocalPlayerVisibility()
+    {
+        Renderer[] renderers;
+
+        if (assignedRole == PlayerRole.Vandalist)
+        {
+            renderers = vandalistModelLocalOnlyShadow.GetComponentsInChildren<Renderer>(true);
+
+        }
+        else if (assignedRole == PlayerRole.Hunter)
+        {
+            renderers = hunterModelLocalOnlyShadow.GetComponentsInChildren<Renderer>(true);
+        }
+        else
+        {
+            Debug.LogWarning($"[PlayerRoleSetup] Unbekannte Rolle {assignedRole}, keine Modelle wurden local ausgeblendet.");
+            return;
+        }
+
+        foreach (Renderer r in renderers)
+        {
+            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
+        }
     }
 
     private void ActivateRoleAction(PlayerRole role)
