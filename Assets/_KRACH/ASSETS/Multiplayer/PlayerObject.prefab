@@ -1246,7 +1246,7 @@ MonoBehaviour:
   playerCamera: {fileID: 4680851988968097038}
   armVisual: {fileID: 4051449148857083925}
   accuseReadyIndicator: {fileID: 0}
-  pullbackDistance: -0.15
+  pullbackDistance: -0.5
   returnDuration: 0.2
   pullbackEase: 5
   returnEase: 6
@@ -2221,7 +2221,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2637629196310745896, guid: 8306677a0fd14894ba71b69e19b967fc, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.3
+      value: 0.043
       objectReference: {fileID: 0}
     - target: {fileID: 2637629196310745896, guid: 8306677a0fd14894ba71b69e19b967fc, type: 3}
       propertyPath: m_LocalPosition.z

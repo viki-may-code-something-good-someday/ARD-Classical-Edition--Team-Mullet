@@ -423,7 +423,7 @@ Transform:
   m_GameObject: {fileID: 3174099627490527000}
   serializedVersion: 2
   m_LocalRotation: {x: 0.70710665, y: 0.00000037252897, z: -0.00000023096797, w: -0.707107}
-  m_LocalPosition: {x: 0.03, y: -0.0011000199, z: 0.005100001}
+  m_LocalPosition: {x: 0.03, y: -0.00110002, z: 0.005100001}
   m_LocalScale: {x: 1, y: 0.39921007, z: 0.21001385}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -547,7 +547,7 @@ Transform:
   m_GameObject: {fileID: 5510036771408417542}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.6, y: 0.3, z: 1.8}
+  m_LocalPosition: {x: 0.6, y: 0.1, z: 1.8}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -640,7 +640,7 @@ MonoBehaviour:
   animationType: 12
   targetType: 11
   forcedTargetType: 0
-  autoPlay: 1
+  autoPlay: 0
   useTargetAsV3: 0
   endValueFloat: 0
   endValueV3: {x: 0.001, y: 0.001, z: 0.001}
@@ -748,7 +748,7 @@ MonoBehaviour:
   animationType: 12
   targetType: 11
   forcedTargetType: 0
-  autoPlay: 1
+  autoPlay: 0
   useTargetAsV3: 0
   endValueFloat: 0
   endValueV3: {x: 0.01, y: 0.01, z: 0.01}
@@ -868,10 +868,10 @@ MonoBehaviour:
   animationType: 2
   targetType: 11
   forcedTargetType: 0
-  autoPlay: 1
+  autoPlay: 0
   useTargetAsV3: 0
   endValueFloat: 0
-  endValueV3: {x: 0.6, y: 0.3, z: 1.8}
+  endValueV3: {x: 0.6, y: 0.1, z: 1.8}
   endValueV2: {x: 0, y: 0}
   endValueColor: {r: 1, g: 1, b: 1, a: 1}
   endValueString: 
