@@ -388,6 +388,32 @@ public class PlayerRoleSetup : NetworkBehaviour
         }
     }
 
+    // ── Lobby-Rückkehr ───────────────────────────────────────────────────────
+
+    [Server]
+    public void ResetForLobby()
+    {
+        if (initRoutine != null)
+        {
+            StopCoroutine(initRoutine);
+            initRoutine = null;
+        }
+
+        // Eventuell laufende RespawnAfterDelay-Coroutine abbrechen – sonst würde sie nach dem
+        // Szenenwechsel noch feuern und versuchen, einen Spieler zu teleportieren/respawnen,
+        // der gerade erst in der Lobby ankommt.
+        StopAllCoroutines();
+
+        catchCount = 0;
+        isInvulnerable = false;
+
+        if (isCaught)
+        {
+            isCaught = false;   // SyncVar-Hook räumt Visuals/Collider auf allen Clients auf
+            ApplyCaughtState(false); // Dedicated Server: Hook feuert dort nicht selbst
+        }
+    }
+
     // ── Debug ─────────────────────────────────────────────────────────────────
 
 #if UNITY_EDITOR

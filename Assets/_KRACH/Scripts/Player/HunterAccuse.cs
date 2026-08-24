@@ -32,6 +32,12 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
     [Tooltip("Arm-GameObject mit DOTweenAnimation-Komponenten für die Schlag-Animation.")]
     [SerializeField] private GameObject armVisual;
 
+    [Header("Vertical Look Rotation")]
+    [Tooltip("Wie stark der Arm der Kamera-Neigung folgt. 1 = 1:1, kleiner = gedämpft.")]
+    [SerializeField] private float pitchRotationMultiplier = 1f;
+    [Tooltip("Maximale Auf-/Ab-Rotation des Arms in Grad, unabhängig von der Kamera-Neigung.")]
+    [SerializeField] private float maxArmPitchAngle = 60f;
+
     [Header("UI Feedback")]
     [Tooltip("Eingeblendet wenn ein Vandalist im Fadenkreuz und in Reichweite ist.")]
     [SerializeField] private GameObject accuseReadyIndicator;
@@ -54,6 +60,8 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
     private float localNextAllowedAccuseTime;   // nur Owner-Client
     private float serverNextAllowedAccuseTime;  // nur Server (Anti-Cheat)
 
+    private Quaternion armBaseLocalRotation;
+
     private bool isCharging;
     private bool isFullyCharged;
     private float chargeTimer;
@@ -66,7 +74,10 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
     {
         enabled = true;
         if (armVisual != null)
+        {
             armRestPosition = armVisual.transform.localPosition;
+            armBaseLocalRotation = armVisual.transform.localRotation;
+        }
 
         if (isOwned && accuseReadyIndicator == null)
             Debug.LogWarning("[HunterAccuse] accuseReadyIndicator ist nicht zugewiesen – " +
@@ -86,13 +97,14 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
     {
         if (!isOwned) return;
 
+        ApplyVerticalArmRotation();
         UpdateTarget();
 
         if (InputManager.Instance == null) return;
 
         if (InputManager.Instance.CurrentInput.ActionHeld)
         {
-            if (isFullyCharged) return; // voll geladen → auf Loslassen warten
+            if (isFullyCharged) return;
 
             if (!isCharging)
             {
@@ -105,6 +117,26 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
         }
         else if (isFullyCharged) ExecuteAccuse();
         else if (isCharging) CancelCharge();
+    }
+
+    // ── Arm ────────────────────────────────────────────────────────────────
+
+    private void ApplyVerticalArmRotation()
+    {
+        if (playerCamera == null || armVisual == null) return;
+
+        float pitch = GetCameraPitch();
+
+        pitch = Mathf.Clamp(pitch, -maxArmPitchAngle, maxArmPitchAngle) * pitchRotationMultiplier;
+
+        armVisual.transform.localRotation = armBaseLocalRotation * Quaternion.Euler(-pitch, 0f, 0f);
+    }
+
+    private float GetCameraPitch()
+    {
+        Vector3 forward = playerCamera.transform.forward;
+        float pitch = Mathf.Asin(Mathf.Clamp(forward.y, -1f, 1f)) * Mathf.Rad2Deg;
+        return pitch; // positiv = nach oben schauen, negativ = nach unten
     }
 
     // ── Charge ────────────────────────────────────────────────────────────────

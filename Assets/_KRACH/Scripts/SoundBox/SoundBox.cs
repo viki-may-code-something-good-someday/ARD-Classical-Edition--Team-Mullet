@@ -6,7 +6,7 @@ using Mirror;
 public class SoundBox : NetworkBehaviour, IDestructable
 {
     [Header("References")]
-    [SerializeField] private StudioEventEmitter musicEmitter;
+    //[SerializeField] private StudioEventEmitter musicEmitter;
     [SerializeField] private GameObject hitAnimsContainer;
     [SerializeField] private ParticleSystem hitParticles;
     [SerializeField] private LuaSoundEmitter hitSoundEmitter;
@@ -57,8 +57,15 @@ public class SoundBox : NetworkBehaviour, IDestructable
     [Server]
     private void GetDestroyed()
     {
-        SoundBoxSpawner.Instance.NotifySoundBoxDestroyed(this);
-        destroySoundEmitter.PlayOneShot();
+        if (SoundBoxSpawner.Instance != null)
+            SoundBoxSpawner.Instance.NotifySoundBoxDestroyed(this);
+        else
+            Debug.LogWarning($"[SoundBox] SoundBoxSpawner.Instance ist null – '{name}' wird nicht beim Spawner abgemeldet.");
+
+        if (destroySoundEmitter != null)
+            destroySoundEmitter.PlayOneShot();
+        else
+            Debug.LogWarning($"[SoundBox] destroySoundEmitter auf '{name}' ist nicht zugewiesen.");
 
         NetworkServer.Destroy(gameObject);
     }

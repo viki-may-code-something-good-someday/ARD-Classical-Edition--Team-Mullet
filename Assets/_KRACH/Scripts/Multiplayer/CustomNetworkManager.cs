@@ -1,6 +1,7 @@
 using Mirror;
 using Steamworks;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -8,7 +9,11 @@ public class CustomNetworkManager : NetworkManager
 {
     [Header("References")]
     [SerializeField] private PlayerObjectController gamePlayerPrefab;
-    //[Scene][SerializeField] private string lobbyScene;
+
+    [Scene]
+    [SerializeField]
+    private string lobbyScene;
+
     [Scene]
     [SerializeField]
     private string gameplayScene;
@@ -18,6 +23,13 @@ public class CustomNetworkManager : NetworkManager
     /// Wird von CameraController und PlayerRoleSetup verwendet.
     /// </summary>
     public string GameplayScene => gameplayScene;
+
+    /// <summary>
+    /// Gibt den Pfad der Lobby-Scene zurück. Wird für ReturnToLobby() benötigt,
+    /// da OnServerAddPlayer nur in der onlineScene neue Spieler zulässt und wir
+    /// beim Zurückwechseln keine neuen Player-Objekte erzeugen wollen.
+    /// </summary>
+    public string LobbyScene => lobbyScene;
 
 
     public List<PlayerObjectController> gamePlayers { get; } = new List<PlayerObjectController>();
@@ -59,5 +71,52 @@ public class CustomNetworkManager : NetworkManager
 
         IsTestMode = testMode;
         ServerChangeScene(sceneName);
+    }
+
+    // ── Rückkehr zur Lobby ───────────────────────────────────────────────────
+
+    /// <summary>
+    /// Wechselt alle verbundenen Spieler zurück in die Lobby-Scene.
+    /// Die vorhandenen PlayerObjectController-Instanzen (gamePlayers) bleiben erhalten –
+    /// ServerChangeScene zerstört nur szenenspezifische Objekte, keine NetworkIdentities
+    /// mit DontDestroyOnLoad-Flag bzw. Player-Objekte laufen über die Connection weiter.
+    /// Ready-Status und Caught-Zustand werden zurückgesetzt, damit die Lobby-UI und
+    /// PlayerRoleSetup sauber neu starten.
+    /// </summary>
+    [Server]
+    public void ReturnToLobby()
+    {
+        if (string.IsNullOrEmpty(lobbyScene))
+        {
+            Debug.LogError("[CustomNetworkManager] lobbyScene ist nicht gesetzt!");
+            return;
+        }
+
+        foreach (PlayerObjectController player in gamePlayers)
+        {
+            if (player == null) continue;
+
+            player.ResetForLobby();
+
+            PlayerRoleSetup roleSetup = player.GetComponent<PlayerRoleSetup>();
+            roleSetup?.ResetForLobby();
+        }
+
+        ServerChangeScene(lobbyScene);
+    }
+
+    /// <summary>
+    /// Läuft auf dem Server, sobald die neue Scene vollständig geladen ist.
+    /// Wichtig für Late-Join-artige Situationen: hier könnten z.B. gamePlayers
+    /// neu validiert werden, falls sich während des Wechsels Connections trennen.
+    /// </summary>
+    public override void OnServerSceneChanged(string sceneName)
+    {
+        base.OnServerSceneChanged(sceneName);
+
+        if (sceneName == lobbyScene)
+        {
+            gamePlayers.RemoveAll(p => p == null);
+        }
     }
 }

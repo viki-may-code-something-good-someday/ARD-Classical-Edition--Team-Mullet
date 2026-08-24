@@ -380,7 +380,7 @@ Transform:
   m_GameObject: {fileID: 2092353053250223471}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.825, z: 0}
+  m_LocalPosition: {x: 0, y: -0.9, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1191,7 +1191,7 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 8
-  groundDistance: 0.1
+  groundDistance: 0.15
   baseStepInterval: 0.3
   footstepSoundEmitter: {fileID: 8697879425367623895}
 --- !u!114 &3612966290959217811
@@ -1218,6 +1218,8 @@ MonoBehaviour:
   pointBlankRadius: 1.5
   pointBlankMinDot: 0.3
   pointBlankContactRadius: 0.8
+  pitchRotationMultiplier: 1
+  maxArmPitchAngle: 60
   punchCooldown: 0.15
   maxOriginDistance: 2
   punchSoundEmitter: {fileID: 3449724432928271097}
@@ -1245,6 +1247,8 @@ MonoBehaviour:
   chargeTime: 0.7
   playerCamera: {fileID: 4680851988968097038}
   armVisual: {fileID: 4051449148857083925}
+  pitchRotationMultiplier: 1
+  maxArmPitchAngle: 60
   accuseReadyIndicator: {fileID: 0}
   pullbackDistance: -0.5
   returnDuration: 0.2

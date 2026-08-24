@@ -26,6 +26,12 @@ public class PlayerInteract : NetworkBehaviour, IRoleAction
     [Tooltip("Innerhalb dieser Distanz zählt der Treffer unabhängig von der Blickrichtung.")]
     [SerializeField] private float pointBlankContactRadius = 0.8f;
 
+    [Header("Vertical Look Rotation")]
+    [Tooltip("Wie stark die Arme der Kamera-Neigung folgen. 1 = 1:1, kleiner = gedämpft.")]
+    [SerializeField] private float pitchRotationMultiplier = 1f;
+    [Tooltip("Maximale Auf-/Ab-Rotation der Arme in Grad, unabhängig von der Kamera-Neigung.")]
+    [SerializeField] private float maxArmPitchAngle = 60f;
+
     [Header("Anti-Cheat")]
     [Tooltip("Mindestzeit zwischen zwei Schlägen. Wird Server-seitig durchgesetzt.")]
     [SerializeField] private float punchCooldown = 0.15f;
@@ -38,6 +44,9 @@ public class PlayerInteract : NetworkBehaviour, IRoleAction
     [SerializeField] private LuaSoundEmitter punchSoundEmitter;
     [SerializeField] private LuaSoundEmitter punchAirSoundEmitter;
 
+
+    // Ursprüngliche lokale Rotation jedes Arms (Index synchron zu armsVisuals), als Basis für den Pitch-Offset.
+    private readonly List<Quaternion> armBaseLocalRotations = new List<Quaternion>();
     private bool rightArmPunching;
     private float serverNextAllowedPunchTime;
 
@@ -50,6 +59,11 @@ public class PlayerInteract : NetworkBehaviour, IRoleAction
         interactableMask = LayerMask.GetMask("Interactable");
         destructableMask = LayerMask.GetMask("Destructable");
         billboardMask = LayerMask.GetMask("Billboard");
+
+        // Ausgangs-Rotation jedes Arms merken, damit wir den Pitch nur als Offset drauflegen
+        // und nicht die Basis-Pose (z.B. leichte Schräghaltung) überschreiben.
+        foreach (GameObject arm in armsVisuals)
+            armBaseLocalRotations.Add(arm != null ? arm.transform.localRotation : Quaternion.identity);
     }
 
     // ── IRoleAction ───────────────────────────────────────────────────────────
@@ -62,6 +76,8 @@ public class PlayerInteract : NetworkBehaviour, IRoleAction
     void Update()
     {
         if (!isOwned || InputManager.Instance == null) return;
+
+        ApplyVerticalArmRotation();
 
         if (InputManager.Instance.CurrentInput.ActionPressed)
             LocalPunch();
@@ -89,6 +105,33 @@ public class PlayerInteract : NetworkBehaviour, IRoleAction
         obj.layer = layer;
         foreach (Transform child in obj.transform)
             SetLayerRecursively(child.gameObject, layer);
+    }
+
+    // ── Arms ─────────────────────────────────────────────────────────────────
+
+    private void ApplyVerticalArmRotation()
+    {
+        if (playerCamera == null) return;
+
+        float pitch = GetCameraPitch();
+
+        pitch = Mathf.Clamp(pitch, -maxArmPitchAngle, maxArmPitchAngle) * pitchRotationMultiplier;
+
+        for (int i = 0; i < armsVisuals.Count; i++)
+        {
+            GameObject arm = armsVisuals[i];
+            if (arm == null) continue;
+
+            Quaternion baseRotation = i < armBaseLocalRotations.Count ? armBaseLocalRotations[i] : Quaternion.identity;
+            arm.transform.localRotation = baseRotation * Quaternion.Euler(-pitch, 0f, 0f);
+        }
+    }
+
+    private float GetCameraPitch()
+    {
+        Vector3 forward = playerCamera.transform.forward;
+        float pitch = Mathf.Asin(Mathf.Clamp(forward.y, -1f, 1f)) * Mathf.Rad2Deg;
+        return pitch; // positiv = nach oben schauen, negativ = nach unten
     }
 
     // ── Punch ─────────────────────────────────────────────────────────────────

@@ -193,4 +193,19 @@ public class PlayerObjectController : NetworkBehaviour
 
         RoleChanged?.Invoke(newRole);
     }
+
+    [Command]
+    public void CmdReturnToLobby()
+    {
+        if (playerIdNumber != 1) return; // nur der Host darf das auslösen
+        (Mirror.NetworkManager.singleton as CustomNetworkManager)?.ReturnToLobby();
+    }
+
+    [Server]
+    public void ResetForLobby()
+    {
+        ready = false;
+        // playerRole bewusst NICHT zurücksetzen – LobbyController.UpdatePlayerItem()
+        // liest die Rolle aus dem SyncVar und sortiert die UI-Liste danach automatisch neu.
+    }
 }

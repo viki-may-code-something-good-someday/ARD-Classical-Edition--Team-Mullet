@@ -270,6 +270,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1553995806723939279, guid: 010f9f2d3e7e94e4d8fb45f44020db0b, type: 3}
+      propertyPath: lobbyScene
+      value: Assets/_KRACH/Scenes/Lobby.unity
+      objectReference: {fileID: 0}
     - target: {fileID: 4838965611117972004, guid: 010f9f2d3e7e94e4d8fb45f44020db0b, type: 3}
       propertyPath: m_Name
       value: NetworkManager
