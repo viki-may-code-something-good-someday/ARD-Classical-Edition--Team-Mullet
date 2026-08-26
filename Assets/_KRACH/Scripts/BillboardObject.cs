@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Mirror;
 
-[RequireComponent(typeof(NetworkIdentity))]
+//[RequireComponent(typeof(NetworkIdentity))]
 public class BillboardObject : NetworkBehaviour
 {
     [Header("Visuals")]
