@@ -77,13 +77,25 @@ public class LobbyController : MonoBehaviour
     {
         if (instance == null) instance = this;
 
-        // Buttons sofort deaktivieren – werden durch die jeweiligen Update-Methoden freigeschaltet
         if (startGameButton != null)
             startGameButton.interactable = false;
         if (switchSidesButton != null)
             switchSidesButton.interactable = false;
 
         UpdateTestModeIndicator();
+    }
+
+    private void Start()
+    {
+        // Bei Rückkehr aus der Gameplay-Scene existieren die PlayerObjectController-Instanzen
+        // bereits (DontDestroyOnLoad) – ihr OnStartClient()/OnStartAuthority() feuert also nicht
+        // erneut. Diese neue LobbyController-Instanz muss sich daher selbst initialisieren,
+        // statt sich auf einen externen Trigger zu verlassen.
+        FindLocalPlayer();
+        UpdateLobbyName();
+        UpdatePlayerList();
+        CheckIfAllReady();
+        UpdateReadyText();
     }
 
     // ── Spielstart ────────────────────────────────────────────────────────────
@@ -220,8 +232,7 @@ public class LobbyController : MonoBehaviour
         {
             PlayerListItem item = CreatePlayerListItem(player);
 
-            // Erster Spieler (Host) → Hunter, alle weiteren → Vandalist
-            int role = (hunterPlayerListItems.Count == 0) ? 0 : 1;
+            int role = player.playerRole == PlayerRole.Hunter ? 0 : 1;
             AddPlayerToList(role, item);
         }
 

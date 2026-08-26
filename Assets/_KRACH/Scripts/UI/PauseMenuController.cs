@@ -60,10 +60,6 @@ public class PauseMenuController : MonoBehaviour
 
     // ── Session Control ──────────────────────────────────────────────────────
 
-    /// <summary>
-    /// Called by the "End Game" button. Host-only: shuts the session down for all
-    /// connected clients. Guarded against non-host calls (e.g. leftover input, UI bug).
-    /// </summary>
     public void EndGameAsHost()
     {
         if (!NetworkServer.active)
@@ -72,20 +68,15 @@ public class PauseMenuController : MonoBehaviour
             return;
         }
 
-        NetworkManager manager = NetworkManager.singleton;
+        CustomNetworkManager manager = NetworkManager.singleton as CustomNetworkManager;
         if (manager == null)
         {
-            Debug.LogError("[PauseMenuController] Kein NetworkManager gefunden – kann Spiel nicht beenden.");
+            Debug.LogError("[PauseMenuController] Kein CustomNetworkManager gefunden – kann nicht zur Lobby zurückkehren.");
             return;
         }
 
-        // StopHost() beendet Server UND lokalen Client zusammen und kickt alle
-        // verbundenen Clients (sie bekommen ein Disconnect, ihr Verhalten regelt
-        // NetworkManager.OnClientDisconnect bzw. euer eigenes OnStopClient).
-        if (NetworkServer.active && NetworkClient.isConnected)
-            manager.StopHost();
-        else if (NetworkServer.active)
-            manager.StopServer();
+        manager.ReturnToLobby();
+        SetPaused(false);
     }
 
     /// <summary>

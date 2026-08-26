@@ -1,7 +1,6 @@
 using Mirror;
 using Steamworks;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -55,6 +54,9 @@ public class CustomNetworkManager : NetworkManager
             gamePlayerInstance.playerSteamID = (ulong)SteamMatchmaking.GetLobbyMemberByIndex((CSteamID)SteamLobby.instance.currentLobbyID, gamePlayers.Count);
 
             NetworkServer.AddPlayerForConnection(conn, gamePlayerInstance.gameObject);
+
+            // Sinnvoller Erst-Default: erster Spieler (Host) → Hunter, alle weiteren → Vandalist.
+            gamePlayerInstance.SetPlayerRole(gamePlayerInstance.playerIdNumber == 1 ? PlayerRole.Hunter : PlayerRole.Vandalist);
         }
     }
 
