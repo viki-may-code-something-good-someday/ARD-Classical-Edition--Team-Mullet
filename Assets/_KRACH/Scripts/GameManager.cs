@@ -35,6 +35,8 @@ public class GameManager : NetworkBehaviour
 
     private float currentPlaytime;
 
+    public float CurrentPlaytime => currentPlaytime;
+
     public bool testInEditor;
     public GameObject networkManager;
 

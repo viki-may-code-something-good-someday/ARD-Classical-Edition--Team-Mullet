@@ -9752,7 +9752,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7956548004404623784, guid: 71e5a7587b39d554fadd21a11f37c8ad, type: 3}
       propertyPath: maxPlaytimeInSeconds
-      value: 300
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 7956548004404623784, guid: 71e5a7587b39d554fadd21a11f37c8ad, type: 3}
       propertyPath: playerCameraController
