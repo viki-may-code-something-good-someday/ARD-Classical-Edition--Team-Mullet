@@ -96,6 +96,9 @@ public class LobbyController : MonoBehaviour
         UpdatePlayerList();
         CheckIfAllReady();
         UpdateReadyText();
+
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 
     // ── Spielstart ────────────────────────────────────────────────────────────

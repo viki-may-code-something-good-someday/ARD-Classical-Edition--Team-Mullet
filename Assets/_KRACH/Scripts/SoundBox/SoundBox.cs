@@ -18,6 +18,10 @@ public class SoundBox : NetworkBehaviour, IDestructable
 
     public ParticleSystem HitParticles => hitParticles;
 
+
+    public static event System.Action<SoundBox> OnDestroyedServer;
+
+
     [Server]
     public void TakeDamage(float _damage, Vector3 _hitPoint, Vector3 _hitNormal)
     {
@@ -61,6 +65,8 @@ public class SoundBox : NetworkBehaviour, IDestructable
             SoundBoxSpawner.Instance.NotifySoundBoxDestroyed(this);
         else
             Debug.LogWarning($"[SoundBox] SoundBoxSpawner.Instance ist null – '{name}' wird nicht beim Spawner abgemeldet.");
+
+        OnDestroyedServer?.Invoke(this);
 
         if (destroySoundEmitter != null)
             destroySoundEmitter.PlayOneShot();

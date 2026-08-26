@@ -17,6 +17,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_KRACH/Scenes/MainLevel_Test.unity
     guid: f5c05be85d9970a4e9eb83333d166e42
+  - enabled: 1
+    path: Assets/_KRACH/Scenes/MainLevel_Level1.unity
+    guid: d1f888920e0ddb340830cb67d1166381
+  - enabled: 1
+    path: Assets/_KRACH/Scenes/WinScreen.unity
+    guid: 11b53a1659f2a6e4398e8d88c1e972e7
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

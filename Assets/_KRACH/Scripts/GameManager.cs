@@ -1,5 +1,8 @@
-﻿using FMODUnity;
+﻿using System.Collections;
+using System.Collections.Generic;
+using FMODUnity;
 using Mirror;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -10,6 +13,13 @@ public enum GameState
     Paused,
     Sequence,
     GameOver
+}
+
+public enum WinningSide
+{
+    None,
+    Hunter,
+    Vandalist
 }
 
 public class GameManager : NetworkBehaviour
@@ -28,6 +38,34 @@ public class GameManager : NetworkBehaviour
     public bool testInEditor;
     public GameObject networkManager;
 
+    // ── Win Condition: Soundboxes ────────────────────────────────────────────
+
+    [Header("Win Condition - Soundboxes")]
+    [Tooltip("Wird ein SoundBox aus dieser Liste zerstört, wird es entfernt. " +
+             "Ist die Liste leer, haben die Vandalisten gewonnen.")]
+    [SerializeField] private List<SoundBox> trackedSoundBoxes = new List<SoundBox>();
+
+#if UNITY_EDITOR
+    [Button("Find All SoundBoxes In Scene")]
+    private void FindAllSoundBoxesInScene()
+    {
+        trackedSoundBoxes = new List<SoundBox>(
+            FindObjectsByType<SoundBox>(FindObjectsSortMode.None));
+        Debug.Log($"[GameManager] {trackedSoundBoxes.Count} SoundBox(es) in der Szene gefunden.");
+    }
+#endif
+
+    // ── Win Screen ────────────────────────────────────────────────────────────
+
+    [Header("Win Screen")]
+    [Scene]
+    [SerializeField] private string winScreenScene;
+    [Tooltip("Wartezeit nach Spielende, bevor zur Win-Screen-Scene gewechselt wird " +
+             "(lässt Sound/UI des Game-Over-Screens noch kurz laufen).")]
+    [SerializeField] private float winScreenTransitionDelay = 3f;
+
+    // ── Lifecycle ─────────────────────────────────────────────────────────────
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -44,6 +82,18 @@ public class GameManager : NetworkBehaviour
             nm.GetComponent<CustomNetworkManager>().StartHost();
             nm.GetComponent<SteamLobby>().HostLobby();
         }
+    }
+
+    private void OnEnable()
+    {
+        PlayerRoleSetup.OnCaughtStateChangedServer += HandlePlayerCaughtStateChanged;
+        SoundBox.OnDestroyedServer += HandleSoundBoxDestroyed;
+    }
+
+    private void OnDisable()
+    {
+        PlayerRoleSetup.OnCaughtStateChangedServer -= HandlePlayerCaughtStateChanged;
+        SoundBox.OnDestroyedServer -= HandleSoundBoxDestroyed;
     }
 
     private void Start()
@@ -86,18 +136,43 @@ public class GameManager : NetworkBehaviour
         RpcSetTimeScale(1f);
     }
 
+    /// <summary>
+    /// Beendet das Spiel server-autoritativ für die angegebene Siegerseite.
+    /// Idempotent: läuft nach dem ersten Aufruf ins Leere, falls das Spiel bereits vorbei ist.
+    /// Kann auch direkt aus dem Inspector (z.B. Debug-Button/UnityEvent) mit einem
+    /// WinningSide-Dropdown-Parameter aufgerufen werden.
+    /// </summary>
     [Server]
-    public void GameOver(bool _won)
+    public void EndGame(WinningSide winner)
     {
+        if (currentState == GameState.GameOver) return;
+
         SetState(GameState.GameOver);
-        RpcGameOver(_won);
+        RpcGameOver(winner);
+
+        CustomNetworkManager manager = NetworkManager.singleton as CustomNetworkManager;
+        if (manager != null)
+            manager.SetLastWinner(winner);
+        else
+            Debug.LogError("[GameManager] Kein CustomNetworkManager gefunden – Gewinner kann nicht an die Win-Screen-Scene übergeben werden.");
+
+        StartCoroutine(TransitionToWinScreenAfterDelay());
     }
 
     [Server]
-    public void WinGame()
+    private IEnumerator TransitionToWinScreenAfterDelay()
     {
-        SetState(GameState.GameOver);
-        RpcWinGame();
+        yield return new WaitForSeconds(winScreenTransitionDelay);
+
+        CustomNetworkManager manager = NetworkManager.singleton as CustomNetworkManager;
+        if (manager == null || string.IsNullOrEmpty(winScreenScene))
+        {
+            Debug.LogError("[GameManager] Kein CustomNetworkManager oder winScreenScene nicht gesetzt – " +
+                           "kann nicht zur Win-Screen-Scene wechseln.");
+            yield break;
+        }
+
+        manager.ServerChangeScene(winScreenScene);
     }
 
     [Server]
@@ -106,21 +181,90 @@ public class GameManager : NetworkBehaviour
         currentState = _newState;
     }
 
+    // ── Win Condition: Timer ────────────────────────────────────────────────────
+
+    [Server]
+    private void UpdateInternalTimer()
+    {
+        currentPlaytime += Time.deltaTime;
+        if (currentPlaytime >= maxPlaytimeInSeconds)
+        {
+            EndGame(WinningSide.Hunter);
+        }
+    }
+
+    // ── Win Condition: Soundboxes ────────────────────────────────────────────
+
+    [Server]
+    private void HandleSoundBoxDestroyed(SoundBox box)
+    {
+        if (!isServer) return;
+        if (currentState != GameState.Playing) return;
+
+        if (trackedSoundBoxes.Remove(box) && trackedSoundBoxes.Count == 0)
+        {
+            EndGame(WinningSide.Vandalist);
+        }
+    }
+
+    // ── Win Condition: Alle Vandalisten gefangen ────────────────────────────────
+
+    [Server]
+    private void HandlePlayerCaughtStateChanged(PlayerRoleSetup setup, bool caught)
+    {
+        if (!isServer) return;
+        if (currentState != GameState.Playing) return;
+
+        CheckAllVandalistsCaughtWinCondition();
+    }
+
+    /// <summary>
+    /// Hunter gewinnen, wenn kein Vandalist mehr aktiv (nicht gefangen) ist.
+    /// Zählt bewusst mit, ob es überhaupt Vandalisten gibt – sonst würde ein Match
+    /// ohne Vandalisten (z.B. Testfall) sofort fälschlich als Hunter-Sieg werten.
+    /// HINWEIS: Solange Vandalisten automatisch respawnen (PlayerRoleSetup.allowRespawn),
+    /// ist "gefangen" nur ein temporärer Zustand – dieser Check wird erst dann zuverlässig
+    /// final, wenn ihr den Auto-Respawn wie geplant deaktiviert.
+    /// </summary>
+    [Server]
+    private void CheckAllVandalistsCaughtWinCondition()
+    {
+        CustomNetworkManager manager = NetworkManager.singleton as CustomNetworkManager;
+        if (manager == null) return;
+
+        int vandalistCount = 0;
+        bool anyActiveVandalist = false;
+
+        foreach (PlayerObjectController player in manager.gamePlayers)
+        {
+            if (player == null || player.playerRole != PlayerRole.Vandalist) continue;
+            vandalistCount++;
+
+            PlayerRoleSetup setup = player.GetComponent<PlayerRoleSetup>();
+            if (setup == null || !setup.IsCaught)
+            {
+                anyActiveVandalist = true;
+                break;
+            }
+        }
+
+        if (vandalistCount == 0) return; // keine Vandalisten im Match, Check ignorieren
+        if (!anyActiveVandalist) EndGame(WinningSide.Hunter);
+    }
+
     // ── RPCs — broadcast to all clients ───────────────────────────────────────
 
     [ClientRpc]
-    private void RpcGameOver(bool _won)
+    private void RpcGameOver(WinningSide winner)
     {
-        RuntimeManager.PlayOneShot(_won ? "event:/SFX/GameWon" : "event:/SFX/GameOver");
-        UI_GameOver.Instance.SetGameOverScreen(_won);
-        Debug.Log($"[GameManager] Game Over — {(_won ? "Won" : "Lost")}");
-    }
+        bool vandalistsWon = winner == WinningSide.Vandalist;
 
-    [ClientRpc]
-    private void RpcWinGame()
-    {
-        RuntimeManager.PlayOneShot("event:/SFX/GameWon");
-        Debug.Log("[GameManager] Win Game");
+        RuntimeManager.PlayOneShot(vandalistsWon ? "event:/SFX/GameWon" : "event:/SFX/GameOver");
+
+        if (UI_GameOver.Instance != null)
+            UI_GameOver.Instance.SetGameOverScreen(vandalistsWon);
+
+        Debug.Log($"[GameManager] Game Over — {winner} gewinnt.");
     }
 
     [ClientRpc]
@@ -134,18 +278,6 @@ public class GameManager : NetworkBehaviour
     private void OnGameStateChanged(GameState _oldState, GameState _newState)
     {
         Debug.Log($"[GameManager] State: {_oldState} → {_newState}");
-    }
-
-    // ── Timer (server only) ────────────────────────────────────────────────────
-
-    [Server]
-    private void UpdateInternalTimer()
-    {
-        currentPlaytime += Time.deltaTime;
-        if (currentPlaytime >= maxPlaytimeInSeconds)
-        {
-            GameOver(false);
-        }
     }
 
     public void RestartGame()

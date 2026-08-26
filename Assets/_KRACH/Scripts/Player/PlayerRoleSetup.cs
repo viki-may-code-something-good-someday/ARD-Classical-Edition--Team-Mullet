@@ -44,6 +44,10 @@ public class PlayerRoleSetup : NetworkBehaviour
              " Echte Spieler brauchen das nicht, ihr CharacterController fällt von selbst.")]
     [SerializeField] private LayerMask ownerlessGroundMask = 8;
 
+
+    public static event System.Action<PlayerRoleSetup, bool> OnCaughtStateChangedServer;
+
+
     // ── State ────────────────────────────────────────────────────────────────
 
     [SyncVar(hook = nameof(OnCaughtStateChanged))]
@@ -319,13 +323,14 @@ public class PlayerRoleSetup : NetworkBehaviour
     {
         catchCount++;
         isInvulnerable = false;
-        isCaught = true;      // SyncVar-Hook aktualisiert Visuals/Collider auf allen Clients
-        ApplyCaughtState(true); // Dedicated Server: dort feuert der Hook nicht
+        isCaught = true;
+        ApplyCaughtState(true);
+
+        OnCaughtStateChangedServer?.Invoke(this, true);
 
         if (!allowRespawn || (maxCatches >= 0 && catchCount > maxCatches))
         {
             Debug.Log($"[PlayerRoleSetup] {name} wurde endgültig eliminiert (Catch #{catchCount}).");
-            // TODO: an Round-/GameManager melden für den Win-Condition-Check.
             return;
         }
 
@@ -341,6 +346,8 @@ public class PlayerRoleSetup : NetworkBehaviour
         isInvulnerable = true;
         isCaught = false;
         ApplyCaughtState(false);
+
+        OnCaughtStateChangedServer?.Invoke(this, false);
 
         yield return new WaitForSeconds(respawnInvulnerability);
         isInvulnerable = false;

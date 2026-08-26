@@ -42,6 +42,10 @@ public class CustomNetworkManager : NetworkManager
     /// </summary>
     public bool IsTestMode { get; private set; }
 
+    public WinningSide LastWinner { get; private set; }
+
+    public void SetLastWinner(WinningSide winner) => LastWinner = winner;
+
 
     public override void OnServerAddPlayer(NetworkConnectionToClient conn)
     {
