@@ -39,7 +39,7 @@ public class UI_GameOver : MonoBehaviour
 
         if (!_won)
         {
-            gameOverSound = RuntimeManager.CreateInstance("event:/SFX/GameOver");
+            //gameOverSound = RuntimeManager.CreateInstance("event:/SFX/GameOver");
             if (gameOverSound.isValid())
             {
                 gameOverSound.start();

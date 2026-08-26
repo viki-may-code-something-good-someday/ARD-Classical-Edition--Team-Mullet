@@ -259,10 +259,13 @@ public class GameManager : NetworkBehaviour
     {
         bool vandalistsWon = winner == WinningSide.Vandalist;
 
-        RuntimeManager.PlayOneShot(vandalistsWon ? "event:/SFX/GameWon" : "event:/SFX/GameOver");
+        //RuntimeManager.PlayOneShot(vandalistsWon ? "event:/SFX/GameWon" : "event:/SFX/GameOver");
+
 
         if (UI_GameOver.Instance != null)
             UI_GameOver.Instance.SetGameOverScreen(vandalistsWon);
+        else
+            Debug.LogWarning("[GameManager] UI_GameOver.Instance ist null – Game-Over-Screen wird nicht angezeigt.");
 
         Debug.Log($"[GameManager] Game Over — {winner} gewinnt.");
     }
