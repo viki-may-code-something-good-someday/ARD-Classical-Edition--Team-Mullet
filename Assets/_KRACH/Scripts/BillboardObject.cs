@@ -20,15 +20,22 @@ public class BillboardObject : NetworkBehaviour
     [SerializeField] private float shoveRadius = 0.6f;
     [SerializeField] private float shoveForce = 6f;
     [SerializeField] private float shoveUpForce = 4f;
-    // How quickly a glancing hit turns into a sideways launch.
-    // Higher = flies sideways from smaller offsets; lower = stays forward longer.
     [SerializeField] private float shoveSideSharpness = 2f;
-    // The player must move toward the object at least this fast to trigger a shove,
-    // so standing next to it does nothing.
     [SerializeField] private float minApproachSpeed = 1f;
-    // Prevents re-launching every frame while still overlapping.
     [SerializeField] private float shoveCooldown = 0.35f;
     [SerializeField] private LayerMask playerMask;
+
+    [Header("Shove Speed Scaling")]
+    [Tooltip("Wie stark die Lauf-Geschwindigkeit des Spielers die Flugweite beeinflusst. " +
+             "0 = keine Auswirkung (immer shoveForce/shoveUpForce), 1 = volle Skalierung mit der Geschwindigkeit.")]
+    [Range(0f, 1f)]
+    [SerializeField] private float shoveSpeedInfluence = 0.5f;
+    [Tooltip("Anlaufgeschwindigkeit, bei der der Spieler exakt die konfigurierte shoveForce/shoveUpForce " +
+             "auslöst (1x Multiplikator). Schnelleres Anlaufen skaliert proportional darüber hinaus.")]
+    [SerializeField] private float shoveReferenceSpeed = 4f;
+    [Tooltip("Obergrenze für den geschwindigkeitsbasierten Multiplikator, damit extrem schnelles " +
+             "Anlaufen das Objekt nicht ins Unendliche schleudert.")]
+    [SerializeField] private float maxShoveSpeedMultiplier = 2f;
 
     [Header("Physics")]
     [SerializeField] private float gravity = 20f;
@@ -152,43 +159,41 @@ public class BillboardObject : NetworkBehaviour
 
         if (!found || bestApproach < minApproachSpeed || shoveCooldownTimer > 0f) return;
 
-        LaunchShove(bestAway, bestRunDir);
+        LaunchShove(bestAway, bestRunDir, bestApproach);
         shoveCooldownTimer = shoveCooldown;
     }
 
-    // Head-on hit -> flung forward (away from the player). Glancing hit -> flung out to that
-    // side. Blended by how off-centre the contact is. Deterministic, never random.
     [Server]
-    private void LaunchShove(Vector3 awayDir, Vector3 runDir)
+    private void LaunchShove(Vector3 awayDir, Vector3 runDir, float approachSpeed)
     {
-        // "Forward" = the player's run direction (fall back to away if barely moving).
         Vector3 forward = runDir.sqrMagnitude > Epsilon ? runDir : awayDir;
 
-        // Player's right, horizontal.
         Vector3 right = Vector3.Cross(Vector3.up, forward);
         right.y = 0f;
         if (right.sqrMagnitude < Epsilon) right = Vector3.Cross(Vector3.up, awayDir);
         right.Normalize();
 
-        // How off-centre the hit is: 0 = dead-on (object straight ahead), 1 = fully to the side.
-        float lean = Vector3.Dot(right, awayDir);              // -1..1: which side + how much
+        float lean = Vector3.Dot(right, awayDir);
         float absLean = Mathf.Clamp01(Mathf.Abs(lean));
         float sideAmount = Mathf.Clamp01(absLean * shoveSideSharpness);
 
         float sideSign = absLean > 0.01f
             ? Mathf.Sign(lean)
-            : ((netId & 1u) == 0u ? 1f : -1f); // stable tie-break for a perfectly centred hit
+            : ((netId & 1u) == 0u ? 1f : -1f);
 
-        // Blend: forward (away from player) when centred, sideways when glancing.
         Vector3 forwardDir = awayDir;
         Vector3 sideDir = right * sideSign;
 
-        Vector3 horizontalDir = forwardDir * (1f - sideAmount) + sideDir * sideAmount;
-        horizontalDir.y = 0f;
-        if (horizontalDir.sqrMagnitude < Epsilon) horizontalDir = awayDir;
-        horizontalDir.Normalize();
+        float speedRatio = shoveReferenceSpeed > Epsilon ? approachSpeed / shoveReferenceSpeed : 1f;
+        float speedMultiplier = Mathf.Lerp(1f, Mathf.Clamp(speedRatio, 0f, maxShoveSpeedMultiplier), shoveSpeedInfluence);
 
-        velocity = horizontalDir * shoveForce + Vector3.up * shoveUpForce;
+        // WICHTIG: Nur der Vorwärtsanteil wird mit der Geschwindigkeit skaliert.
+        Vector3 forwardComponent = forwardDir * ((1f - sideAmount) * shoveForce * speedMultiplier);
+        Vector3 sideComponent = sideDir * (sideAmount * shoveForce);
+
+        Vector3 horizontalForce = forwardComponent + sideComponent;
+
+        velocity = horizontalForce + Vector3.up * (shoveUpForce * speedMultiplier / 2f);
     }
 
     // Called SERVER-SIDE from Player_Interact (inside the puncher's Command).

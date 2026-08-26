@@ -210,6 +210,9 @@ MonoBehaviour:
   playerMask:
     serializedVersion: 2
     m_Bits: 64
+  shoveSpeedInfluence: 1
+  shoveReferenceSpeed: 6
+  maxShoveSpeedMultiplier: 2
   gravity: 25
   groundDrag: 9
   airDrag: 0.6
