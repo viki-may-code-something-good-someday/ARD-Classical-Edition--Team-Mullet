@@ -32,28 +32,28 @@ public class LuaSoundEmitterAttributeProcessor : OdinAttributeProcessor<LuaSound
 /// </summary>
 public enum SoundTrigger
 {
-    None             = 0,
-    Script           = 100, // not a game event — triggered from code only
-    ObjectStart      = 1,
-    ObjectDestroy    = 2,
-    TriggerEnter     = 3,
-    TriggerExit      = 4,
-    TriggerEnter2D   = 5,
-    TriggerExit2D    = 6,
-    CollisionEnter   = 7,
-    CollisionExit    = 8,
+    None = 0,
+    Script = 100, // not a game event — triggered from code only
+    ObjectStart = 1,
+    ObjectDestroy = 2,
+    TriggerEnter = 3,
+    TriggerExit = 4,
+    TriggerEnter2D = 5,
+    TriggerExit2D = 6,
+    CollisionEnter = 7,
+    CollisionExit = 8,
     CollisionEnter2D = 9,
-    CollisionExit2D  = 10,
-    ObjectEnable     = 11,
-    ObjectDisable    = 12,
+    CollisionExit2D = 10,
+    ObjectEnable = 11,
+    ObjectDisable = 12,
     ObjectMouseEnter = 13,
-    ObjectMouseExit  = 14,
-    ObjectMouseDown  = 15,
-    ObjectMouseUp    = 16,
-    UIMouseEnter     = 17,
-    UIMouseExit      = 18,
-    UIMouseDown      = 19,
-    UIMouseUp        = 20,
+    ObjectMouseExit = 14,
+    ObjectMouseDown = 15,
+    ObjectMouseUp = 16,
+    UIMouseEnter = 17,
+    UIMouseExit = 18,
+    UIMouseDown = 19,
+    UIMouseUp = 20,
 }
 
 [AddComponentMenu("Lua/LuaSoundEmitter")]
@@ -74,8 +74,8 @@ public class LuaSoundEmitter : FMODUnity.EventHandler
     [SerializeField] private uint targetClientId = 0;
 
     private bool IsMultiplayerEnabled() => enableMultiplayer;
-    private bool IsMirrorTargetMode()   => enableMultiplayer && mirrorSyncMode == MirrorSyncMode.Target;
-    private bool IsOcclusionEnabled()   => enableOcclusion;
+    private bool IsMirrorTargetMode() => enableMultiplayer && mirrorSyncMode == MirrorSyncMode.Target;
+    private bool IsOcclusionEnabled() => enableOcclusion;
     private bool IsOneShotCooldownEnabled() => enableOneShotCooldown;
 
     public enum MirrorSyncMode
@@ -152,19 +152,19 @@ public class LuaSoundEmitter : FMODUnity.EventHandler
     [SerializeField] private bool isObstructed;
 
     // ── FMOD handles (persistent/looping instance) ──────────────────────────────
-    private EventInstance    audioSource;
+    private EventInstance audioSource;
     private EventDescription eventDescription;
-    private List<ParamRef>   cachedParams = new List<ParamRef>();
+    private List<ParamRef> cachedParams = new List<ParamRef>();
 
     // ── State ─────────────────────────────────────────────────────────────────
     private bool hasStartedEvent;
     private bool hasTriggered;        // gates the persistent Play() path (TriggerOnce)
     private bool hasTriggeredOneShot; // gates the PlayOneShot() path (TriggerOnce)
     private bool isQuitting;
-    private int  materialParameterValue;
+    private int materialParameterValue;
     private float oneShotCooldownTimer = 0f;
 
-    public bool IsActive  { get; private set; }
+    public bool IsActive { get; private set; }
     public bool IsPlaying()
     {
         if (!audioSource.isValid()) return false;
@@ -174,9 +174,9 @@ public class LuaSoundEmitter : FMODUnity.EventHandler
 
     // ── Constants ─────────────────────────────────────────────────────────────
     private const string OcclusionParam = "Occlusion";
-    private const string FadeParam      = "OcclusionFade";
-    private const string MaterialParam  = "ReverbType";
-    private const float  MinDistance    = 0f;
+    private const string FadeParam = "OcclusionFade";
+    private const string MaterialParam = "ReverbType";
+    private const float MinDistance = 0f;
 
     private enum ReverbType { None, Room, Hallway, Arena, Padded }
 
@@ -193,12 +193,12 @@ public class LuaSoundEmitter : FMODUnity.EventHandler
 
         materialParameterValue = selectedMaterial switch
         {
-            ReverbType.None    => 0,
-            ReverbType.Room    => 1,
+            ReverbType.None => 0,
+            ReverbType.Room => 1,
             ReverbType.Hallway => 2,
-            ReverbType.Arena   => 3,
-            ReverbType.Padded  => 4,
-            _                  => 1
+            ReverbType.Arena => 3,
+            ReverbType.Padded => 4,
+            _ => 1
         };
 
         if (Preload)
@@ -271,7 +271,7 @@ public class LuaSoundEmitter : FMODUnity.EventHandler
 
             // ── Distance-based fade ───────────────────────────────────────────
             float normalized = Mathf.Clamp01(1f - distToPlayer / (maxParameterDistance - MinDistance));
-            float fadeValue  = invertFadeRange
+            float fadeValue = invertFadeRange
                 ? Mathf.Clamp01(distToPlayer / (maxParameterDistance - MinDistance))
                 : normalized;
 
@@ -634,8 +634,12 @@ public class LuaSoundEmitter : FMODUnity.EventHandler
     // Gizmos
     // ═════════════════════════════════════════════════════════════════════════
 
+    [SerializeField] private bool showGizmos = false;
+
     private void OnDrawGizmosSelected()
     {
+        if (!showGizmos) return;
+
         Gizmos.color = new Color(1f, 0.2f, 0.35f, 0.35f);
         Gizmos.DrawWireSphere(transform.position, maxDistance);
 
@@ -653,7 +657,7 @@ public class LuaSoundEmitter : FMODUnity.EventHandler
         }
 
 #if UNITY_EDITOR
-        var redStyle  = new GUIStyle(EditorStyles.label) { normal = { textColor = new Color(1f, 0.4f, 0.4f) } };
+        var redStyle = new GUIStyle(EditorStyles.label) { normal = { textColor = new Color(1f, 0.4f, 0.4f) } };
         var blueStyle = new GUIStyle(EditorStyles.label) { normal = { textColor = new Color(0.4f, 0.6f, 1f) } };
         var yellowStyle = new GUIStyle(EditorStyles.label) { normal = { textColor = new Color(1f, 1f, 0f) } };
 

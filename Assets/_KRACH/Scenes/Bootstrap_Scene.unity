@@ -188,6 +188,10 @@ PrefabInstance:
       propertyPath: lobbyScene
       value: Assets/_KRACH/Scenes/Lobby.unity
       objectReference: {fileID: 0}
+    - target: {fileID: 1553995806723939279, guid: 010f9f2d3e7e94e4d8fb45f44020db0b, type: 3}
+      propertyPath: gameplayScene
+      value: Assets/_KRACH/Scenes/MainLevel_Level1.unity
+      objectReference: {fileID: 0}
     - target: {fileID: 4838965611117972004, guid: 010f9f2d3e7e94e4d8fb45f44020db0b, type: 3}
       propertyPath: m_Name
       value: NetworkManager
