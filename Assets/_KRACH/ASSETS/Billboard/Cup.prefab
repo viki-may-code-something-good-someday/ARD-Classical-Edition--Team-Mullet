@@ -60,6 +60,10 @@ PrefabInstance:
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2398233507360955838, guid: 85459ab20452abc488469f13c66a14a4, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 3847888004710153319, guid: 85459ab20452abc488469f13c66a14a4, type: 3}
       propertyPath: sceneId
       value: 0
@@ -90,15 +94,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8647497576118087877, guid: 85459ab20452abc488469f13c66a14a4, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -2.4
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8647497576118087877, guid: 85459ab20452abc488469f13c66a14a4, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.287
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8647497576118087877, guid: 85459ab20452abc488469f13c66a14a4, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 1.36
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8647497576118087877, guid: 85459ab20452abc488469f13c66a14a4, type: 3}
       propertyPath: m_LocalRotation.w

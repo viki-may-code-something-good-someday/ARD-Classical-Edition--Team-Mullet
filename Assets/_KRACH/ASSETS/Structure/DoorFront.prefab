@@ -49,7 +49,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Door
   pairedDoor: {fileID: 0}
   teleportCooldown: 1
-  exitOffsetDistance: 2
+  exitOffsetDistance: 0.8
+  yOffset: -0.4
 --- !u!54 &1200129535938218606
 Rigidbody:
   m_ObjectHideFlags: 0

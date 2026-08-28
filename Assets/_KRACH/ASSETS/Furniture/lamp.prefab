@@ -105,8 +105,40 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83c1220ad38d7fb41b2524a693bb2bf2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BillboardFacingCamera
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  spriteTransform: {fileID: 0}
   flippedSprite: 0
   knockbackEnabled: 0
+  punchForce: 12
+  punchUpForce: 3
+  punchRandomRange: {x: 0.75, y: 1.25}
+  shoveEnabled: 1
+  shoveRadius: 0.6
+  shoveForce: 6
+  shoveUpForce: 4
+  shoveSideSharpness: 2
+  minApproachSpeed: 1
+  shoveCooldown: 0.35
+  playerMask:
+    serializedVersion: 2
+    m_Bits: 0
+  shoveSpeedInfluence: 0.5
+  shoveReferenceSpeed: 4
+  maxShoveSpeedMultiplier: 2
+  gravity: 20
+  groundDrag: 8
+  airDrag: 0.5
+  groundCheckDistance: 0.2
+  groundOffset: 0
+  environmentMask:
+    serializedVersion: 2
+    m_Bits: 8191
+  blockedByWalls: 1
+  collideRadius: 0.25
+  punchParticles: {fileID: 0}
+  particleOffset: {x: 0, y: 0.6, z: 0}
 --- !u!1 &9018417432633665822
 GameObject:
   m_ObjectHideFlags: 0

@@ -32,6 +32,10 @@ PrefabInstance:
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 21300000, guid: f081fe725aa911a4cac33aceda552557, type: 3}
+    - target: {fileID: 2398233507360955838, guid: 85459ab20452abc488469f13c66a14a4, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 3847888004710153319, guid: 85459ab20452abc488469f13c66a14a4, type: 3}
       propertyPath: sceneId
       value: 0
@@ -66,15 +70,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8647497576118087877, guid: 85459ab20452abc488469f13c66a14a4, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.6
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8647497576118087877, guid: 85459ab20452abc488469f13c66a14a4, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.287
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8647497576118087877, guid: 85459ab20452abc488469f13c66a14a4, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.751
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8647497576118087877, guid: 85459ab20452abc488469f13c66a14a4, type: 3}
       propertyPath: m_LocalRotation.w
