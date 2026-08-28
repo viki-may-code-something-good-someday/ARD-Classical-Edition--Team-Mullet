@@ -7,7 +7,8 @@ namespace Mirror
 {
     [CustomEditor(typeof(NetworkBehaviour), true)]
     [CanEditMultipleObjects]
-    public class NetworkBehaviourInspector : Editor
+
+    public class NetworkBehaviourInspector : Sirenix.OdinInspector.Editor.OdinEditor
     {
         bool syncsAnything;
         SyncObjectCollectionsDrawer syncObjectCollectionsDrawer;

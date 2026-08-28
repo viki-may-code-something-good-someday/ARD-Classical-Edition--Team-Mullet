@@ -99,6 +99,10 @@ MonoBehaviour:
   explosionRadius: 1
   wallDecorationsFadeOutSpeedMultiplier: 0.2
   speedUpWallDecorationsFadeOutSpeedMultiplier: 0.5
+  doorPrefab: {fileID: 5479403208583929418, guid: d655a1df6d740d94b97cce4a3431db60, type: 3}
+  spawnedDoors: []
+  thicknessAxis: 0
+  doorSurfaceGap: 0.05
 --- !u!114 &1675187135193447262
 MonoBehaviour:
   m_ObjectHideFlags: 0

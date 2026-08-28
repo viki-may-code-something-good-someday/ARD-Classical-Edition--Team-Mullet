@@ -1,8 +1,13 @@
-using FMODUnity;
 using Mirror;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+
+#if UNITY_EDITOR
+using UnityEditor;
+using Sirenix.OdinInspector;
+using UnityEditor.SceneManagement;
+#endif
 
 public class Wall : NetworkBehaviour, IDestructable
 {
@@ -27,12 +32,21 @@ public class Wall : NetworkBehaviour, IDestructable
     [SerializeField] private float wallDecorationsFadeOutSpeedMultiplier = 0.2f;
     [SerializeField] private float speedUpWallDecorationsFadeOutSpeedMultiplier = 0.5f;
 
+    [Header("Doors")]
+    [SerializeField] private Door doorPrefab;
+    [SerializeField] private List<Door> spawnedDoors = new List<Door>();
 
 
 
     public float Health { get { return health; } }
 
     public ParticleSystem HitParticles => hitParticle;
+
+#if UNITY_EDITOR
+    private enum Axis { X, Y, Z }
+    [SerializeField] private Axis thicknessAxis = Axis.Z;
+    [SerializeField] private float doorSurfaceGap = 0.05f;
+#endif
 
     private bool fadeOutSpeedIncreased;
     private bool fadeOutPieces;
@@ -107,8 +121,6 @@ public class Wall : NetworkBehaviour, IDestructable
             wallMetalSoundEmitter.PlayOneShot();
     }
 
-    // Dieser Hook wird auf ALLEN Rechnern ausgefuehrt, sobald isDestroyed = true wird.
-    // Auch wenn ein Spieler 5 Minuten spaeter ins Spiel joint, sieht er dadurch die Wand im kaputten Zustand.
     private void OnWallDestroyed(bool oldState, bool newState)
     {
         if (newState == true && oldState == false)
@@ -117,6 +129,14 @@ public class Wall : NetworkBehaviour, IDestructable
             wallBroken.SetActive(true);
 
             WallDecorationsSetup();
+
+            // Doors are children of this Wall, not of wallNormal, so they are NOT
+            // deactivated by the line above. A destroyed wall has a hole, not a doorway,
+            // so we explicitly disable them here — runs on every client via the SyncVar hook.
+            foreach (Door door in spawnedDoors)
+            {
+                if (door != null) door.DeactivateDoor();
+            }
         }
     }
 
@@ -184,4 +204,114 @@ public class Wall : NetworkBehaviour, IDestructable
             }
         }
     }
+
+
+#if UNITY_EDITOR
+    [Button("Generate Paired Doors")]
+    private void GeneratePairedDoors()
+    {
+        if (doorPrefab == null)
+        {
+            Debug.LogError("[Wall] doorPrefab is not assigned.");
+            return;
+        }
+
+        ClearDoors();
+
+        if (!TryGetLocalBounds(out Bounds localBounds))
+        {
+            Debug.LogError("[Wall] Could not determine bounds (no BoxCollider or Renderer found).");
+            return;
+        }
+
+        Vector3 axisDir = thicknessAxis switch
+        {
+            Axis.X => Vector3.right,
+            Axis.Y => Vector3.up,
+            _ => Vector3.forward
+        };
+
+        float halfExtent = Vector3.Scale(localBounds.extents, axisDir).magnitude;
+
+        Door frontDoor = SpawnDoor(localBounds.center + axisDir * (halfExtent + doorSurfaceGap), axisDir);
+        Door backDoor = SpawnDoor(localBounds.center - axisDir * (halfExtent + doorSurfaceGap), -axisDir);
+
+        LinkDoors(frontDoor, backDoor);
+        LinkDoors(backDoor, frontDoor);
+
+        spawnedDoors.Add(frontDoor);
+        spawnedDoors.Add(backDoor);
+
+        // Without this, the change to the spawnedDoors list is never flagged as unsaved —
+        // Unity won't write it to the scene/prefab even on explicit save, and it's lost
+        // as soon as the scene is reloaded or reopened.
+        EditorUtility.SetDirty(this);
+        if (gameObject.scene.IsValid())
+            EditorSceneManager.MarkSceneDirty(gameObject.scene);
+    }
+
+    private void LinkDoors(Door target, Door pair)
+    {
+        SerializedObject so = new SerializedObject(target);
+        so.FindProperty("pairedDoor").objectReferenceValue = pair;
+        so.ApplyModifiedProperties();
+    }
+
+    private Door SpawnDoor(Vector3 localPosition, Vector3 localOutwardDir)
+    {
+        Door door = (Door)PrefabUtility.InstantiatePrefab(doorPrefab, transform);
+        Undo.RegisterCreatedObjectUndo(door.gameObject, "Generate Door");
+
+        // Apply the door's own configurable Y offset (e.g. pivot correction)
+        localPosition.y += door.YOffset;
+
+        door.transform.localPosition = localPosition;
+        door.transform.localRotation = Quaternion.LookRotation(localOutwardDir, Vector3.up);
+
+        return door;
+    }
+
+    [Button("Clear Doors")]
+    private void ClearDoors()
+    {
+        foreach (Door door in spawnedDoors)
+        {
+            if (door != null) Undo.DestroyObjectImmediate(door.gameObject);
+        }
+        spawnedDoors.Clear();
+
+        foreach (Door child in GetComponentsInChildren<Door>(true).ToList())
+        {
+            Undo.DestroyObjectImmediate(child.gameObject);
+        }
+
+        EditorUtility.SetDirty(this);
+        if (gameObject.scene.IsValid())
+            EditorSceneManager.MarkSceneDirty(gameObject.scene);
+    }
+
+    private bool TryGetLocalBounds(out Bounds localBounds)
+    {
+        BoxCollider box = GetComponentInChildren<BoxCollider>();
+        if (box != null)
+        {
+            Vector3 worldCenter = box.transform.TransformPoint(box.center);
+            Vector3 localCenter = transform.InverseTransformPoint(worldCenter);
+            Vector3 localSize = Vector3.Scale(box.size, box.transform.lossyScale);
+            localBounds = new Bounds(localCenter, localSize);
+            return true;
+        }
+
+        Renderer rend = wallNormal != null ? wallNormal.GetComponentInChildren<Renderer>() : GetComponentInChildren<Renderer>();
+        if (rend != null)
+        {
+            Vector3 localCenter = transform.InverseTransformPoint(rend.bounds.center);
+            localBounds = new Bounds(localCenter, rend.bounds.size);
+            return true;
+        }
+
+        localBounds = default;
+        return false;
+    }
+#endif
 }

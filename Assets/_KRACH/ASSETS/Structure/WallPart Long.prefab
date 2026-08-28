@@ -97,6 +97,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: -293704639154427236}
     - target: {fileID: 8904730114808629814, guid: fbddb5bcaae4dfc4fb5a678f78546259, type: 3}
+      propertyPath: spawnedDoors.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8904730114808629814, guid: fbddb5bcaae4dfc4fb5a678f78546259, type: 3}
       propertyPath: wallBreakdownSoundEmitter
       value: 
       objectReference: {fileID: 8700705567309624618}
