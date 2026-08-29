@@ -12,13 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fbadd665b4669f48ace9538a010a914, type: 3}
   m_Name: Hunter RoleMovementConfig
   m_EditorClassIdentifier: Assembly-CSharp::RoleMovementConfig
-  walkSpeed: 6
+  walkSpeed: 5
   canSprint: 1
-  baseSprintSpeed: 9
+  baseSprintSpeed: 7
   maxSprintSpeed: 15
-  sprintBurstThreshold: 2.5
-  sprintAcceleration: 1.7
-  sprintBurstAcceleration: 14
+  sprintBurstThreshold: 3
+  sprintAcceleration: 1.5
+  sprintBurstAcceleration: 12
   sprintDecaySpeed: 3
   jumpHeight: 1.5
   riseGravityMultiplier: 1

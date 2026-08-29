@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using FMODUnity;
 using Mirror;
@@ -33,12 +33,28 @@ public class GameManager : NetworkBehaviour
 
     public float maxPlaytimeInSeconds;
 
-    private float currentPlaytime;
-
-    public float CurrentPlaytime => currentPlaytime;
-
     public bool testInEditor;
     public GameObject networkManager;
+
+    //Timer
+    [SyncVar]
+    private double matchEndTime;
+
+    public float CurrentPlaytime => currentState == GameState.Playing
+        ? Mathf.Max(0f, maxPlaytimeInSeconds - (float)(matchEndTime - NetworkTime.time))
+        : 0f;
+
+    public float TimeRemaining => currentState == GameState.Playing
+        ? Mathf.Max(0f, (float)(matchEndTime - NetworkTime.time))
+        : maxPlaytimeInSeconds;
+
+    //SoundBoxCounter
+    [SyncVar] private int totalSoundBoxCount;
+    [SyncVar] private int remainingSoundBoxCount;
+
+    public int TotalSoundBoxCount => totalSoundBoxCount;
+    public int RemainingSoundBoxCount => remainingSoundBoxCount;
+    public int DestroyedSoundBoxCount => totalSoundBoxCount - remainingSoundBoxCount;
 
     // ── Win Condition: Soundboxes ────────────────────────────────────────────
 
@@ -120,7 +136,11 @@ public class GameManager : NetworkBehaviour
     [Server]
     public void StartGame()
     {
-        currentPlaytime = 0f;
+        matchEndTime = NetworkTime.time + maxPlaytimeInSeconds;
+
+        totalSoundBoxCount = trackedSoundBoxes.Count;
+        remainingSoundBoxCount = trackedSoundBoxes.Count;
+
         SetState(GameState.Playing);
     }
 
@@ -188,8 +208,7 @@ public class GameManager : NetworkBehaviour
     [Server]
     private void UpdateInternalTimer()
     {
-        currentPlaytime += Time.deltaTime;
-        if (currentPlaytime >= maxPlaytimeInSeconds)
+        if (NetworkTime.time >= matchEndTime)
         {
             EndGame(WinningSide.Hunter);
         }
@@ -203,9 +222,14 @@ public class GameManager : NetworkBehaviour
         if (!isServer) return;
         if (currentState != GameState.Playing) return;
 
-        if (trackedSoundBoxes.Remove(box) && trackedSoundBoxes.Count == 0)
+        if (trackedSoundBoxes.Remove(box))
         {
-            EndGame(WinningSide.Vandalist);
+            remainingSoundBoxCount = trackedSoundBoxes.Count;
+
+            if (remainingSoundBoxCount == 0)
+            {
+                EndGame(WinningSide.Vandalist);
+            }
         }
     }
 

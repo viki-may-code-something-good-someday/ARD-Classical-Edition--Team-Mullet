@@ -118,6 +118,8 @@ public class FurnitureGenerator : MonoBehaviour
             instance.transform.position = samplePoint;
             instance.transform.rotation = Quaternion.Euler(0f, rotationY, 0f);
 
+            Physics.SyncTransforms();
+
             if (!TryComputeWorldOBB(instance, out OBB2D candidateObb))
             {
                 Debug.LogWarning($"[FurnitureGenerator] '{prefab.name}' has no active Renderer/Collider — cannot compute a footprint, skipping entirely.");

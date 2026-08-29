@@ -168,6 +168,7 @@ MonoBehaviour:
   oneShotCooldownDuration: 1
   scaledValue: 0
   isObstructed: 0
+  showGizmos: 0
 --- !u!114 &6640883149923703224
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -216,6 +217,7 @@ MonoBehaviour:
   oneShotCooldownDuration: 1
   scaledValue: 0
   isObstructed: 0
+  showGizmos: 0
 --- !u!114 &5038511741283537845
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -264,6 +266,7 @@ MonoBehaviour:
   oneShotCooldownDuration: 1
   scaledValue: 0
   isObstructed: 0
+  showGizmos: 0
 --- !u!1 &3671108214043795730
 GameObject:
   m_ObjectHideFlags: 0
@@ -330,7 +333,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -876546973899608171, guid: 1fefb42810d6d7243b9218d51e26597c, type: 3}
+  - {fileID: 2100000, guid: 6bd3f6113b95f5d43a918395de061f87, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
