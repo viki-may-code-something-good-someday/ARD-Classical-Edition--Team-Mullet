@@ -20,9 +20,9 @@
   <Project Path="com.rlabrecque.steamworks.net.editor.csproj" />
   <Project Path="FMODUnityHaptics.csproj" />
   <Project Path="Telepathy.csproj" />
+  <Project Path="Assembly-CSharp-Editor.csproj" />
   <Project Path="FMODUnityResonance.csproj" />
   <Project Path="DOTweenPro.EditorScripts.csproj" />
-  <Project Path="Assembly-CSharp-Editor.csproj" />
   <Project Path="DOTweenPro.Scripts.csproj" />
   <Project Path="Mirror.CompilerSymbols.csproj" />
   <Project Path="FolderColorSettings.Editor.csproj" />
