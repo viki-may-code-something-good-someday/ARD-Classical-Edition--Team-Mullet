@@ -7,8 +7,53 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: Bueroklammer
+    second: {fileID: 2100000, guid: 7cc208c40658fbc4eaccac25eeac16ae, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: HairDetail1
+    second: {fileID: 2100000, guid: c61d041e9c56ee9488d15a7eeb478b29, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: HairDetail2
+    second: {fileID: 2100000, guid: 4e9a4b613ec642545b1851af5d87d136, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: HairDetail3
+    second: {fileID: 2100000, guid: 803bfda2a79e65f43ba433439e8f409e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: VandalistBody2
-    second: {fileID: 2100000, guid: c8cfa2c66c0d4004c9c033184d9c393f, type: 2}
+    second: {fileID: 2100000, guid: 60859613c23e7db4f8ba1cf5276e98e9, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: VandalistCollar
+    second: {fileID: 2100000, guid: a8a5a7feae705884298952f2b483ee2f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: VandalistHead
+    second: {fileID: 2100000, guid: 963b7bf05230d05409124dcd47bb2076, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Vandalist_Glasses
+    second: {fileID: 2100000, guid: 2dedbd47b588dcd42a8d9b2d77fd41c9, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Vandalist_coat
+    second: {fileID: 2100000, guid: 43a9a34f761d9554584a43ca62fb6db5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Vandalist_hair
+    second: {fileID: 2100000, guid: 618feaa0afb39c64197ed26bd491d9f1, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -96,7 +141,7 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
-    globalScale: 1
+    globalScale: 100
     rootMotionBoneName: 
     hasTranslationDoF: 0
     hasExtraRoot: 0
