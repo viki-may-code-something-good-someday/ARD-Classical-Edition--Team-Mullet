@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 917c9c1d19600464dbc82bd20f442982
+guid: f48d33c61db16b6439216d136297036e
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
@@ -7,13 +7,8 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: Hand
-    second: {fileID: 2100000, guid: 1cdccaf1ff0015e4fb27c7d6d12add73, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Hand3
-    second: {fileID: 2100000, guid: 17142fc128a4e81459786feed06282f2, type: 2}
+      name: openPBR_shader1
+    second: {fileID: 2100000, guid: b1e3d43589913e6479951c40c6c43ffd, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -43,7 +38,7 @@ ModelImporter:
     isReadable: 0
   meshes:
     lODScreenPercentages: []
-    globalScale: 100
+    globalScale: 60
     meshCompression: 0
     addColliders: 0
     useSRGBMaterialColor: 1
@@ -101,7 +96,7 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
-    globalScale: 100
+    globalScale: 0.59999996
     rootMotionBoneName: 
     hasTranslationDoF: 0
     hasExtraRoot: 0
