@@ -141,6 +141,7 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
         pitch = Mathf.Clamp(pitch, -maxArmPitchAngle, maxArmPitchAngle) * pitchRotationMultiplier;
 
         armRotationContainer.localRotation = armBaseLocalRotation * Quaternion.Euler(-pitch, 0f, 0f);
+
         //armVisual.transform.localRotation = armBaseLocalRotation * Quaternion.Euler(-pitch, 0f, 0f);
     }
 

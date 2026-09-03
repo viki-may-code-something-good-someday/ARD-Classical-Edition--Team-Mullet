@@ -27,6 +27,7 @@ public class PlayerInteract : NetworkBehaviour, IRoleAction
     [SerializeField] private float pointBlankContactRadius = 0.8f;
 
     [Header("Vertical Look Rotation")]
+    [SerializeField] private Transform armRotationContainer;
     [Tooltip("Wie stark die Arme der Kamera-Neigung folgen. 1 = 1:1, kleiner = gedämpft.")]
     [SerializeField] private float pitchRotationMultiplier = 1f;
     [Tooltip("Maximale Auf-/Ab-Rotation der Arme in Grad, unabhängig von der Kamera-Neigung.")]
@@ -64,6 +65,11 @@ public class PlayerInteract : NetworkBehaviour, IRoleAction
         // und nicht die Basis-Pose (z.B. leichte Schräghaltung) überschreiben.
         foreach (GameObject arm in armsVisuals)
             armBaseLocalRotations.Add(arm != null ? arm.transform.localRotation : Quaternion.identity);
+    }
+
+    private void Start()
+    {
+        CacheArmContainerBaseRotation();
     }
 
     // ── IRoleAction ───────────────────────────────────────────────────────────
@@ -109,22 +115,24 @@ public class PlayerInteract : NetworkBehaviour, IRoleAction
 
     // ── Arms ─────────────────────────────────────────────────────────────────
 
+    private Quaternion armContainerBaseLocalRotation;
+
+    // Call this once, e.g. in Start() or Awake(), after armRotationContainer is assigned
+    private void CacheArmContainerBaseRotation()
+    {
+        if (armRotationContainer == null) return;
+        armContainerBaseLocalRotation = armRotationContainer.localRotation;
+    }
+
     private void ApplyVerticalArmRotation()
     {
-        if (playerCamera == null) return;
+        if (playerCamera == null || armRotationContainer == null) return;
 
         float pitch = GetCameraPitch();
 
         pitch = Mathf.Clamp(pitch, -maxArmPitchAngle, maxArmPitchAngle) * pitchRotationMultiplier;
 
-        for (int i = 0; i < armsVisuals.Count; i++)
-        {
-            GameObject arm = armsVisuals[i];
-            if (arm == null) continue;
-
-            Quaternion baseRotation = i < armBaseLocalRotations.Count ? armBaseLocalRotations[i] : Quaternion.identity;
-            arm.transform.localRotation = baseRotation * Quaternion.Euler(-pitch, 0f, 0f);
-        }
+        armRotationContainer.localRotation = armContainerBaseLocalRotation * Quaternion.Euler(-pitch, 0f, 0f);
     }
 
     private float GetCameraPitch()
