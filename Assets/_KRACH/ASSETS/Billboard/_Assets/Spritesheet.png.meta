@@ -97,7 +97,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Spritesheet_0
+      name: CupGP
       rect:
         serializedVersion: 2
         x: 128
@@ -112,14 +112,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 9589589bc580867439c0429c89a1ab80
+      spriteID: f813e3bdf07b3704781bc882d5620b6d
       internalID: 63844870
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Spritesheet_1
+      name: KettleGP
       rect:
         serializedVersion: 2
         x: 855
@@ -134,14 +134,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: e479d93213b9bce4ea9a5b3608dbb582
-      internalID: -1970630991
+      spriteID: b18f89d91dab2e14f833ae6657833f75
+      internalID: -575952112
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Spritesheet_2
+      name: WALLITEM
       rect:
         serializedVersion: 2
         x: 1614
@@ -156,14 +156,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 17da81e386ca62d4e8c5be67db8cba98
+      spriteID: 413918d3cdd57584cba52c93bd4fc9bc
       internalID: 732969710
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Spritesheet_3
+      name: TrashGP
       rect:
         serializedVersion: 2
         x: 142
@@ -178,7 +178,7 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 3ec6deb9158f7084a85632b937b251ea
+      spriteID: a4a6dd46f458d9e40b212c66604ea31d
       internalID: -709197897
       vertices: []
       indices: 
@@ -200,14 +200,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 7ad8cc45f8918ad4fb61068595f04c84
+      spriteID: 6d26d6b5336a48f4290d401b10a10dc6
       internalID: 1849987803
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Spritesheet_5
+      name: BottleGP
       rect:
         serializedVersion: 2
         x: 849
@@ -222,14 +222,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: f7996dadf9c092d45a53ea58e1481cb7
+      spriteID: eae1b61928b7ef44791fdda04ffaf4f4
       internalID: 1596788123
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Spritesheet_6
+      name: MouseGP
       rect:
         serializedVersion: 2
         x: 1334
@@ -244,14 +244,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: ea23a995538096547b442c9a0f0cd5e9
+      spriteID: 46c2d3235262ab844ac52e2865c020ce
       internalID: -1636885760
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Spritesheet_7
+      name: CamGP
       rect:
         serializedVersion: 2
         x: 101
@@ -266,14 +266,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 4ca72d2fbb4ebbd43a4975377d17c51c
+      spriteID: 311cda98d981ffb45beace509a34a5b8
       internalID: -2010159753
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Spritesheet_8
+      name: HeadphonesGP
       rect:
         serializedVersion: 2
         x: 1228
@@ -288,7 +288,7 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 35dca7a3cbc39d749877d87d5ce75167
+      spriteID: 36e3f3dcdbed581448583f67e1bbcdd3
       internalID: 1500356107
       vertices: []
       indices: 
@@ -312,15 +312,15 @@ TextureImporter:
       - key: SpriteEditor.SliceSettings
         value: '{"sliceOnImport":true,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      Spritesheet_0: 63844870
-      Spritesheet_1: -1970630991
-      Spritesheet_2: 732969710
-      Spritesheet_3: -709197897
+      BottleGP: 1596788123
+      CamGP: -2010159753
+      CupGP: 63844870
+      HeadphonesGP: 1500356107
+      KettleGP: -575952112
+      MouseGP: -1636885760
       Spritesheet_4: 1849987803
-      Spritesheet_5: 1596788123
-      Spritesheet_6: -1636885760
-      Spritesheet_7: -2010159753
-      Spritesheet_8: 1500356107
+      TrashGP: -709197897
+      WALLITEM: 732969710
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -97,7 +97,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: SpritesheetRB_0
+      name: CupRB
       rect:
         serializedVersion: 2
         x: 57
@@ -112,14 +112,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 656a1ad3009c2cd439affff1e7d26f69
-      internalID: 480708015
+      spriteID: e133acd649442554f8b0b5225325e4ae
+      internalID: 358232468
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: SpritesheetRB_1
+      name: KettleRB
       rect:
         serializedVersion: 2
         x: 706
@@ -134,14 +134,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 2de042a3dad569b41ab6e07c7163bab3
-      internalID: -1884421595
+      spriteID: 559cd934fc636e241baabc3eeeea60c2
+      internalID: 844031397
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: SpritesheetRB_2
+      name: PlantRB
       rect:
         serializedVersion: 2
         x: 1304
@@ -156,14 +156,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: c787ba876a44d954b8ffc1c44c17e824
+      spriteID: 105f28ff3e397a04183f70aa3cb4dc61
       internalID: -1386494447
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: SpritesheetRB_3
+      name: TrashRB
       rect:
         serializedVersion: 2
         x: 66
@@ -178,7 +178,7 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 7491eaece7263054eb96382c79043cc6
+      spriteID: 4f6fbb3d3936821448cec55f13bcbb82
       internalID: -1804337020
       vertices: []
       indices: 
@@ -200,14 +200,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 447a20114a874604f9e5e611c72c9bc3
+      spriteID: 449472acb2b2f4049865dfdc8f36fb66
       internalID: 1914602815
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: SpritesheetRB_5
+      name: BottleRB
       rect:
         serializedVersion: 2
         x: 849
@@ -222,14 +222,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 30e9e790b5bc092459805d153c47567f
+      spriteID: 8cabb04e897dd3f4cbf0f190a3b86b41
       internalID: 13589958
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: SpritesheetRB_6
+      name: MouseRB
       rect:
         serializedVersion: 2
         x: 1310
@@ -244,14 +244,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 4462b4265defe334ab1bea5d88fd318f
+      spriteID: eeed0f6130b8822409c69b3f80cadb2f
       internalID: -1954903773
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: SpritesheetRB_7
+      name: CamRB
       rect:
         serializedVersion: 2
         x: 101
@@ -266,14 +266,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: ddbbbf1eb1b92e846babaa7383b272dc
+      spriteID: 1b8c888c21df4a74291410cccfb805b2
       internalID: 800752420
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: SpritesheetRB_8
+      name: HeadphonesRB
       rect:
         serializedVersion: 2
         x: 1228
@@ -288,7 +288,7 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: dacedd50ec9b9954a961a993661efadb
+      spriteID: ce3e3e70c6c4cfd489889924cba2a6cb
       internalID: 1671709227
       vertices: []
       indices: 
@@ -312,15 +312,15 @@ TextureImporter:
       - key: SpriteEditor.SliceSettings
         value: '{"sliceOnImport":true,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      SpritesheetRB_0: 480708015
-      SpritesheetRB_1: -1884421595
-      SpritesheetRB_2: -1386494447
-      SpritesheetRB_3: -1804337020
+      BottleRB: 13589958
+      CamRB: 800752420
+      CupRB: 358232468
+      HeadphonesRB: 1671709227
+      KettleRB: 844031397
+      MouseRB: -1954903773
+      PlantRB: -1386494447
       SpritesheetRB_4: 1914602815
-      SpritesheetRB_5: 13589958
-      SpritesheetRB_6: -1954903773
-      SpritesheetRB_7: 800752420
-      SpritesheetRB_8: 1671709227
+      TrashRB: -1804337020
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

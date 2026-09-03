@@ -97,7 +97,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Spritesheet2RT_0
+      name: BoxRB
       rect:
         serializedVersion: 2
         x: 63
@@ -119,7 +119,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Spritesheet2RT_1
+      name: TapeRB
       rect:
         serializedVersion: 2
         x: 1342
@@ -141,7 +141,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Spritesheet2RT_2
+      name: CableRB
       rect:
         serializedVersion: 2
         x: 108
@@ -163,7 +163,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Spritesheet2RT_3
+      name: PaperRB
       rect:
         serializedVersion: 2
         x: 910
@@ -185,7 +185,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Spritesheet2RT_4
+      name: PictureRB
       rect:
         serializedVersion: 2
         x: 1420
@@ -207,7 +207,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Spritesheet2RT_5
+      name: StackRB
       rect:
         serializedVersion: 2
         x: 122
@@ -229,7 +229,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Spritesheet2RT_6
+      name: BottlesRB
       rect:
         serializedVersion: 2
         x: 1165
@@ -268,13 +268,13 @@ TextureImporter:
       - key: SpriteEditor.SliceSettings
         value: '{"sliceOnImport":true,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      Spritesheet2RT_0: -1202574298
-      Spritesheet2RT_1: 207238167
-      Spritesheet2RT_2: -959858768
-      Spritesheet2RT_3: -1298945277
-      Spritesheet2RT_4: 279431823
-      Spritesheet2RT_5: 2066407110
-      Spritesheet2RT_6: -1273954694
+      BottlesRB: -1273954694
+      BoxRB: -1202574298
+      CableRB: -959858768
+      PaperRB: -1298945277
+      PictureRB: 279431823
+      StackRB: 2066407110
+      TapeRB: 207238167
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
