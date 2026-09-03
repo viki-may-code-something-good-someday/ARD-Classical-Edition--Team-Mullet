@@ -31,6 +31,7 @@ Material:
   - _OUTLINE_NML
   m_InvalidKeywords:
   - TOON_OUTLINE_NORMAL
+  - _GLOSSYREFLECTIONS_OFF
   - _NORMALMAP
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -154,7 +155,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NormalMap:
-        m_Texture: {fileID: 2800000, guid: a8abf87baec4d0e478750251bfc6b03a, type: 3}
+        m_Texture: {fileID: 2800000, guid: 33c0f35c1a9942f40b13fc4f6ef1ace1, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NormalMapForMatCap:
@@ -384,6 +385,7 @@ Material:
     - _MatCap: 0
     - _MaterialID: 1
     - _Metallic: 0
+    - _Mode: 0
     - _Nearest_Distance: 0.5
     - _NormalMapSpace: 0
     - _NormalScale: 1
@@ -464,6 +466,7 @@ Material:
     - _Tweak_SystemShadowsLevel: -0.042
     - _Tweak_transparency: 0
     - _UVDetail: 0
+    - _UVSec: 0
     - _Unlit_Intensity: 0
     - _UseShadowThreshold: 0
     - _Use_1stAs2nd: 1
@@ -477,6 +480,7 @@ Material:
     - _ZTestTransparent: 4
     - _ZWrite: 1
     - _ZWriteMode: 1
+    - __dirty: 1
     - _simpleUI: 0
     - _utsTechnique: 0
     m_Colors:
@@ -502,7 +506,7 @@ Material:
     - _MatCapColor: {r: 1, g: 1, b: 1, a: 1}
     - _OutlineMaskColor: {r: 0, g: 0, b: 0, a: 1}
     - _Outline_Color: {r: 1, g: 1, b: 1, a: 1}
-    - _RimLightColor: {r: 0.4245283, g: 0.16802987, b: 0.042052332, a: 1}
+    - _RimLightColor: {r: 0.42452827, g: 0.16802984, b: 0.04205232, a: 1}
     - _RimLightMaskColor: {r: 1, g: 0, b: 1, a: 1}
     - _SecondShadeMaskColor: {r: 0, g: 0, b: 1, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
