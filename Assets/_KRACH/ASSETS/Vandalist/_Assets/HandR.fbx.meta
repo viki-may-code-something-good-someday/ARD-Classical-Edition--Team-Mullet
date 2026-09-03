@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 6235a92b52a570c4e82503bd223dc166
+guid: 0e894b81ad80aa04fb49f52c0b502c43
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
@@ -7,13 +7,8 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: mic
-    second: {fileID: 2100000, guid: 70c9369f9e7656f4dbaac5c7f5daa786, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: openPBR_shader1
-    second: {fileID: 2100000, guid: c97cfbdf5f1384e43927474dc670068d, type: 2}
+      name: Hand3
+    second: {fileID: 2100000, guid: f7caac26b9bc84f40bbb5dba024fd3b0, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -43,7 +38,7 @@ ModelImporter:
     isReadable: 0
   meshes:
     lODScreenPercentages: []
-    globalScale: 10
+    globalScale: 1
     meshCompression: 0
     addColliders: 0
     useSRGBMaterialColor: 1
@@ -101,7 +96,7 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
-    globalScale: 0.099999994
+    globalScale: 1
     rootMotionBoneName: 
     hasTranslationDoF: 0
     hasExtraRoot: 0
