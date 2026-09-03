@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 7f46f95fc3332324aa1f30892ce39754
+guid: f45db3b7aff6de744894e2796330f64c
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
@@ -7,8 +7,18 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: Material.001
-    second: {fileID: 2100000, guid: 6bd3f6113b95f5d43a918395de061f87, type: 2}
+      name: lambert1
+    second: {fileID: 2100000, guid: 26c771381284c444b9c06ea00e28a0a4, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: mischpult
+    second: {fileID: 2100000, guid: 60aa1eced916a344980022796f784898, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: pult
+    second: {fileID: 2100000, guid: 6d42c797af190df48ba3738ae7148fd2, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -38,7 +48,7 @@ ModelImporter:
     isReadable: 0
   meshes:
     lODScreenPercentages: []
-    globalScale: 1
+    globalScale: 20
     meshCompression: 0
     addColliders: 0
     useSRGBMaterialColor: 1
@@ -96,7 +106,7 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
-    globalScale: 1
+    globalScale: 0.19999999
     rootMotionBoneName: 
     hasTranslationDoF: 0
     hasExtraRoot: 0
