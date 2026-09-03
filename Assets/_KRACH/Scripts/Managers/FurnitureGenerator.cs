@@ -9,9 +9,11 @@ using Sirenix.OdinInspector;
 #endif
 
 /// <summary>
-/// Editor-time procedural furniture/billboard placement tool. Samples random points across
-/// the baked NavMesh (area-weighted, so density is uniform regardless of triangle size),
-/// then places furniture or billboard prefabs while rejecting any placement that overlaps
+/// Editor-time procedural furniture/billboard placement tool. The walkable NavMesh is
+/// bucketed into a coarse 2D grid; each grid cell gets its own object budget so small or
+/// isolated rooms are guaranteed a minimum amount of coverage instead of being starved by
+/// pure global area-weighted sampling. Within a cell, triangles are still sampled
+/// area-weighted for a uniform distribution. Placement rejects any footprint that overlaps
 /// a Wall footprint or an already-placed object footprint. Generated objects become normal
 /// scene GameObjects — this does not run at runtime.
 /// </summary>
@@ -22,11 +24,17 @@ public class FurnitureGenerator : MonoBehaviour
     [SerializeField] private List<GameObject> billboardPrefabs = new List<GameObject>();
 
     [Header("Density")]
-    [Tooltip("Target objects per square meter of walkable NavMesh area.")]
+    [Tooltip("Target objects per square meter of walkable NavMesh area, per grid cell.")]
     [SerializeField] private float density = 0.05f;
     [Tooltip("0 = only furniture, 1 = only billboards.")]
     [Range(0f, 1f)]
     [SerializeField] private float billboardRatio = 0.3f;
+
+    [Header("Grid Quota (guarantees coverage in small rooms)")]
+    [Tooltip("Size of the coarse grid cells (meters) used to guarantee minimum coverage in small/isolated rooms. Not true room detection — just spatial buckets. Should roughly match your typical small room size.")]
+    [SerializeField] private float gridCellSize = 2f;
+    [Tooltip("Minimum objects guaranteed per non-empty grid cell, regardless of density-derived count.")]
+    [SerializeField] private int minObjectsPerCell = 1;
 
     [Header("Spacing")]
     [Tooltip("Extra gap enforced between placed objects, on top of their own footprint.")]
@@ -42,6 +50,18 @@ public class FurnitureGenerator : MonoBehaviour
 
     private readonly List<OBB2D> placedFootprints = new List<OBB2D>();
     private readonly List<OBB2D> wallFootprints = new List<OBB2D>();
+
+    /// <summary>
+    /// Triangles bucketed into one coarse grid cell, plus a precomputed cumulative-area
+    /// distribution so a point can be sampled uniformly (area-weighted) within the cell.
+    /// </summary>
+    private class GridCell
+    {
+        public readonly List<int> triangleIndices = new List<int>();
+        public readonly List<float> triangleAreas = new List<float>();
+        public float[] cumulativeAreas;
+        public float totalArea;
+    }
 
 #if UNITY_EDITOR
     [Button("Generate Furniture")]
@@ -76,29 +96,35 @@ public class FurnitureGenerator : MonoBehaviour
                 wallFootprints.Add(wallObb);
         }
 
-        BuildTriangleDistribution(navData, out float[] cumulativeAreas, out float totalArea);
-        int targetCount = Mathf.RoundToInt(totalArea * density);
-
-        Debug.Log($"[FurnitureGenerator] NavMesh area: {totalArea:F1} m² — targeting {targetCount} objects.");
+        Dictionary<Vector2Int, GridCell> grid = BuildTriangleGrid(navData);
+        List<GridCell> cells = new List<GridCell>(grid.Values);
+        Shuffle(cells); // avoid any scan-order bias between cells
 
         placedFootprints.Clear();
         int placedCount = 0;
+        int targetTotal = 0;
 
-        for (int i = 0; i < targetCount; i++)
+        foreach (GridCell cell in cells)
         {
-            if (TryPlaceOneObject(navData, cumulativeAreas, totalArea))
-                placedCount++;
+            int cellTarget = Mathf.Max(minObjectsPerCell, Mathf.RoundToInt(cell.totalArea * density));
+            targetTotal += cellTarget;
+
+            for (int i = 0; i < cellTarget; i++)
+            {
+                if (TryPlaceOneObject(navData, cell))
+                    placedCount++;
+            }
         }
 
-        Debug.Log($"[FurnitureGenerator] Placed {placedCount}/{targetCount} objects " +
-                  $"({targetCount - placedCount} skipped — no valid spot found within attempt limit).");
+        Debug.Log($"[FurnitureGenerator] {grid.Count} grid cells covering NavMesh — targeting {targetTotal} objects total. " +
+                  $"Placed {placedCount}/{targetTotal} ({targetTotal - placedCount} skipped — no valid spot found within attempt limit).");
 
         EditorUtility.SetDirty(this);
         if (gameObject.scene.IsValid())
             EditorSceneManager.MarkSceneDirty(gameObject.scene);
     }
 
-    private bool TryPlaceOneObject(NavMeshTriangulation navData, float[] cumulativeAreas, float totalArea)
+    private bool TryPlaceOneObject(NavMeshTriangulation navData, GridCell cell)
     {
         bool useBillboard = billboardPrefabs.Count > 0 &&
                              (furniturePrefabs.Count == 0 || Random.value < billboardRatio);
@@ -111,7 +137,7 @@ public class FurnitureGenerator : MonoBehaviour
 
         for (int attempt = 0; attempt < maxAttemptsPerObject; attempt++)
         {
-            Vector3 samplePoint = SampleRandomPointOnNavMesh(navData, cumulativeAreas, totalArea);
+            Vector3 samplePoint = SampleRandomPointInCell(navData, cell);
             float rotationY = Random.Range(0f, 360f);
 
             GameObject instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab, generatedParent);
@@ -120,7 +146,7 @@ public class FurnitureGenerator : MonoBehaviour
 
             Physics.SyncTransforms();
 
-            if (!TryComputeWorldOBB(instance, out OBB2D candidateObb))
+            if (!TryComputeFootprintForPlacement(instance, useBillboard, out OBB2D candidateObb))
             {
                 Debug.LogWarning($"[FurnitureGenerator] '{prefab.name}' has no active Renderer/Collider — cannot compute a footprint, skipping entirely.");
                 DestroyImmediate(instance);
@@ -141,6 +167,47 @@ public class FurnitureGenerator : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Computes the placement footprint for an instance. For billboards, only the small
+    /// collider on the InteractionTrigger child is used — every other collider on the
+    /// instance (e.g. the large interaction/visual collider) is temporarily disabled so
+    /// TryComputeWorldOBB measures against the small collider only, then all colliders are
+    /// restored to their original enabled state so runtime behavior is unaffected. This
+    /// keeps billboards from being rejected far more often than furniture just because of
+    /// their larger physical collider.
+    /// </summary>
+    private bool TryComputeFootprintForPlacement(GameObject instance, bool useBillboard, out OBB2D obb)
+    {
+        if (useBillboard)
+        {
+            InteractionTrigger trigger = instance.GetComponentInChildren<InteractionTrigger>();
+            Collider triggerCollider = trigger != null ? trigger.GetComponent<Collider>() : null;
+
+            if (triggerCollider != null)
+            {
+                Collider[] allColliders = instance.GetComponentsInChildren<Collider>(true);
+                var previousStates = new Dictionary<Collider, bool>();
+
+                foreach (Collider col in allColliders)
+                {
+                    previousStates[col] = col.enabled;
+                    col.enabled = (col == triggerCollider);
+                }
+
+                Physics.SyncTransforms();
+                bool success = TryComputeWorldOBB(instance, out obb);
+
+                foreach (var kvp in previousStates)
+                    kvp.Key.enabled = kvp.Value;
+
+                Physics.SyncTransforms();
+                return success;
+            }
+        }
+
+        return TryComputeWorldOBB(instance, out obb);
+    }
+
     private bool OverlapsAnyWall(OBB2D candidate)
     {
         foreach (OBB2D wallObb in wallFootprints)
@@ -156,16 +223,15 @@ public class FurnitureGenerator : MonoBehaviour
     }
 
     /// <summary>
-    /// Precomputes per-triangle area and a cumulative distribution so triangle selection can
-    /// be area-weighted. Without this, small triangles (common near complex geometry) and
-    /// large triangles (common in open rooms) would be equally likely, clustering points in
-    /// geometrically complex areas instead of distributing them uniformly across the floor.
+    /// Buckets every NavMesh triangle into a coarse grid cell based on its centroid (X/Z),
+    /// and precomputes a per-cell cumulative-area distribution for area-weighted sampling
+    /// within that cell. This is what lets each cell get its own independent object budget
+    /// instead of one global budget spread over the whole NavMesh.
     /// </summary>
-    private void BuildTriangleDistribution(NavMeshTriangulation navData, out float[] cumulativeAreas, out float totalArea)
+    private Dictionary<Vector2Int, GridCell> BuildTriangleGrid(NavMeshTriangulation navData)
     {
+        var grid = new Dictionary<Vector2Int, GridCell>();
         int triCount = navData.indices.Length / 3;
-        cumulativeAreas = new float[triCount];
-        totalArea = 0f;
 
         for (int i = 0; i < triCount; i++)
         {
@@ -173,18 +239,46 @@ public class FurnitureGenerator : MonoBehaviour
             Vector3 b = navData.vertices[navData.indices[i * 3 + 1]];
             Vector3 c = navData.vertices[navData.indices[i * 3 + 2]];
 
-            totalArea += Vector3.Cross(b - a, c - a).magnitude * 0.5f;
-            cumulativeAreas[i] = totalArea;
+            float area = Vector3.Cross(b - a, c - a).magnitude * 0.5f;
+            Vector3 centroid = (a + b + c) / 3f;
+
+            var cellCoord = new Vector2Int(
+                Mathf.FloorToInt(centroid.x / gridCellSize),
+                Mathf.FloorToInt(centroid.z / gridCellSize));
+
+            if (!grid.TryGetValue(cellCoord, out GridCell cell))
+            {
+                cell = new GridCell();
+                grid[cellCoord] = cell;
+            }
+
+            cell.triangleIndices.Add(i);
+            cell.triangleAreas.Add(area);
+            cell.totalArea += area;
         }
+
+        foreach (GridCell cell in grid.Values)
+        {
+            cell.cumulativeAreas = new float[cell.triangleAreas.Count];
+            float running = 0f;
+            for (int i = 0; i < cell.triangleAreas.Count; i++)
+            {
+                running += cell.triangleAreas[i];
+                cell.cumulativeAreas[i] = running;
+            }
+        }
+
+        return grid;
     }
 
-    private Vector3 SampleRandomPointOnNavMesh(NavMeshTriangulation navData, float[] cumulativeAreas, float totalArea)
+    private Vector3 SampleRandomPointInCell(NavMeshTriangulation navData, GridCell cell)
     {
-        float target = Random.value * totalArea;
-        int triIndex = System.Array.BinarySearch(cumulativeAreas, target);
-        if (triIndex < 0) triIndex = ~triIndex;
-        triIndex = Mathf.Clamp(triIndex, 0, cumulativeAreas.Length - 1);
+        float target = Random.value * cell.totalArea;
+        int idx = System.Array.BinarySearch(cell.cumulativeAreas, target);
+        if (idx < 0) idx = ~idx;
+        idx = Mathf.Clamp(idx, 0, cell.cumulativeAreas.Length - 1);
 
+        int triIndex = cell.triangleIndices[idx];
         Vector3 a = navData.vertices[navData.indices[triIndex * 3]];
         Vector3 b = navData.vertices[navData.indices[triIndex * 3 + 1]];
         Vector3 c = navData.vertices[navData.indices[triIndex * 3 + 2]];
@@ -193,6 +287,15 @@ public class FurnitureGenerator : MonoBehaviour
         float r1 = Mathf.Sqrt(Random.value);
         float r2 = Random.value;
         return (1 - r1) * a + (r1 * (1 - r2)) * b + (r1 * r2) * c;
+    }
+
+    private static void Shuffle<T>(List<T> list)
+    {
+        for (int i = list.Count - 1; i > 0; i--)
+        {
+            int j = Random.Range(0, i + 1);
+            (list[i], list[j]) = (list[j], list[i]);
+        }
     }
 
     [Button("Clear Generated")]
