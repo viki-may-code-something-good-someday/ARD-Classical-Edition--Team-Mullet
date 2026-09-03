@@ -51,6 +51,9 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
     [SerializeField] private float returnDuration = 0.2f;
     [SerializeField] private Ease pullbackEase = Ease.InQuad;
     [SerializeField] private Ease returnEase = Ease.OutQuad;
+    [Tooltip("Wie lange nach dem Auslösen der Anklage-Animation gewartet wird, bevor der Arm" +
+             " automatisch zur Ausgangsposition zurückkehrt.")]
+    [SerializeField] private float accuseAnimationReturnDelay = 1f;
 
     public static event System.Action<NetworkIdentity> OnVandalistCaught;
 
@@ -66,6 +69,7 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
     private bool isFullyCharged;
     private float chargeTimer;
     private Tween pullbackTween;
+    private Tween returnToRestTween; // verzögerter Rücksprung nach der Anklage-Animation
     private Vector3 armRestPosition;
 
     // ── IRoleAction ───────────────────────────────────────────────────────────
@@ -87,6 +91,12 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
     public void OnRoleDeactivated()
     {
         enabled = false;
+
+        if (returnToRestTween != null)
+        {
+            returnToRestTween.Kill();
+        }
+
         CancelCharge();
         ClearTarget();
     }
@@ -143,6 +153,11 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
 
     private void StartCharge()
     {
+        if (returnToRestTween != null)
+        {
+            returnToRestTween.Kill();
+        }
+
         isCharging = true;
         chargeTimer = 0f;
         TweenArmTo(armRestPosition + Vector3.forward * pullbackDistance, chargeTime, pullbackEase);
@@ -150,7 +165,15 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
 
     private void CancelCharge()
     {
-        if (!isCharging) return;
+        if (!isCharging)
+        {
+            return;
+        }
+
+        if (returnToRestTween != null)
+        {
+            returnToRestTween.Kill();
+        }
 
         ResetChargeState();
         TweenArmTo(armRestPosition, returnDuration, returnEase);
@@ -163,6 +186,12 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
         if (armVisual != null)
         {
             pullbackTween?.Kill();
+
+            if (returnToRestTween != null)
+            {
+                returnToRestTween.Kill();
+            }
+
             armVisual.transform.localPosition = armRestPosition; // vor der Execute-Anim zurücksetzen
         }
 
@@ -290,5 +319,20 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
 
         foreach (DOTweenAnimation anim in anims)
             anim.DORestart();
+
+        ScheduleReturnToRestAfterAccuse();
+    }
+
+    private void ScheduleReturnToRestAfterAccuse()
+    {
+        if (returnToRestTween != null)
+        {
+            returnToRestTween.Kill();
+        }
+
+        returnToRestTween = DOVirtual.DelayedCall(accuseAnimationReturnDelay, () =>
+        {
+            TweenArmTo(armRestPosition, returnDuration, returnEase);
+        });
     }
 }
