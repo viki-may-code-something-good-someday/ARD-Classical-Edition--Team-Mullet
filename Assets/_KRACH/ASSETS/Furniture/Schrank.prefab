@@ -6,7 +6,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 5636330499266610375}
+    m_TransformParent: {fileID: 2677958042815113975}
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 9dde027735ae82948bd2132a80229705, type: 3}
       propertyPath: m_LocalPosition.x
@@ -26,7 +26,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 9dde027735ae82948bd2132a80229705, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 9dde027735ae82948bd2132a80229705, type: 3}
       propertyPath: m_LocalRotation.y
@@ -116,11 +116,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7483834209970111799, guid: 7a1d7f76d6278df43ad427afdc1b6dfd, type: 3}
       propertyPath: m_LocalScale.x
-      value: 2.6669
+      value: 2.4667225
       objectReference: {fileID: 0}
     - target: {fileID: 7483834209970111799, guid: 7a1d7f76d6278df43ad427afdc1b6dfd, type: 3}
       propertyPath: m_LocalScale.y
-      value: 3.8469727
+      value: 3.7293708
       objectReference: {fileID: 0}
     - target: {fileID: 7483834209970111799, guid: 7a1d7f76d6278df43ad427afdc1b6dfd, type: 3}
       propertyPath: m_LocalScale.z
@@ -138,13 +138,13 @@ PrefabInstance:
     m_RemovedGameObjects:
     - {fileID: 64229382073134294, guid: 7a1d7f76d6278df43ad427afdc1b6dfd, type: 3}
     m_AddedGameObjects:
-    - targetCorrespondingSourceObject: {fileID: 1147322297579781825, guid: 7a1d7f76d6278df43ad427afdc1b6dfd, type: 3}
-      insertIndex: 0
+    - targetCorrespondingSourceObject: {fileID: 7277354731343253745, guid: 7a1d7f76d6278df43ad427afdc1b6dfd, type: 3}
+      insertIndex: -1
       addedObject: {fileID: 233347622212217590}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7a1d7f76d6278df43ad427afdc1b6dfd, type: 3}
---- !u!4 &5636330499266610375 stripped
+--- !u!4 &2677958042815113975 stripped
 Transform:
-  m_CorrespondingSourceObject: {fileID: 1147322297579781825, guid: 7a1d7f76d6278df43ad427afdc1b6dfd, type: 3}
+  m_CorrespondingSourceObject: {fileID: 7277354731343253745, guid: 7a1d7f76d6278df43ad427afdc1b6dfd, type: 3}
   m_PrefabInstance: {fileID: 4743520988688038406}
   m_PrefabAsset: {fileID: 0}
