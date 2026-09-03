@@ -485,10 +485,10 @@ Material:
     - _AngelRingMaskColor: {r: 0, g: 1, b: 0, a: 1}
     - _AngelRing_Color: {r: 1, g: 1, b: 1, a: 1}
     - _Ap_RimLightColor: {r: 1, g: 1, b: 1, a: 1}
-    - _BaseColor: {r: 0.29699183, g: 0.45989913, b: 0.8867924, a: 1}
+    - _BaseColor: {r: 1, g: 0.4470588, b: 0.6343504, a: 1}
     - _BaseColorMap_MipInfo: {r: 0, g: 0, b: 0, a: 0}
     - _BaseColorMaskColor: {r: 1, g: 1, b: 1, a: 1}
-    - _Color: {r: 0.2969918, g: 0.45989907, b: 0.8867924, a: 1}
+    - _Color: {r: 1, g: 0.4470588, b: 0.6343504, a: 1}
     - _ColorShift: {r: 0, g: 0, b: 0, a: 1}
     - _DoubleSidedConstants: {r: 1, g: 1, b: -1, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
@@ -502,7 +502,7 @@ Material:
     - _MatCapColor: {r: 1, g: 1, b: 1, a: 1}
     - _OutlineMaskColor: {r: 0, g: 0, b: 0, a: 1}
     - _Outline_Color: {r: 1, g: 1, b: 1, a: 1}
-    - _RimLightColor: {r: 0.3962264, g: 0.12896048, b: 0.12896048, a: 1}
+    - _RimLightColor: {r: 0.9150943, g: 0.3237362, b: 0.6254618, a: 1}
     - _RimLightMaskColor: {r: 1, g: 0, b: 1, a: 1}
     - _SecondShadeMaskColor: {r: 0, g: 0, b: 1, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
