@@ -33,6 +33,7 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
     [SerializeField] private GameObject armVisual;
 
     [Header("Vertical Look Rotation")]
+    [SerializeField] private Transform armRotationContainer;
     [Tooltip("Wie stark der Arm der Kamera-Neigung folgt. 1 = 1:1, kleiner = gedämpft.")]
     [SerializeField] private float pitchRotationMultiplier = 1f;
     [Tooltip("Maximale Auf-/Ab-Rotation des Arms in Grad, unabhängig von der Kamera-Neigung.")]
@@ -139,7 +140,8 @@ public class HunterAccuse : NetworkBehaviour, IRoleAction
 
         pitch = Mathf.Clamp(pitch, -maxArmPitchAngle, maxArmPitchAngle) * pitchRotationMultiplier;
 
-        armVisual.transform.localRotation = armBaseLocalRotation * Quaternion.Euler(-pitch, 0f, 0f);
+        armRotationContainer.localRotation = armBaseLocalRotation * Quaternion.Euler(-pitch, 0f, 0f);
+        //armVisual.transform.localRotation = armBaseLocalRotation * Quaternion.Euler(-pitch, 0f, 0f);
     }
 
     private float GetCameraPitch()
