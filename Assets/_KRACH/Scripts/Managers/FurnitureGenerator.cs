@@ -41,6 +41,8 @@ public class FurnitureGenerator : MonoBehaviour
     [SerializeField] private float objectSpacing = 0.1f;
     [Tooltip("Minimum distance a footprint must keep from any Wall footprint.")]
     [SerializeField] private float wallClearance = 0.15f;
+    [Tooltip("No object will spawn within this radius (meters, XZ distance) of any Door's position — keeps doorways clear.")]
+    [SerializeField] private float doorClearanceRadius = 1.5f;
 
     [Header("Placement")]
     [SerializeField] private int maxAttemptsPerObject = 30;
@@ -50,6 +52,7 @@ public class FurnitureGenerator : MonoBehaviour
 
     private readonly List<OBB2D> placedFootprints = new List<OBB2D>();
     private readonly List<OBB2D> wallFootprints = new List<OBB2D>();
+    private readonly List<Vector3> doorPositions = new List<Vector3>();
 
     /// <summary>
     /// Triangles bucketed into one coarse grid cell, plus a precomputed cumulative-area
@@ -96,6 +99,12 @@ public class FurnitureGenerator : MonoBehaviour
                 wallFootprints.Add(wallObb);
         }
 
+        doorPositions.Clear();
+        foreach (Door door in FindObjectsByType<Door>(FindObjectsSortMode.InstanceID))
+        {
+            doorPositions.Add(door.transform.position);
+        }
+
         Dictionary<Vector2Int, GridCell> grid = BuildTriangleGrid(navData);
         List<GridCell> cells = new List<GridCell>(grid.Values);
         Shuffle(cells); // avoid any scan-order bias between cells
@@ -138,6 +147,10 @@ public class FurnitureGenerator : MonoBehaviour
         for (int attempt = 0; attempt < maxAttemptsPerObject; attempt++)
         {
             Vector3 samplePoint = SampleRandomPointInCell(navData, cell);
+
+            if (TooCloseToAnyDoor(samplePoint))
+                continue;
+
             float rotationY = Random.Range(0f, 360f);
 
             GameObject instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab, generatedParent);
@@ -206,6 +219,24 @@ public class FurnitureGenerator : MonoBehaviour
         }
 
         return TryComputeWorldOBB(instance, out obb);
+    }
+
+    /// <summary>
+    /// XZ-distance check against every Door position — keeps a clear radius around doorways
+    /// so furniture/billboards can't block them. Checked against the sample point before
+    /// anything is instantiated, so a rejected point costs nothing.
+    /// </summary>
+    private bool TooCloseToAnyDoor(Vector3 position)
+    {
+        float radiusSqr = doorClearanceRadius * doorClearanceRadius;
+        foreach (Vector3 doorPos in doorPositions)
+        {
+            float dx = position.x - doorPos.x;
+            float dz = position.z - doorPos.z;
+            if (dx * dx + dz * dz <= radiusSqr)
+                return true;
+        }
+        return false;
     }
 
     private bool OverlapsAnyWall(OBB2D candidate)
