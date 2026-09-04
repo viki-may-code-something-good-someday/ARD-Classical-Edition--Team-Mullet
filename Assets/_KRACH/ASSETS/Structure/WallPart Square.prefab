@@ -60,6 +60,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: WallPart Square
       objectReference: {fileID: 0}
+    - target: {fileID: 3671108214043795730, guid: fbddb5bcaae4dfc4fb5a678f78546259, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6257489950564341073, guid: fbddb5bcaae4dfc4fb5a678f78546259, type: 3}
       propertyPath: m_LocalPosition.y
       value: 2
