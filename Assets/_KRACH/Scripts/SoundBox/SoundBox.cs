@@ -14,7 +14,7 @@ public class SoundBox : NetworkBehaviour, IDestructable
 
     [Header("Settings")]
     [SerializeField] private float health;
-    [SerializeField] private float destroyDelay = 2f;
+    [SerializeField] private float destroyDelay = 1.5f;
 
     public ParticleSystem HitParticles => hitParticles;
 
@@ -30,14 +30,14 @@ public class SoundBox : NetworkBehaviour, IDestructable
 
         if (health <= 0f)
         {
-            GetDestroyed();
+            DelayedDestroy();
         }
     }
 
     [ClientRpc]
     private void RpcShowEffects(Vector3 _hitPoint, Vector3 _hitNormal)
     {
-        foreach (DOTweenAnimation anim in hitAnimsContainer.GetComponentsInChildren<DOTweenAnimation>())
+        foreach (DOTweenAnimation anim in hitAnimsContainer.GetComponents<DOTweenAnimation>())
         {
             if (anim != null)
             {
@@ -56,6 +56,11 @@ public class SoundBox : NetworkBehaviour, IDestructable
 
         if (hitSoundEmitter != null)
             hitSoundEmitter.PlayOneShot();
+    }
+
+    private void DelayedDestroy()
+    {
+        Invoke(nameof(GetDestroyed), destroyDelay);
     }
 
     [Server]
